@@ -52,13 +52,23 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
 @interface NSObject (RZDataBinding)
 
 /**
- *  Register a selector to be called on a given target whenever keyPath changes on the receiver. The selector is also called immediately before this method returns.
+ *  Register a selector to be called on a given target whenever keyPath changes on the receiver. The selector is not called immediately.
  *
  *  @param target  The object on which to call the action selector. Must be non-nil. This object is not retained.
  *  @param action  The selector to call on the target. Must not be NULL. The method must take either zero or exactly one parameter, an NSDictionary, and have a void return type. If the method has an NSDictionary parameter, the dictionary will contain values for the appropriate RZDBChangeKeys. If keys are absent, they can be assumed to be nil. Values will not be NSNull.
  *  @param keyPath The key path of the receiver for which changes should trigger an action. Must be KVO compliant.
  */
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath;
+
+/**
+ *  Register a selector to be called on a given target whenever keyPath changes on the receiver.
+ *
+ *  @param target  The object on which to call the action selector. Must be non-nil. This object is not retained.
+ *  @param action  The selector to call on the target. Must not be NULL. The method must take either zero or exactly one parameter, an NSDictionary, and have a void return type. If the method has an NSDictionary parameter, the dictionary will contain values for the appropriate RZDBChangeKeys. If keys are absent, they can be assumed to be nil. Values will not be NSNull.
+ *  @param keyPath The key path of the receiver for which changes should trigger an action. Must be KVO compliant.
+ *  @param callImmediately If YES, the action is also called immediately before this method returns. In this case the change dictionary, if present, will not contain a value for kRZDBChangeKeyOld.
+ */
+- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately;
 
 /**
  *  Removes previously registered target/action pairs so that the actions are no longer called when the receiver changes value for keyPath.
