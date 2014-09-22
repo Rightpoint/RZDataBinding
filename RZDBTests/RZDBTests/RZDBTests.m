@@ -5,7 +5,6 @@
 //  Created by Rob Visentin on 9/18/14.
 //
 
-@import UIKit;
 @import XCTest;
 
 #import "NSObject+RZDataBinding.h"
@@ -46,7 +45,7 @@
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
     
-    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChange:@"string"];
+    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChange:@"string" callImmediately:YES];
     XCTAssertTrue(observer.callbackCalled, @"Callback not called on initial add");
     
     observer.callbackCalled = NO;
@@ -64,7 +63,7 @@
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
     
-    [testObj rz_addTarget:observer action:@selector(changeCallbackWithDict:) forKeyPathChange:@"string"];
+    [testObj rz_addTarget:observer action:@selector(changeCallbackWithDict:) forKeyPathChange:@"string" callImmediately:YES];
     XCTAssertTrue(observer.callbackCalled, @"Callback not called on initial add");
     
     observer.callbackCalled = NO;
@@ -111,6 +110,20 @@
     
     XCTAssertNil(weakA, @"Add target prevented object deallocation.");
     XCTAssertNil(weakB, @"Bind key prevented object deallocation.");
+}
+
+- (void)testAutomaticCleanup
+{
+    RZDBTestObject *testObjA = [RZDBTestObject new];
+    RZDBTestObject *testObjB = [RZDBTestObject new];
+    
+    @autoreleasepool {
+        [testObjA rz_addTarget:testObjB action:@selector(changeCallback) forKeyPathChange:@"string"];
+        
+        testObjB = nil;
+    }
+    
+    XCTAssertTrue([[testObjA valueForKey:@"_rz_registeredObservers"] count] == 0, @"Registered observers were not automatically cleaned up.");
 }
 
 @end
