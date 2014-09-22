@@ -145,9 +145,9 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         BOOL actionsEqual = (action == NULL || action == pair.action);
         BOOL boundKeysEqual = (boundKey == pair.boundKey || [boundKey isEqualToString:pair.boundKey]);
         
-        BOOL equal =  targetsEqual && actionsEqual && boundKeysEqual;
+        BOOL remove = (pair.target == nil || pair.action == NULL) || (targetsEqual && actionsEqual && boundKeysEqual);
         
-        if ( equal ) {
+        if ( remove ) {
             [self.targetActionPairs removeObject:pair];
         }
     }];
