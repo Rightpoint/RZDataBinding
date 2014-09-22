@@ -1,10 +1,11 @@
 //
 //  NSObject+RZDataBinding.m
-//  bhphoto
 //
 //  Created by Rob Visentin on 9/17/14.
-//  Copyright (c) 2014 Raizlabs
 
+// Copyright 2014 Raizlabs and other contributors
+// http://raizlabs.com/
+//
 // Permission is hereby granted, free of charge, to any person obtaining
 // a copy of this software and associated documentation files (the
 // "Software"), to deal in the Software without restriction, including
@@ -46,8 +47,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 @interface RZDBTargetActionPair : NSObject
 
-
-@property (weak, nonatomic) NSObject *target;
+@property (weak, nonatomic) id target;
 @property (assign, nonatomic) SEL action;
 @property (copy, nonatomic) NSString *boundKey;
 
@@ -69,23 +69,6 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     return self;
 }
 
-- (BOOL)isEqual:(id)object
-{
-    BOOL equal = NO;
-    
-    if ( [object isKindOfClass:[RZDBTargetActionPair class]] ) {
-        RZDBTargetActionPair *otherPair = (RZDBTargetActionPair *)object;
-        
-        BOOL targetsEqual = (self.target == otherPair.target);
-        BOOL actionsEqual = (self.action == NULL || self.action == otherPair.action);
-        BOOL boundKeysEqual = (self.boundKey == otherPair.boundKey || [self.boundKey isEqualToString:otherPair.boundKey]);
-        
-        equal =  targetsEqual && actionsEqual && boundKeysEqual;
-    }
-
-    return equal;
-}
-
 @end
 
 #pragma mark - RZDBObserver
@@ -101,7 +84,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 - (instancetype)initWithObservedObject:(NSObject *)observedObject keyPath:(NSString *)keyPath observationOptions:(NSKeyValueObservingOptions)observingOptions;
 
 - (void)addTargetActionPair:(RZDBTargetActionPair *)pair;
-- (void)removeTargetActionPair:(RZDBTargetActionPair *)pair;
+- (void)removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey;
 
 @end
 
@@ -155,11 +138,17 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     }
 }
 
-- (void)removeTargetActionPair:(RZDBTargetActionPair *)pair
+- (void)removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey
 {
-    [[self.targetActionPairs copy] enumerateObjectsUsingBlock:^(RZDBTargetActionPair *obj, NSUInteger idx, BOOL *stop) {
-        if ( [pair isEqual:obj] ) {
-            [self.targetActionPairs removeObject:obj];
+    [[self.targetActionPairs copy] enumerateObjectsUsingBlock:^(RZDBTargetActionPair *pair, NSUInteger idx, BOOL *stop) {
+        BOOL targetsEqual = (target == pair.target);
+        BOOL actionsEqual = (action == NULL || action == pair.action);
+        BOOL boundKeysEqual = (boundKey == pair.boundKey || [boundKey isEqualToString:pair.boundKey]);
+        
+        BOOL equal =  targetsEqual && actionsEqual && boundKeysEqual;
+        
+        if ( equal ) {
+            [self.targetActionPairs removeObject:pair];
         }
     }];
 }
@@ -224,8 +213,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 - (void)rz_removeTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath
 {
     if ( [self _rz_isObservingKeyPath:keyPath] ) {
-        RZDBTargetActionPair *pair = [[RZDBTargetActionPair alloc] initWithTarget:target action:action boundKey:nil];
-        [self _rz_removeTargetActionPair:pair forKeyPath:keyPath];
+        [self _rz_removeTarget:target action:action boundKey:nil forKeyPath:keyPath];
     }
 }
 
@@ -240,15 +228,22 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     [object _rz_addTargetActionPair:pair forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld | NSKeyValueObservingOptionPrior];
     
     [self willChangeValueForKey:key];
-    [self setValue:[object valueForKeyPath:foreignKeyPath] forKey:key];
+    
+    @try {
+        [self setValue:[object valueForKeyPath:foreignKeyPath] forKey:key];
+    }
+    @catch (NSException *exception) {
+        NSLog(@"RZDataBinding failed to bind key:%@ to key path:%@ of object:%@. Reason: %@", key, foreignKeyPath, [object description], exception.reason);
+        @throw exception;
+    }
+    
     [self didChangeValueForKey:key];
 }
 
 - (void)rz_unbindKey:(NSString *)key fromKeyPath:(NSString *)foreignKeyPath ofObject:(id)object
 {
     if ( [object _rz_isObservingKeyPath:foreignKeyPath] ) {
-        RZDBTargetActionPair *pair = [[RZDBTargetActionPair alloc] initWithTarget:self action:@selector(_rz_observeBoundKeyChange:) boundKey:key];
-        [object _rz_removeTargetActionPair:pair forKeyPath:foreignKeyPath];
+        [object _rz_removeTarget:self action:@selector(_rz_observeBoundKeyChange:) boundKey:key forKeyPath:foreignKeyPath];
     }
 }
 
@@ -285,13 +280,13 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     [observer addTargetActionPair:pair];
 }
 
-- (void)_rz_removeTargetActionPair:(RZDBTargetActionPair *)pair forKeyPath:(NSString *)keyPath
+- (void)_rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath
 {
     NSMutableDictionary *registeredObservers = [self _rz_registeredObservers];
     RZDBObserver *observer = registeredObservers[keyPath];
     
     if ( observer != nil ) {
-        [observer removeTargetActionPair:pair];
+        [observer removeTarget:target action:action boundKey:boundKey];
         
         if ( [observer.targetActionPairs count] == 0 ) {
             [registeredObservers removeObjectForKey:keyPath];
