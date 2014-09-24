@@ -44,6 +44,8 @@ NSString* const kRZDBChangeKeyKeyPath = @"RZDBChangeKeyPath";
 static NSString* const kRZDBChangeKeyIsPrior  = @"RZDBChangeIsPrior";
 static NSString* const kRZDBChangeKeyBoundKey = @"RZDBChangeBoundKey";
 
+static NSString* const kRZDBDefaultSelectorPrefix = @"_rz_default_";
+
 static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 #define RZDBNotNull(obj) ((obj) != nil && ![(obj) isEqual:[NSNull null]])
@@ -53,11 +55,14 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 @interface NSObject (RZDataBinding_Private)
 
 - (NSMutableArray *)_rz_registeredObservers;
+- (void)_rz_setRegisteredObservers:(NSMutableArray *)registeredObservers;
+
+- (RZDBObserverContainer *)_rz_dependentObservers;
+- (void)_rz_setDependentObservers:(RZDBObserverContainer *)dependentObservers;
+
 - (void)_rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options;
 - (void)_rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath;
 - (void)_rz_observeBoundKeyChange:(NSDictionary *)change;
-
-- (RZDBObserverContainer *)_rz_dependentObservers;
 
 @end
 
@@ -69,7 +74,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 @property (copy, nonatomic) NSString *keyPath;
 @property (assign, nonatomic) NSKeyValueObservingOptions observationOptions;
 
-@property (weak, nonatomic) id target;
+@property (assign, nonatomic) __unsafe_unretained id target;
 @property (assign, nonatomic) SEL action;
 @property (copy, nonatomic) NSString *boundKey;
 
@@ -153,23 +158,62 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 @implementation NSObject (RZDataBinding_Private)
 
++ (void)load
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        @autoreleasepool {
+            SEL selector = NSSelectorFromString(@"dealloc");
+            SEL replacementSelector = @selector(_rz_dealloc);
+            
+            Method originalMethod = class_getInstanceMethod(self, selector);
+            Method replacementMethod = class_getInstanceMethod(self, replacementSelector);
+            
+            SEL defaultSelector = NSSelectorFromString([NSString stringWithFormat:@"%@%@", kRZDBDefaultSelectorPrefix, NSStringFromSelector(selector)]);
+            
+            class_addMethod(self, defaultSelector, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod));
+            class_replaceMethod(self, selector, method_getImplementation(replacementMethod), method_getTypeEncoding(replacementMethod));
+        }
+    });
+}
+
 - (NSMutableArray *)_rz_registeredObservers
 {
-    NSMutableArray *registeredObservers = objc_getAssociatedObject(self, _cmd);
-    
-    if ( registeredObservers == nil ) {
-        registeredObservers = [NSMutableArray array];
-        objc_setAssociatedObject(self, _cmd, registeredObservers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    }
-    
-    return registeredObservers;
+    return objc_getAssociatedObject(self, @selector(_rz_registeredObservers));
+}
+
+- (void)_rz_setRegisteredObservers:(NSMutableArray *)registeredObservers
+{
+    objc_setAssociatedObject(self, @selector(_rz_registeredObservers), registeredObservers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
+- (RZDBObserverContainer *)_rz_dependentObservers
+{
+    return objc_getAssociatedObject(self, @selector(_rz_dependentObservers));
+}
+
+- (void)_rz_setDependentObservers:(RZDBObserverContainer *)dependentObservers
+{
+    objc_setAssociatedObject(self, @selector(_rz_dependentObservers), dependentObservers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)_rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options
 {
     NSMutableArray *registeredObservers = [self _rz_registeredObservers];
     
+    if ( registeredObservers == nil ) {
+        registeredObservers = [NSMutableArray array];
+        [self _rz_setRegisteredObservers:registeredObservers];
+    }
+    
     RZDBObserver *observer = [[RZDBObserver alloc] initWithObservedObject:self keyPath:keyPath observationOptions:options];
+    
+    RZDBObserverContainer *dependentObservers = [target _rz_dependentObservers];
+    
+    if ( dependentObservers == nil ) {
+        dependentObservers = [[RZDBObserverContainer alloc] init];
+        [target _rz_setDependentObservers:dependentObservers];
+    }
     
     [registeredObservers addObject:observer];
     [[target _rz_dependentObservers] addObserver:observer];
@@ -211,16 +255,26 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     }
 }
 
-- (RZDBObserverContainer *)_rz_dependentObservers
+- (void)_rz_dealloc
 {
-    RZDBObserverContainer *dependentObservers = objc_getAssociatedObject(self, _cmd);
+    NSMutableArray *registeredObservers = [self _rz_registeredObservers];
+    RZDBObserverContainer *dependentObservers = [self _rz_dependentObservers];
     
-    if ( dependentObservers == nil ) {
-        dependentObservers = [[RZDBObserverContainer alloc] init];
-        objc_setAssociatedObject(self, _cmd, dependentObservers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    if ( registeredObservers != nil ) {
+        [[registeredObservers copy] enumerateObjectsUsingBlock:^(RZDBObserver *obs, NSUInteger idx, BOOL *stop) {
+            [obs invalidate];
+        }];
+    }
+
+    if ( dependentObservers != nil ) {
+        [dependentObservers.observers compact];
+        
+        [[dependentObservers.observers allObjects] enumerateObjectsUsingBlock:^(RZDBObserver *obs, NSUInteger idx, BOOL *stop) {
+            [obs invalidate];
+        }];
     }
     
-    return dependentObservers;
+    ((void(*)(id, SEL))objc_msgSend)(self, NSSelectorFromString([NSString stringWithFormat:@"%@%@", kRZDBDefaultSelectorPrefix, @"dealloc"]));
 }
 
 @end
@@ -253,20 +307,14 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ( context == kRZDBKVOContext ) {
-        if ( self.target != nil && self.action != NULL ) {
-            NSMethodSignature *signature = [self.target methodSignatureForSelector:self.action];
-            
-            if ( signature.numberOfArguments > 2 ) {
-                NSDictionary *changeDict = [self changeDictForKVOChange:change];
-                ((void(*)(id, SEL, id))objc_msgSend)(self.target, self.action, changeDict);
-            }
-            else {
-                ((void(*)(id, SEL))objc_msgSend)(self.target, self.action);
-            }
+        NSMethodSignature *signature = [self.target methodSignatureForSelector:self.action];
+        
+        if ( signature.numberOfArguments > 2 ) {
+            NSDictionary *changeDict = [self changeDictForKVOChange:change];
+            ((void(*)(id, SEL, id))objc_msgSend)(self.target, self.action, changeDict);
         }
         else {
-            // This case should never be reached, but if it is, cleanup and recover.
-            [self invalidate];
+            ((void(*)(id, SEL))objc_msgSend)(self.target, self.action);
         }
     }
 }
@@ -334,7 +382,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 {
     self = [super init];
     if ( self != nil ) {
-        self.observers = [NSPointerArray pointerArrayWithOptions:(NSPointerFunctionsWeakMemory | NSPointerFunctionsObjectPointerPersonality)];
+        self.observers = [NSPointerArray pointerArrayWithOptions:(NSPointerFunctionsWeakMemory | NSPointerFunctionsOpaquePersonality)];
     }
     return self;
 }
@@ -357,15 +405,6 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     if ( observerIndex != NSNotFound ) {
         [self.observers removePointerAtIndex:observerIndex];
     }
-}
-
-- (void)dealloc
-{
-    [self.observers compact];
-    
-    [[self.observers allObjects] enumerateObjectsUsingBlock:^(RZDBObserver *observer, NSUInteger idx, BOOL *stop) {
-        [observer invalidate];
-    }];
 }
 
 @end
