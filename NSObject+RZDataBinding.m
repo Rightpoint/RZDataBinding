@@ -234,8 +234,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         BOOL allEqual = (targetsEqual && actionsEqual && boundKeysEqual && keyPathsEqual);
         
         if ( allEqual ) {
-            [[target _rz_dependentObservers] removeObserver:observer];
-            [registeredObservers removeObject:observer];
+            [observer invalidate];
         }
     }];
 }
@@ -362,14 +361,6 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     
     self.observedObject = nil;
     self.target = nil;
-}
-
-- (void)dealloc
-{
-    @try {
-        [self.observedObject removeObserver:self forKeyPath:self.keyPath context:kRZDBKVOContext];
-    }
-    @catch (NSException *exception) {}
 }
 
 @end
