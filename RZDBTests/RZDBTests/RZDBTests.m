@@ -88,6 +88,19 @@
     XCTAssertTrue(obj3.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)obj3.callbackCalls);
 }
 
+- (void)testMultiRegistration
+{
+    RZDBTestObject *testObj = [RZDBTestObject new];
+    RZDBTestObject *observer = [RZDBTestObject new];
+    
+    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[@"string", @"callbackCalls"]];
+    
+    testObj.string = @"test";
+    testObj.callbackCalls = 0;
+    
+    XCTAssertTrue(observer.callbackCalls == 2, @"Callback called incorrect number of times. Expected:2 Actual:%i", (int)observer.callbackCalls);
+}
+
 - (void)testKeyBinding
 {
     RZDBTestObject *testObj = [RZDBTestObject new];

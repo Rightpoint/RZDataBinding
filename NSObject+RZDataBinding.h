@@ -71,6 +71,15 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately;
 
 /**
+ *  A convenience method that calls rz_addTarget:action:forKeyPathChange: for each keyPath in the keyPaths array.
+ *
+ *  @param target   The object on which to call the action selector. Must be non-nil. This object is not retained.
+ *  @param action   The selector to call on the target. Must not be NULL. See rz_addTarget documentation for more details.
+ *  @param keyPaths An array of key paths that should trigger an action. Each key path must be KVC compliant.
+ */
+- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths;
+
+/**
  *  Removes previously registered target/action pairs so that the actions are no longer called when the receiver changes value for keyPath.
  *
  *  @param target  The target to remove. Must be non-nil.

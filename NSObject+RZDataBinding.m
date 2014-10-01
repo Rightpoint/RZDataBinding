@@ -120,6 +120,13 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     [self _rz_addTarget:target action:action boundKey:nil forKeyPath:keyPath withOptions:observationOptions];
 }
 
+- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths
+{
+    [keyPaths enumerateObjectsUsingBlock:^(NSString *keyPath, NSUInteger idx, BOOL *stop) {
+        [self rz_addTarget:target action:action forKeyPathChange:keyPath];
+    }];
+}
+
 - (void)rz_removeTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath
 {
     [self _rz_removeTarget:target action:action boundKey:nil forKeyPath:keyPath];
