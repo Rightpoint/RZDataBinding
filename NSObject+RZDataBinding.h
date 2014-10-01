@@ -56,7 +56,7 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
  *
  *  @param target  The object on which to call the action selector. Must be non-nil. This object is not retained.
  *  @param action  The selector to call on the target. Must not be NULL. The method must take either zero or exactly one parameter, an NSDictionary, and have a void return type. If the method has an NSDictionary parameter, the dictionary will contain values for the appropriate RZDBChangeKeys. If keys are absent, they can be assumed to be nil. Values will not be NSNull.
- *  @param keyPath The key path of the receiver for which changes should trigger an action. Must be KVO compliant.
+ *  @param keyPath The key path of the receiver for which changes should trigger an action. Must be KVC compliant.
  */
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath;
 
@@ -65,7 +65,7 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
  *
  *  @param target  The object on which to call the action selector. Must be non-nil. This object is not retained.
  *  @param action  The selector to call on the target. Must not be NULL. The method must take either zero or exactly one parameter, an NSDictionary, and have a void return type. If the method has an NSDictionary parameter, the dictionary will contain values for the appropriate RZDBChangeKeys. If keys are absent, they can be assumed to be nil. Values will not be NSNull.
- *  @param keyPath The key path of the receiver for which changes should trigger an action. Must be KVO compliant.
+ *  @param keyPath The key path of the receiver for which changes should trigger an action. Must be KVC compliant.
  *  @param callImmediately If YES, the action is also called immediately before this method returns. In this case the change dictionary, if present, will not contain a value for kRZDBChangeKeyOld.
  */
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately;
@@ -84,8 +84,8 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
 /**
  *  Binds the given key of the receiver to the value of a key path of another object. Before the key path of the object changes, the receiver sends a willChangeValueForKey message for the bound key. When the key path of the object changes, the receiver sets the same value for the bound key, and then sends a didChangeValueForKey message for the key. The receiver's value for the key will match the value for the object's foreign key path before this method returns.
  *
- *  @param key            The receiver's key whose value should be bound to the value of a foreign key path.
- *  @param foreignKeyPath A key path of another object to which the receiver's key value should be bound. Must be KVO compliant.
+ *  @param key            The receiver's key whose value should be bound to the value of a foreign key path. Must be KVC compliant.
+ *  @param foreignKeyPath A key path of another object to which the receiver's key value should be bound. Must be KVC compliant.
  *  @param object         An object with a key path that the receiver should bind to.
  */
 - (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object;

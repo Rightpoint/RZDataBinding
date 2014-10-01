@@ -31,8 +31,8 @@
 
 #import "NSObject+RZDataBinding.h"
 
-@class RZDBObserverContainer;
 @class RZDBObserver;
+@class RZDBObserverContainer;
 
 // public change keys
 NSString* const kRZDBChangeKeyObject  = @"RZDBChangeObject";
@@ -41,7 +41,6 @@ NSString* const kRZDBChangeKeyNew     = @"RZDBChangeNew";
 NSString* const kRZDBChangeKeyKeyPath = @"RZDBChangeKeyPath";
 
 // private change keys
-static NSString* const kRZDBChangeKeyIsPrior  = @"RZDBChangeIsPrior";
 static NSString* const kRZDBChangeKeyBoundKey = @"RZDBChangeBoundKey";
 
 static NSString* const kRZDBDefaultSelectorPrefix = @"_rz_default_";
@@ -63,6 +62,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 - (void)_rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options;
 - (void)_rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath;
 - (void)_rz_observeBoundKeyChange:(NSDictionary *)change;
+- (void)_rz_dealloc;
 
 @end
 
@@ -131,8 +131,6 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     NSParameterAssert(foreignKeyPath);
     
     if ( object != nil ) {
-        [self willChangeValueForKey:key];
-        
         @try {
             [self setValue:[object valueForKeyPath:foreignKeyPath] forKey:key];
         }
@@ -141,9 +139,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
             @throw exception;
         }
         
-        [self didChangeValueForKey:key];
-        
-        [object _rz_addTarget:self action:@selector(_rz_observeBoundKeyChange:) boundKey:key forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld | NSKeyValueObservingOptionPrior];
+        [object _rz_addTarget:self action:@selector(_rz_observeBoundKeyChange:) boundKey:key forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld];
     }
 }
 
@@ -226,10 +222,10 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     NSMutableArray *registeredObservers = [self _rz_registeredObservers];
     
     [[registeredObservers copy] enumerateObjectsUsingBlock:^(RZDBObserver *observer, NSUInteger idx, BOOL *stop) {
-        BOOL targetsEqual = (target == observer.target);
-        BOOL actionsEqual = (action == NULL || action == observer.action);
+        BOOL targetsEqual   = (target == observer.target);
+        BOOL actionsEqual   = (action == NULL || action == observer.action);
         BOOL boundKeysEqual = (boundKey == observer.boundKey || [boundKey isEqualToString:observer.boundKey]);
-        BOOL keyPathsEqual = [keyPath isEqualToString:observer.keyPath];
+        BOOL keyPathsEqual  = [keyPath isEqualToString:observer.keyPath];
         
         BOOL allEqual = (targetsEqual && actionsEqual && boundKeysEqual && keyPathsEqual);
         
@@ -244,13 +240,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     NSString *boundKey = change[kRZDBChangeKeyBoundKey];
     
     if ( boundKey != nil ) {
-        if ( [change[kRZDBChangeKeyIsPrior] boolValue] ) {
-            [self willChangeValueForKey:boundKey];
-        }
-        else {
-            [self setValue:change[kRZDBChangeKeyNew] forKey:boundKey];
-            [self didChangeValueForKey:boundKey];
-        }
+        [self setValue:change[kRZDBChangeKeyNew] forKey:boundKey];
     }
 }
 
@@ -259,19 +249,14 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     NSMutableArray *registeredObservers = [self _rz_registeredObservers];
     RZDBObserverContainer *dependentObservers = [self _rz_dependentObservers];
     
-    if ( registeredObservers != nil ) {
-        [[registeredObservers copy] enumerateObjectsUsingBlock:^(RZDBObserver *obs, NSUInteger idx, BOOL *stop) {
-            [obs invalidate];
-        }];
-    }
+    [[registeredObservers copy] enumerateObjectsUsingBlock:^(RZDBObserver *obs, NSUInteger idx, BOOL *stop) {
+        [obs invalidate];
+    }];
 
-    if ( dependentObservers != nil ) {
-        [dependentObservers.observers compact];
-        
-        [[dependentObservers.observers allObjects] enumerateObjectsUsingBlock:^(RZDBObserver *obs, NSUInteger idx, BOOL *stop) {
-            [obs invalidate];
-        }];
-    }
+    [dependentObservers.observers compact];
+    [[dependentObservers.observers allObjects] enumerateObjectsUsingBlock:^(RZDBObserver *obs, NSUInteger idx, BOOL *stop) {
+        [obs invalidate];
+    }];
     
     ((void(*)(id, SEL))objc_msgSend)(self, NSSelectorFromString([NSString stringWithFormat:@"%@%@", kRZDBDefaultSelectorPrefix, @"dealloc"]));
 }
@@ -336,10 +321,6 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     
     if ( self.keyPath != nil ) {
         changeDict[kRZDBChangeKeyKeyPath] = self.keyPath;
-    }
-    
-    if ( RZDBNotNull(kvoChange[NSKeyValueChangeNotificationIsPriorKey]) ) {
-        changeDict[kRZDBChangeKeyIsPrior] = kvoChange[NSKeyValueChangeNotificationIsPriorKey];
     }
     
     if ( self.boundKey != nil ) {
