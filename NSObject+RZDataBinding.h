@@ -48,6 +48,9 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyNew;
  */
 OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
 
+// convenience macros for creating keys and keypaths
+#define RZDBKey(k) NSStringFromSelector(@selector(k))
+#define RZDBKeyPath(kp) @#kp
 
 @interface NSObject (RZDataBinding)
 
