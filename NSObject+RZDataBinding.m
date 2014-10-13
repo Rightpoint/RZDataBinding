@@ -34,6 +34,10 @@
 @class RZDBObserver;
 @class RZDBObserverContainer;
 
+RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity = ^NSValue* (NSValue *value) {
+    return value;
+};
+
 // public change keys
 NSString* const kRZDBChangeKeyObject  = @"RZDBChangeObject";
 NSString* const kRZDBChangeKeyOld     = @"RZDBChangeOld";
@@ -41,9 +45,12 @@ NSString* const kRZDBChangeKeyNew     = @"RZDBChangeNew";
 NSString* const kRZDBChangeKeyKeyPath = @"RZDBChangeKeyPath";
 
 // private change keys
-static NSString* const kRZDBChangeKeyBoundKey = @"RZDBChangeBoundKey";
+static NSString* const kRZDBChangeKeyBoundKey           = @"_RZDBChangeBoundKey";
+static NSString* const kRZDBChangeKeyBindingFunctionKey = @"_RZDBChangeBindingFunction";
 
 static NSString* const kRZDBDefaultSelectorPrefix = @"_rz_default_";
+
+static NSString* const kRZDBKeyBindingExceptionFormat = @"RZDataBinding failed to bind key:%@ to key path:%@ of object:%@. Reason: %@";
 
 static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
@@ -59,7 +66,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 - (RZDBObserverContainer *)_rz_dependentObservers;
 - (void)_rz_setDependentObservers:(RZDBObserverContainer *)dependentObservers;
 
-- (void)_rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options;
+- (void)_rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options;
 - (void)_rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath;
 - (void)_rz_observeBoundKeyChange:(NSDictionary *)change;
 - (void)_rz_dealloc;
@@ -78,9 +85,11 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 @property (assign, nonatomic) SEL action;
 @property (copy, nonatomic) NSString *boundKey;
 
+@property (copy, nonatomic) RZDBKeyBindingFunction bindingFunction;
+
 - (instancetype)initWithObservedObject:(NSObject *)observedObject keyPath:(NSString *)keyPath observationOptions:(NSKeyValueObservingOptions)observingOptions;
 
-- (void)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey;
+- (void)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction;
 
 - (void)invalidate;
 
@@ -117,7 +126,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         observationOptions |= NSKeyValueObservingOptionInitial;
     }
     
-    [self _rz_addTarget:target action:action boundKey:nil forKeyPath:keyPath withOptions:observationOptions];
+    [self _rz_addTarget:target action:action boundKey:nil bindingFunction:nil forKeyPath:keyPath withOptions:observationOptions];
 }
 
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths
@@ -142,11 +151,33 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
             [self setValue:[object valueForKeyPath:foreignKeyPath] forKey:key];
         }
         @catch (NSException *exception) {
-            NSLog(@"RZDataBinding failed to bind key:%@ to key path:%@ of object:%@. Reason: %@", key, foreignKeyPath, [object description], exception.reason);
-            @throw exception;
+            @throw [NSString stringWithFormat:kRZDBKeyBindingExceptionFormat, key, foreignKeyPath, [object description], exception.reason];
         }
         
-        [object _rz_addTarget:self action:@selector(_rz_observeBoundKeyChange:) boundKey:key forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld];
+        [object _rz_addTarget:self action:@selector(_rz_observeBoundKeyChange:) boundKey:key bindingFunction:nil forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld];
+    }
+}
+
+- (void)rz_bindKeyValue:(NSString *)key toKeyPathValue:(NSString *)foreignKeyPath ofObject:(id)object withFunction:(RZDBKeyBindingFunction)bindingFunction
+{
+    NSParameterAssert(key);
+    NSParameterAssert(foreignKeyPath);
+    
+    if ( object != nil ) {
+        bindingFunction = bindingFunction ?: kRZDBKeyBindingFunctionIdentity;
+        
+        @try {
+            if ( ![[self valueForKey:key] isKindOfClass:[NSValue class]] || ![[object valueForKeyPath:foreignKeyPath] isKindOfClass:[NSValue class]] ) {
+                @throw [NSException exceptionWithName:nil reason:[NSString stringWithFormat:@"Data types of key and key path must be primitive types or NSValue subclasses when using %@.", NSStringFromSelector(_cmd)] userInfo:nil];
+            }
+            
+            [self setValue:bindingFunction([object valueForKeyPath:foreignKeyPath]) forKey:key];
+        }
+        @catch (NSException *exception) {
+            @throw [NSString stringWithFormat:kRZDBKeyBindingExceptionFormat, key, foreignKeyPath, [object description], exception.reason];
+        }
+    
+        [object _rz_addTarget:self action:@selector(_rz_observeBoundKeyChange:) boundKey:key bindingFunction:bindingFunction forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld];
     }
 }
 
@@ -200,7 +231,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     objc_setAssociatedObject(self, @selector(_rz_dependentObservers), dependentObservers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void)_rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options
+- (void)_rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options
 {
     NSMutableArray *registeredObservers = [self _rz_registeredObservers];
     
@@ -221,7 +252,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     [registeredObservers addObject:observer];
     [[target _rz_dependentObservers] addObserver:observer];
     
-    [observer setTarget:target action:action boundKey:boundKey];
+    [observer setTarget:target action:action boundKey:boundKey bindingFunction:bindingFunction];
 }
 
 - (void)_rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath
@@ -247,7 +278,11 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     NSString *boundKey = change[kRZDBChangeKeyBoundKey];
     
     if ( boundKey != nil ) {
-        [self setValue:change[kRZDBChangeKeyNew] forKey:boundKey];
+        RZDBKeyBindingFunction bindingFunction = change[kRZDBChangeKeyBindingFunctionKey];
+        
+        id value = (bindingFunction != nil) ? bindingFunction(change[kRZDBChangeKeyNew]) : change[kRZDBChangeKeyNew];
+        
+        [self setValue:value forKey:boundKey];
     }
 }
 
@@ -286,11 +321,12 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     return self;
 }
 
-- (void)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey
+- (void)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction
 {
     self.target = target;
     self.action = action;
     self.boundKey = boundKey;
+    self.bindingFunction = bindingFunction;
     
     [self.observedObject addObserver:self forKeyPath:self.keyPath options:self.observationOptions context:kRZDBKVOContext];
 }
@@ -332,6 +368,10 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     
     if ( self.boundKey != nil ) {
         changeDict[kRZDBChangeKeyBoundKey] = self.boundKey;
+    }
+    
+    if ( self.bindingFunction != nil ) {
+        changeDict[kRZDBChangeKeyBindingFunctionKey] = self.bindingFunction;
     }
     
     return [changeDict copy];
