@@ -66,6 +66,21 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
 #define RZDBKey(k) NSStringFromSelector(@selector(k))
 #define RZDBKeyPath(kp) @#kp
 
+/**
+ *  Set this to 1 (recommended) to enable automatic cleanup of observers on object deallocation.
+ *  If enabled, it is safe to observe or bind to weak references, and there is need to call rz_removeTarget
+ *  or rz_unbindKey before targets or observed objects are deallocated. To achieve automatic cleanup,
+ *  RZDB swizzles the dealloc method to ensure observers are properly invalidated. There are other ways of implementing similar
+ *  behavior, but we found this to be both the safest and most reliable.
+ *
+ *  If set to 0 (not recommended), objects MUST remove themselves as targets and unbind their keys from any observed objects before being deallocated.
+ *  Failure to do so will result in crashes (just like standard KVO). Additionally, you should not add a target to or bind keys to 
+ *  objects without first establishing a strong reference. Otherwise, the foreign object might be deallocated before the observer, causing in a crash.
+ *  If you choose to disable global automatic cleanup by setting this to 0, you may still use the RZDBObservableObject as a base class to enable
+ *  class-specific automatic cleanup.
+ */
+#define RZDB_AUTOMATIC_CLEANUP 1
+
 @interface NSObject (RZDataBinding)
 
 /**
@@ -103,7 +118,7 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
  *  @param action  The action to remove. Pass NULL to remove all actions registered for the target.
  *  @param keyPath The key path to remove the target/action pair for.
  *
- *  @note There is obligation to call this method before either the target or receiver are deallocated.
+ *  @note If RZDB_AUTOMATIC_CLEANUP is enabled, then there is obligation to call this method before either the target or receiver are deallocated.
  */
 - (void)rz_removeTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath;
 
@@ -139,8 +154,21 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
  *  @param foreignKeyPath The key path that the key should be unbound from.
  *  @param object         The object that the receiver should be unbound from.
  *
- *  @note There is no obligation to call this method before either the receiver or the foreign object are deallocated.
+ *  @note If RZDB_AUTOMATIC_CLEANUP is enabled, then there is no obligation to call this method before either the receiver or the foreign object are deallocated.
  */
 - (void)rz_unbindKey:(NSString *)key fromKeyPath:(NSString *)foreignKeyPath ofObject:(id)object;
 
+@end
+
+/**
+ *  A base class that automatically cleans up the appropriate observers before being deallocated, replicating the behavior of RZDB_AUTOMATIC_CLEANUP.
+ *  When adding targets or binding to RZDBObservableObject instances, it is not necessary to call rz_removeTarget or rz_unbindKey before
+ *  either the target or observable object are deallocated.
+ *
+ *  @note If RZDB_AUTOMATIC_CLEANUP is enabled, there is no need to use this base class. Use of this base class is intended for users who wish to disable
+ *  global automatic cleanup, but easily enable it for certain classes.
+ *
+ *  @see RZDB_AUTOMATIC_CLEANUP
+ */
+@interface RZDBObservableObject : NSObject
 @end

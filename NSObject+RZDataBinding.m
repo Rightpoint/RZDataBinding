@@ -69,7 +69,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 - (void)_rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options;
 - (void)_rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath;
 - (void)_rz_observeBoundKeyChange:(NSDictionary *)change;
-- (void)_rz_dealloc;
+- (void)_rz_cleanupObservers;
 
 @end
 
@@ -188,28 +188,20 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 @end
 
+#pragma mark - RZDBObservableObject implementation
+
+@implementation RZDBObservableObject
+
+- (void)dealloc
+{
+    [self _rz_cleanupObservers];
+}
+
+@end
+
 #pragma mark - RZDataBinding_Private implementation
 
 @implementation NSObject (RZDataBinding_Private)
-
-+ (void)load
-{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        @autoreleasepool {
-            SEL selector = NSSelectorFromString(@"dealloc");
-            SEL replacementSelector = @selector(_rz_dealloc);
-            
-            Method originalMethod = class_getInstanceMethod(self, selector);
-            Method replacementMethod = class_getInstanceMethod(self, replacementSelector);
-            
-            SEL defaultSelector = NSSelectorFromString([NSString stringWithFormat:@"%@%@", kRZDBDefaultSelectorPrefix, NSStringFromSelector(selector)]);
-            
-            class_addMethod(self, defaultSelector, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod));
-            class_replaceMethod(self, selector, method_getImplementation(replacementMethod), method_getTypeEncoding(replacementMethod));
-        }
-    });
-}
 
 - (NSMutableArray *)_rz_registeredObservers
 {
@@ -286,7 +278,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     }
 }
 
-- (void)_rz_dealloc
+- (void)_rz_cleanupObservers
 {
     NSMutableArray *registeredObservers = [self _rz_registeredObservers];
     RZDBObserverContainer *dependentObservers = [self _rz_dependentObservers];
@@ -294,14 +286,40 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     [[registeredObservers copy] enumerateObjectsUsingBlock:^(RZDBObserver *obs, NSUInteger idx, BOOL *stop) {
         [obs invalidate];
     }];
-
+    
     [dependentObservers.observers compact];
     [[dependentObservers.observers allObjects] enumerateObjectsUsingBlock:^(RZDBObserver *obs, NSUInteger idx, BOOL *stop) {
         [obs invalidate];
     }];
+}
+
+#if RZDB_AUTOMATIC_CLEANUP
++ (void)load
+{
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        @autoreleasepool {
+            SEL selector = NSSelectorFromString(@"dealloc");
+            SEL replacementSelector = @selector(_rz_dealloc);
+            
+            Method originalMethod = class_getInstanceMethod(self, selector);
+            Method replacementMethod = class_getInstanceMethod(self, replacementSelector);
+            
+            SEL defaultSelector = NSSelectorFromString([NSString stringWithFormat:@"%@%@", kRZDBDefaultSelectorPrefix, NSStringFromSelector(selector)]);
+            
+            class_addMethod(self, defaultSelector, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod));
+            class_replaceMethod(self, selector, method_getImplementation(replacementMethod), method_getTypeEncoding(replacementMethod));
+        }
+    });
+}
+
+- (void)_rz_dealloc
+{
+    [self _rz_cleanupObservers];
     
     ((void(*)(id, SEL))objc_msgSend)(self, NSSelectorFromString([NSString stringWithFormat:@"%@%@", kRZDBDefaultSelectorPrefix, @"dealloc"]));
 }
+#endif
 
 @end
 

@@ -9,6 +9,7 @@
 
 #import "NSObject+RZDataBinding.h"
 
+/** Change the base class to RZDBObservableObject to run tests with RZDB_AUTOMATIC_CLEANUP disabled */
 @interface RZDBTestObject : NSObject
 
 @property (copy, nonatomic) NSString *string;
