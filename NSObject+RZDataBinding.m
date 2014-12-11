@@ -158,7 +158,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     }
 }
 
-- (void)rz_bindKeyValue:(NSString *)key toKeyPathValue:(NSString *)foreignKeyPath ofObject:(id)object withFunction:(RZDBKeyBindingFunction)bindingFunction
+- (void)rz_bindKey:(NSString *)key toKeyPathValue:(NSString *)foreignKeyPath ofObject:(id)object withFunction:(RZDBKeyBindingFunction)bindingFunction
 {
     NSParameterAssert(key);
     NSParameterAssert(foreignKeyPath);
@@ -167,8 +167,8 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         bindingFunction = bindingFunction ?: kRZDBKeyBindingFunctionIdentity;
         
         @try {
-            if ( ![[self valueForKey:key] isKindOfClass:[NSValue class]] || ![[object valueForKeyPath:foreignKeyPath] isKindOfClass:[NSValue class]] ) {
-                @throw [NSException exceptionWithName:nil reason:[NSString stringWithFormat:@"Data types of key and key path must be primitive types or NSValue subclasses when using %@.", NSStringFromSelector(_cmd)] userInfo:nil];
+            if ( ![[object valueForKeyPath:foreignKeyPath] isKindOfClass:[NSValue class]] ) {
+                @throw [NSException exceptionWithName:nil reason:[NSString stringWithFormat:@"The data type of value key path must be a  primitive type or NSValue subclasses when using %@.", NSStringFromSelector(_cmd)] userInfo:nil];
             }
             
             [self setValue:bindingFunction([object valueForKeyPath:foreignKeyPath]) forKey:key];

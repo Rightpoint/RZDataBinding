@@ -1,0 +1,6 @@
+{
+    "name" : "Bob",
+    "colorName" : "Green",
+    "color" : 65280,
+    "heartbeat" : 60
+}
