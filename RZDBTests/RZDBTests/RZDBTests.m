@@ -46,7 +46,7 @@
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
     
-    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChange:RZDBKey(string) callImmediately:YES];
+    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChange:RZDB_KP(RZDBTestObject, string) callImmediately:YES];
     XCTAssertTrue(observer.callbackCalls != 0, @"Callback not called on initial add");
     
     observer.callbackCalls = 0;
@@ -54,7 +54,7 @@
     XCTAssertTrue(observer.callbackCalls != 0, @"Callback not called on key path change");
     
     observer.callbackCalls = 0;
-    [testObj rz_removeTarget:observer action:@selector(changeCallback) forKeyPathChange:RZDBKey(string)];
+    [testObj rz_removeTarget:observer action:@selector(changeCallback) forKeyPathChange:RZDB_KP(RZDBTestObject, string)];
     testObj.string = @"test2";
     XCTAssertFalse(observer.callbackCalls != 0, @"Callback called even after removal");
 }
@@ -64,7 +64,7 @@
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
     
-    [testObj rz_addTarget:observer action:@selector(changeCallbackWithDict:) forKeyPathChange:RZDBKey(string) callImmediately:YES];
+    [testObj rz_addTarget:observer action:@selector(changeCallbackWithDict:) forKeyPathChange:RZDB_KP(RZDBTestObject, string) callImmediately:YES];
     XCTAssertTrue(observer.callbackCalls != 0, @"Callback not called on initial add");
     
     observer.callbackCalls = 0;
@@ -80,8 +80,8 @@
     RZDBTestObject *obj2 = [RZDBTestObject new];
     RZDBTestObject *obj3 = [RZDBTestObject new];
     
-    [obj2 rz_bindKey:RZDBKey(string) toKeyPath:RZDBKey(string) ofObject:obj1];
-    [obj2 rz_addTarget:obj3 action:@selector(changeCallback) forKeyPathChange:RZDBKey(string)];
+    [obj2 rz_bindKey:RZDB_KP(RZDBTestObject, string) toKeyPath:RZDB_KP(RZDBTestObject, string) ofObject:obj1];
+    [obj2 rz_addTarget:obj3 action:@selector(changeCallback) forKeyPathChange:RZDB_KP(RZDBTestObject, string)];
     
     obj1.string = @"string";
     
@@ -93,7 +93,7 @@
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
     
-    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDBKey(string), RZDBKey(callbackCalls)]];
+    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP(RZDBTestObject, string), RZDB_KP(RZDBTestObject, callbackCalls)]];
     
     testObj.string = @"test";
     testObj.callbackCalls = 0;
@@ -108,13 +108,13 @@
     
     testObj.string = @"test";
     
-    [observer rz_bindKey:RZDBKey(string) toKeyPath:RZDBKey(string) ofObject:testObj];
+    [observer rz_bindKey:RZDB_KP(RZDBTestObject, string) toKeyPath:RZDB_KP(RZDBTestObject, string) ofObject:testObj];
     XCTAssertTrue([observer.string isEqualToString:@"test"], @"Bound keys not equal on initial binding");
     
     testObj.string = @"test2";
     XCTAssertTrue([observer.string isEqualToString:testObj.string], @"Bound key not equal when key path changed");
     
-    [observer rz_unbindKey:RZDBKey(string) fromKeyPath:RZDBKey(string) ofObject:testObj];
+    [observer rz_unbindKey:RZDB_KP(RZDBTestObject, string) fromKeyPath:RZDB_KP(RZDBTestObject, string) ofObject:testObj];
     testObj.string = @"test3";
     XCTAssertTrue([observer.string isEqualToString:@"test2"], @"String shouldn't change after keys are unbound");
 }
@@ -126,13 +126,13 @@
     
     testObj.callbackCalls = 5;
     
-    [observer rz_bindKey:RZDBKey(callbackCalls) toKeyPath:RZDBKey(callbackCalls) ofObject:testObj withFunction:^id (id value) {
+    [observer rz_bindKey:RZDB_KP(RZDBTestObject, callbackCalls) toKeyPath:RZDB_KP(RZDBTestObject, callbackCalls) ofObject:testObj withFunction:^id (id value) {
         return @([(NSNumber *)value integerValue] + 100);
     }];
     
     XCTAssertTrue(observer.callbackCalls == 105, @"Key binding function was not properly applied before setting value for key when key path changed.");
     
-    [observer rz_unbindKey:RZDBKey(callbackCalls) fromKeyPath:RZDBKey(callbackCalls) ofObject:testObj];
+    [observer rz_unbindKey:RZDB_KP(RZDBTestObject, callbackCalls) fromKeyPath:RZDB_KP(RZDBTestObject, callbackCalls) ofObject:testObj];
     testObj.callbackCalls = 100;
     XCTAssertTrue(observer.callbackCalls == 105, @"Value shouldn't change after keys are unbound.");
 }
@@ -143,8 +143,8 @@
     RZDBTestObject *obj2 = [RZDBTestObject new];
     RZDBTestObject *obj3 = [RZDBTestObject new];
     
-    [obj2 rz_bindKey:RZDBKey(string) toKeyPath:RZDBKey(string) ofObject:obj1];
-    [obj3 rz_bindKey:RZDBKey(string) toKeyPath:RZDBKey(string) ofObject:obj2];
+    [obj2 rz_bindKey:RZDB_KP(RZDBTestObject, string) toKeyPath:RZDB_KP(RZDBTestObject, string) ofObject:obj1];
+    [obj3 rz_bindKey:RZDB_KP(RZDBTestObject, string) toKeyPath:RZDB_KP(RZDBTestObject, string) ofObject:obj2];
     
     obj1.string = @"test";
     
@@ -160,8 +160,8 @@
     __weak RZDBTestObject *weakB = testObjB;
     
     @autoreleasepool {
-        [testObjA rz_addTarget:testObjB action:@selector(changeCallback) forKeyPathChange:RZDBKey(string)];
-        [testObjB rz_bindKey:RZDBKey(string) toKeyPath:RZDBKey(string) ofObject:testObjA];
+        [testObjA rz_addTarget:testObjB action:@selector(changeCallback) forKeyPathChange:RZDB_KP(RZDBTestObject, string)];
+        [testObjB rz_bindKey:RZDB_KP(RZDBTestObject, string) toKeyPath:RZDB_KP(RZDBTestObject, string) ofObject:testObjA];
         
         testObjA = nil;
         testObjB = nil;
@@ -177,12 +177,12 @@
     RZDBTestObject *testObjB = [RZDBTestObject new];
     
     @autoreleasepool {
-        [testObjA rz_addTarget:testObjB action:@selector(changeCallback) forKeyPathChange:RZDBKey(string)];
+        [testObjA rz_addTarget:testObjB action:@selector(changeCallback) forKeyPathChange:RZDB_KP(RZDBTestObject, string)];
         
         testObjB = nil;
     }
     
-    XCTAssertTrue([[testObjA valueForKey:RZDBKey(string)] count] == 0, @"Registered observers were not automatically cleaned up.");
+    XCTAssertTrue([[testObjA valueForKey:RZDB_KP(RZDBTestObject, string)] count] == 0, @"Registered observers were not automatically cleaned up.");
 }
 
 @end
