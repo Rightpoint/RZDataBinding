@@ -7,13 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D41F4FDB1A5346EF00D0BA2D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = D41F4FD71A5346EF00D0BA2D /* LaunchScreen.xib */; };
+		D41F4FDC1A5346EF00D0BA2D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D41F4FD91A5346EF00D0BA2D /* Main.storyboard */; };
 		D4C5F3FF1A39F5A100CC6FB3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D4C5F3FE1A39F5A100CC6FB3 /* main.m */; };
 		D4C5F4021A39F5A100CC6FB3 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D4C5F4011A39F5A100CC6FB3 /* AppDelegate.m */; };
 		D4C5F4051A39F5A100CC6FB3 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D4C5F4041A39F5A100CC6FB3 /* ViewController.m */; };
-		D4C5F4081A39F5A100CC6FB3 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D4C5F4061A39F5A100CC6FB3 /* Main.storyboard */; };
 		D4C5F40A1A39F5A100CC6FB3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4C5F4091A39F5A100CC6FB3 /* Images.xcassets */; };
-		D4C5F40D1A39F5A100CC6FB3 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = D4C5F40B1A39F5A100CC6FB3 /* LaunchScreen.xib */; };
-		D4C5F4191A39F5A100CC6FB3 /* RZDBDemoTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D4C5F4181A39F5A100CC6FB3 /* RZDBDemoTests.m */; };
 		D4C5F4241A39F64E00CC6FB3 /* RZDBUser.m in Sources */ = {isa = PBXBuildFile; fileRef = D4C5F4231A39F64E00CC6FB3 /* RZDBUser.m */; };
 		D4C5F4271A39F6C800CC6FB3 /* NSObject+RZDataBinding.m in Sources */ = {isa = PBXBuildFile; fileRef = D4C5F4261A39F6C800CC6FB3 /* NSObject+RZDataBinding.m */; };
 		D4C5F42B1A39F8F200CC6FB3 /* user1.json in Resources */ = {isa = PBXBuildFile; fileRef = D4C5F42A1A39F8F200CC6FB3 /* user1.json */; };
@@ -21,17 +20,9 @@
 		D4C5F42F1A39FA0000CC6FB3 /* user3.json in Resources */ = {isa = PBXBuildFile; fileRef = D4C5F42E1A39FA0000CC6FB3 /* user3.json */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		D4C5F4131A39F5A100CC6FB3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D4C5F3F11A39F5A100CC6FB3 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = D4C5F3F81A39F5A100CC6FB3;
-			remoteInfo = RZDBDemo;
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXFileReference section */
+		D41F4FD81A5346EF00D0BA2D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = SOURCE_ROOT; };
+		D41F4FDA1A5346EF00D0BA2D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = SOURCE_ROOT; };
 		D4C5F3F91A39F5A100CC6FB3 /* RZDBDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RZDBDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D4C5F3FD1A39F5A100CC6FB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D4C5F3FE1A39F5A100CC6FB3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
@@ -39,12 +30,7 @@
 		D4C5F4011A39F5A100CC6FB3 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		D4C5F4031A39F5A100CC6FB3 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
 		D4C5F4041A39F5A100CC6FB3 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
-		D4C5F4071A39F5A100CC6FB3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D4C5F4091A39F5A100CC6FB3 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		D4C5F40C1A39F5A100CC6FB3 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
-		D4C5F4121A39F5A100CC6FB3 /* RZDBDemoTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RZDBDemoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		D4C5F4171A39F5A100CC6FB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		D4C5F4181A39F5A100CC6FB3 /* RZDBDemoTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RZDBDemoTests.m; sourceTree = "<group>"; };
 		D4C5F4221A39F64E00CC6FB3 /* RZDBUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RZDBUser.h; sourceTree = "<group>"; };
 		D4C5F4231A39F64E00CC6FB3 /* RZDBUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RZDBUser.m; sourceTree = "<group>"; };
 		D4C5F4251A39F6C800CC6FB3 /* NSObject+RZDataBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+RZDataBinding.h"; path = "../NSObject+RZDataBinding.h"; sourceTree = "<group>"; };
@@ -62,13 +48,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D4C5F40F1A39F5A100CC6FB3 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -77,7 +56,6 @@
 			children = (
 				D4C5F4281A39F6CC00CC6FB3 /* RZDataBinding */,
 				D4C5F3FB1A39F5A100CC6FB3 /* RZDBDemo */,
-				D4C5F4151A39F5A100CC6FB3 /* RZDBDemoTests */,
 				D4C5F3FA1A39F5A100CC6FB3 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -86,7 +64,6 @@
 			isa = PBXGroup;
 			children = (
 				D4C5F3F91A39F5A100CC6FB3 /* RZDBDemo.app */,
-				D4C5F4121A39F5A100CC6FB3 /* RZDBDemoTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -100,9 +77,9 @@
 				D4C5F4041A39F5A100CC6FB3 /* ViewController.m */,
 				D4C5F4221A39F64E00CC6FB3 /* RZDBUser.h */,
 				D4C5F4231A39F64E00CC6FB3 /* RZDBUser.m */,
-				D4C5F4061A39F5A100CC6FB3 /* Main.storyboard */,
+				D41F4FD71A5346EF00D0BA2D /* LaunchScreen.xib */,
+				D41F4FD91A5346EF00D0BA2D /* Main.storyboard */,
 				D4C5F4091A39F5A100CC6FB3 /* Images.xcassets */,
-				D4C5F40B1A39F5A100CC6FB3 /* LaunchScreen.xib */,
 				D4C5F4291A39F8DF00CC6FB3 /* Resources */,
 				D4C5F3FC1A39F5A100CC6FB3 /* Supporting Files */,
 			);
@@ -114,23 +91,6 @@
 			children = (
 				D4C5F3FD1A39F5A100CC6FB3 /* Info.plist */,
 				D4C5F3FE1A39F5A100CC6FB3 /* main.m */,
-			);
-			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		D4C5F4151A39F5A100CC6FB3 /* RZDBDemoTests */ = {
-			isa = PBXGroup;
-			children = (
-				D4C5F4181A39F5A100CC6FB3 /* RZDBDemoTests.m */,
-				D4C5F4161A39F5A100CC6FB3 /* Supporting Files */,
-			);
-			path = RZDBDemoTests;
-			sourceTree = "<group>";
-		};
-		D4C5F4161A39F5A100CC6FB3 /* Supporting Files */ = {
-			isa = PBXGroup;
-			children = (
-				D4C5F4171A39F5A100CC6FB3 /* Info.plist */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -174,24 +134,6 @@
 			productReference = D4C5F3F91A39F5A100CC6FB3 /* RZDBDemo.app */;
 			productType = "com.apple.product-type.application";
 		};
-		D4C5F4111A39F5A100CC6FB3 /* RZDBDemoTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = D4C5F41F1A39F5A100CC6FB3 /* Build configuration list for PBXNativeTarget "RZDBDemoTests" */;
-			buildPhases = (
-				D4C5F40E1A39F5A100CC6FB3 /* Sources */,
-				D4C5F40F1A39F5A100CC6FB3 /* Frameworks */,
-				D4C5F4101A39F5A100CC6FB3 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				D4C5F4141A39F5A100CC6FB3 /* PBXTargetDependency */,
-			);
-			name = RZDBDemoTests;
-			productName = RZDBDemoTests;
-			productReference = D4C5F4121A39F5A100CC6FB3 /* RZDBDemoTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -203,10 +145,6 @@
 				TargetAttributes = {
 					D4C5F3F81A39F5A100CC6FB3 = {
 						CreatedOnToolsVersion = 6.1;
-					};
-					D4C5F4111A39F5A100CC6FB3 = {
-						CreatedOnToolsVersion = 6.1;
-						TestTargetID = D4C5F3F81A39F5A100CC6FB3;
 					};
 				};
 			};
@@ -224,7 +162,6 @@
 			projectRoot = "";
 			targets = (
 				D4C5F3F81A39F5A100CC6FB3 /* RZDBDemo */,
-				D4C5F4111A39F5A100CC6FB3 /* RZDBDemoTests */,
 			);
 		};
 /* End PBXProject section */
@@ -234,19 +171,12 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D41F4FDB1A5346EF00D0BA2D /* LaunchScreen.xib in Resources */,
 				D4C5F42D1A39F99F00CC6FB3 /* user2.json in Resources */,
-				D4C5F4081A39F5A100CC6FB3 /* Main.storyboard in Resources */,
 				D4C5F42F1A39FA0000CC6FB3 /* user3.json in Resources */,
-				D4C5F40D1A39F5A100CC6FB3 /* LaunchScreen.xib in Resources */,
+				D41F4FDC1A5346EF00D0BA2D /* Main.storyboard in Resources */,
 				D4C5F42B1A39F8F200CC6FB3 /* user1.json in Resources */,
 				D4C5F40A1A39F5A100CC6FB3 /* Images.xcassets in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		D4C5F4101A39F5A100CC6FB3 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -265,39 +195,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		D4C5F40E1A39F5A100CC6FB3 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				D4C5F4191A39F5A100CC6FB3 /* RZDBDemoTests.m in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
-/* Begin PBXTargetDependency section */
-		D4C5F4141A39F5A100CC6FB3 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = D4C5F3F81A39F5A100CC6FB3 /* RZDBDemo */;
-			targetProxy = D4C5F4131A39F5A100CC6FB3 /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
-
 /* Begin PBXVariantGroup section */
-		D4C5F4061A39F5A100CC6FB3 /* Main.storyboard */ = {
+		D41F4FD71A5346EF00D0BA2D /* LaunchScreen.xib */ = {
 			isa = PBXVariantGroup;
 			children = (
-				D4C5F4071A39F5A100CC6FB3 /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		D4C5F40B1A39F5A100CC6FB3 /* LaunchScreen.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				D4C5F40C1A39F5A100CC6FB3 /* Base */,
+				D41F4FD81A5346EF00D0BA2D /* Base */,
 			);
 			name = LaunchScreen.xib;
+			sourceTree = "<group>";
+		};
+		D41F4FD91A5346EF00D0BA2D /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D41F4FDA1A5346EF00D0BA2D /* Base */,
+			);
+			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -401,40 +315,6 @@
 			};
 			name = Release;
 		};
-		D4C5F4201A39F5A100CC6FB3 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = RZDBDemoTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RZDBDemo.app/RZDBDemo";
-			};
-			name = Debug;
-		};
-		D4C5F4211A39F5A100CC6FB3 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
-				INFOPLIST_FILE = RZDBDemoTests/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/RZDBDemo.app/RZDBDemo";
-			};
-			name = Release;
-		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -454,14 +334,7 @@
 				D4C5F41E1A39F5A100CC6FB3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
-		};
-		D4C5F41F1A39F5A100CC6FB3 /* Build configuration list for PBXNativeTarget "RZDBDemoTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				D4C5F4201A39F5A100CC6FB3 /* Debug */,
-				D4C5F4211A39F5A100CC6FB3 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
