@@ -91,7 +91,7 @@
 		D49BB2B619CB862A000DEC83 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0600;
+				LastUpgradeCheck = 0610;
 				TargetAttributes = {
 					D49BB2BF19CB866D000DEC83 = {
 						CreatedOnToolsVersion = 6.0;
@@ -141,6 +141,7 @@
 		D49BB2BA19CB862A000DEC83 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
 			};
 			name = Debug;
 		};
@@ -257,6 +258,7 @@
 				D49BB2C919CB866D000DEC83 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

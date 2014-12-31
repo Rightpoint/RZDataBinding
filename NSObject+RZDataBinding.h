@@ -49,18 +49,13 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyNew;
 OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
 
 /**
- *  A function that takes a value as a parameter and returns a value.
+ *  A function that takes a value as a parameter and returns an object.
  *
  *  @param value The value that just changed on a foreign object for a bound key path.
  *
  *  @return The value to set for the bound key. Ideally the returned value should depend solely on the input value.
  */
-typedef NSValue* (^RZDBKeyBindingFunction)(NSValue *value);
-
-/**
- *  The identity function.
- */
-OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
+typedef id (^RZDBKeyBindingFunction)(id value);
 
 // convenience macros for creating keys and keypaths
 #define RZDBKey(k) NSStringFromSelector(@selector(k))
@@ -128,8 +123,6 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
  *  @param key            The receiver's key whose value should be bound to the value of a foreign key path. Must be KVC compliant.
  *  @param foreignKeyPath A key path of another object to which the receiver's key value should be bound. Must be KVC compliant.
  *  @param object         An object with a key path that the receiver should bind to.
- *
- *  @note This method binds the value of a key directly to a foreign key path. If you are binding values and wish to apply a function to values before they are set, use the similar rz_bindKeyValue method. @see rz_bindKeyValue:toKeyPathValue:ofObject:withFunction.
  */
 - (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object;
 
@@ -140,12 +133,9 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
  *  @param foreignKeyPath A key path of another object to which the receiver's key value should be bound. Must be KVC compliant.
  *  @param object         An object with a key path that the receiver should bind to.
  *  @param bindingFunction The function to apply to changed values before setting the value of the bound key. If nil, the identity function is assumed, but then there is no difference from regular rz_bindKey.
- *
- *  @note This method can only be used to bind keys and keypaths that are either primitive types or NSValue classes. Attempting to bind objects with incorrect data types will throw an exception.
- *
- *  @see rz_bindKey:toKeyPath:ofObject: to bind keys and key paths of arbitrary types.
+ *  If nil, the identity function is assumed.
  */
-- (void)rz_bindKeyValue:(NSString *)key toKeyPathValue:(NSString *)foreignKeyPath ofObject:(id)object withFunction:(RZDBKeyBindingFunction)bindingFunction;
+- (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object withFunction:(RZDBKeyBindingFunction)bindingFunction;
 
 /**
  *  Unbinds the given key of the receiver from the key path of another object.

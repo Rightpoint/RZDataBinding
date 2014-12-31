@@ -119,20 +119,18 @@
     XCTAssertTrue([observer.string isEqualToString:@"test2"], @"String shouldn't change after keys are unbound");
 }
 
-- (void)testValueKeyBinding
+- (void)testKeyBindingWithFunction
 {
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
     
     testObj.callbackCalls = 5;
     
-    XCTAssertThrows([observer rz_bindKeyValue:RZDBKey(string) toKeyPathValue:RZDBKey(string) ofObject:testObj withFunction:nil], @"Value key binding should not allow binding of non-primitive non-NSValue types.");
-    
-    [observer rz_bindKeyValue:RZDBKey(callbackCalls) toKeyPathValue:RZDBKey(callbackCalls) ofObject:testObj withFunction:^NSValue *(NSValue *value) {
+    [observer rz_bindKey:RZDBKey(callbackCalls) toKeyPath:RZDBKey(callbackCalls) ofObject:testObj withFunction:^id (id value) {
         return @([(NSNumber *)value integerValue] + 100);
     }];
     
-    XCTAssertTrue(observer.callbackCalls == 105, @"Value binding function was not properly applied before setting value for key when key path changed.");
+    XCTAssertTrue(observer.callbackCalls == 105, @"Key binding function was not properly applied before setting value for key when key path changed.");
     
     [observer rz_unbindKey:RZDBKey(callbackCalls) fromKeyPath:RZDBKey(callbackCalls) ofObject:testObj];
     testObj.callbackCalls = 100;
