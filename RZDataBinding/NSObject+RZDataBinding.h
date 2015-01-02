@@ -158,8 +158,7 @@ typeof(_rzdb_keypath_obj.p) _rzdb_keypath_prop __unused; \
  *  @param key            The receiver's key whose value should be bound to the value of a foreign key path. Must be KVC compliant.
  *  @param foreignKeyPath A key path of another object to which the receiver's key value should be bound. Must be KVC compliant.
  *  @param object         An object with a key path that the receiver should bind to.
- *  @param bindingFunction The function to apply to changed values before setting the value of the bound key. If nil, the identity function is assumed, but then there is no difference from regular rz_bindKey.
- *  If nil, the identity function is assumed.
+ *  @param bindingFunction The function to apply to changed values before setting the value of the bound key. If nil, the identity function is assumed, making this method identical to regular rz_bindKey.
  *
  *  @see RZDB_KP macro for creating keypaths.
  */
