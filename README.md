@@ -8,10 +8,10 @@ alt="RZDataBinding">
 `RZDataBinding` is a framework designed to help preserve data integrity in your iOS or OSX app. It is built using the standard Key-Value Observation (KVO) framework, but is safer and provides additional functionality.
 
 ##Usage
-Register a callback for when the keypath of an object changes:
+**Register a callback for when the keypath of an object changes:**
 ``` obj-c
 // Register a selector to be called on a given target whenever keyPath changes on the receiver.
-// The method must take either zero or exactly one parameter, an NSDictionary, and return void. 
+// Action must take either zero or exactly one parameter, an NSDictionary. 
 // If the method has a parameter, the dictionary will contain values for the appropriate 
 // RZDBChangeKeys. If keys are absent, they can be assumed to be nil. Values will not be NSNull.
 - (void)rz_addTarget:(id)target
@@ -19,7 +19,7 @@ Register a callback for when the keypath of an object changes:
         forKeyPathChange:(NSString *)keyPath;
 ```
 
-Bind values of two objects together either directly or with a function:
+**Bind values of two objects together either directly or with a function:**
 ``` obj-c
 // Binds the value of a given key of the receiver to the value of a key path of another object. 
 // When the key path of the object changes, the bound key of the receiver is also changed.
@@ -96,7 +96,7 @@ static void* const MyKVOContext = (void *)&MyKVOContext;
 Aside from the obvious reduction in code, the `RZDataBinding` implementation demonstrates several other wins:
 
 1. No need to manage different KVO contexts and check which object/keypath changed
-2. No need to implement an instance method, meaning *any* object can be the target of `RZDataBinding`
+2. No need to implement an instance method, meaning *any* object can be added as a target
 3. No need to teardown before deallocation (standard KVO crashes if you fail to do this)
 
 `RZDataBinding` also provides a convenience macro to create keypaths that are checked at compile time for validity (not shown in this example). No more unwieldy `NSStringFromSelector(@selector(foo:))`!
