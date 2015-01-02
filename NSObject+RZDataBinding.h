@@ -26,7 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-@import Foundation;
+#import <Foundation/Foundation.h>
 
 /**
  *  The value for this key is the object that changed. This key is always present.
