@@ -89,7 +89,7 @@ typeof(_rzdb_keypath_obj.p) _rzdb_keypath_prop __unused; \
 @#p; \
 })
 #else
-#define RZDB_KEY(c, p) (@#p)
+#define RZDB_KP(c, p) (@#p)
 #endif
 
 @interface NSObject (RZDataBinding)
