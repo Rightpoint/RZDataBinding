@@ -98,3 +98,5 @@ Aside from the obvious reduction in code, the `RZDataBinding` implementation dem
 1. No need to manage different KVO contexts and check which object/keypath changed
 2. No need to implement an instance method, meaning *any* object can be the target of `RZDataBinding`
 3. No need to teardown before deallocation (standard KVO crashes if you fail to do this)
+
+`RZDataBinding` also provides a convenience macro to create keypaths that are checked at compile time for validity (not shown in this example). No more unwieldy `NSStringFromSelector(@selector(foo:))`!
