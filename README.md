@@ -5,7 +5,7 @@ RZDataBinding
 alt="RZDataBinding">
 </p>
 ## Overview
-`RZDataBinding` is a framework designed to help preserve data integrity in your iOS or OSX app. It is built using the standard Key-Value Observation (KVO) framework, but is safer and provides additional functionality.
+`RZDataBinding` is a framework designed to help maintain data integrity in your iOS or OSX app. It is built using the standard Key-Value Observation (KVO) framework, but is safer and provides additional functionality.
 
 ##Usage
 **Register a callback for when the keypath of an object changes:**
@@ -27,8 +27,8 @@ alt="RZDataBinding">
         toKeyPath:(NSString *)foreignKeyPath
         ofObject:(id)object;
 
-// Same as the above method, but the binding function is first applied to the changed value 
-// before setting the value of the bound key. 
+// Same as the above method, but the binding function is first applied 
+// to the changed value before setting the value of the bound key.
 // If nil, the identity function is assumed, making it identical to regular rz_bindKey.
 - (void)rz_bindKey:(NSString *)key 
         toKeyPath:(NSString *)foreignKeyPath 
