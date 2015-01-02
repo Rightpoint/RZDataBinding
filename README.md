@@ -14,21 +14,26 @@ Register a callback for when the keypath of an object changes:
 // The method must take either zero or exactly one parameter, an NSDictionary, and return void. 
 // If the method has a parameter, the dictionary will contain values for the appropriate 
 // RZDBChangeKeys. If keys are absent, they can be assumed to be nil. Values will not be NSNull.
-- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath;
+- (void)rz_addTarget:(id)target
+        action:(SEL)action
+        forKeyPathChange:(NSString *)keyPath;
 ```
 
 Bind values of two objects together either directly or with a function:
 ``` obj-c
 // Binds the value of a given key of the receiver to the value of a key path of another object. 
 // When the key path of the object changes, the bound key of the receiver is also changed.
-- (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object;
+- (void)rz_bindKey:(NSString *)key
+        toKeyPath:(NSString *)foreignKeyPath
+        ofObject:(id)object;
 
 // Same as the above method, but the binding function is first applied to the changed value 
 // before setting the value of the bound key. 
 // If nil, the identity function is assumed, making it identical to regular rz_bindKey.
 - (void)rz_bindKey:(NSString *)key 
         toKeyPath:(NSString *)foreignKeyPath 
-        ofObject:(id)object withFunction:(RZDBKeyBindingFunction)bindingFunction;
+        ofObject:(id)object
+        withFunction:(RZDBKeyBindingFunction)bindingFunction;
 ```
 Targets can be removed and keys unbound with corresponding removal methods, but unlike with standard KVO, you are not obligated to do so. `RZDataBinding` will automatically cleanup observers before objects are deallocated. 
 
