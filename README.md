@@ -38,7 +38,7 @@ alt="RZDataBinding">
 Targets can be removed and keys unbound with corresponding removal methods, but unlike with standard KVO, you are not obligated to do so. `RZDataBinding` will automatically cleanup observers before objects are deallocated. 
 
 ## Why not use plain KVO?
-Consider the following code, which calls `nameChanged` when a user object's name changes, and reload a collection view when the user's preferences change:
+Consider the following code, which calls `nameChanged:` when a user object's name changes, and reload a collection view when the user's preferences change:
 
 **Using KVO:**
 ``` obj-c
@@ -53,7 +53,7 @@ static void* const MyKVOContext = (void *)&MyKVOContext;
                   
     [self.user addObserver:self
                forKeyPath:@"preferences"
-               options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
+               options:kNilOptions
                context:MyKVOContext];
 }
 
@@ -64,7 +64,7 @@ static void* const MyKVOContext = (void *)&MyKVOContext;
   if ( context == MyKVOContext ) {
         if ( [object isEqual:self.user] ) {
             if ( [keyPath isEqualToString:@"name"] ) {
-                [self nameChanged];
+                [self nameChanged:change];
             }
             else if ( [keyPath isEqualToString:@"preferences"] ) {
                 [self.collectionView reloadData];
@@ -85,7 +85,7 @@ static void* const MyKVOContext = (void *)&MyKVOContext;
 - (void)setupKVO
 {
     [self.user rz_addTarget:self 
-               action:@selector(nameChanged) 
+               action:@selector(nameChanged:) 
                forKeyPathChange:@"name"];
     
     [self.user rz_addTarget:self.collectionView 
