@@ -22,20 +22,22 @@
 
 @implementation RZTableViewController
 
-- (void)viewDidLoad
+- (id)initWithCoder:(NSCoder *)aDecoder
 {
-    [super viewDidLoad];
-    
-    NSMutableArray *users = [NSMutableArray array];
-    
-    for ( int i = 1; i <= 3; i++ ) {
-        NSString *fileName = [NSString stringWithFormat:@"user%i", i];
-        RZUser *user = [[RZUser alloc] initWithJSONFile:fileName];
+    self = [super initWithCoder:aDecoder];
+    if ( self ) {
+        NSMutableArray *users = [NSMutableArray array];
         
-        [users addObject:user];
+        for ( int i = 1; i <= 3; i++ ) {
+            NSString *fileName = [NSString stringWithFormat:@"user%i", i];
+            RZUser *user = [[RZUser alloc] initWithJSONFile:fileName];
+            
+            [users addObject:user];
+        }
+        
+        self.users = users;
     }
-    
-    self.users = users;
+    return self;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
@@ -45,9 +47,7 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"RZUserCell"];
-    cell.imageView.contentMode = UIViewContentModeScaleToFill;
-    
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"RZUserCell"];    
     RZUser *user = self.users[indexPath.row];
     
     [cell.textLabel rz_bindKey:RZDB_KP(UILabel, text) toKeyPath:RZDB_KP(RZUser, fullName) ofObject:user];

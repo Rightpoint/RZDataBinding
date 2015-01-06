@@ -8,6 +8,8 @@
 
 #import "RZUser.h"
 
+#import "NSObject+RZDataBinding.h"
+
 @interface RZUser ()
 
 @property (copy, nonatomic, readwrite) NSString *fullName;
@@ -20,6 +22,8 @@
 {
     self = [super init];
     if ( self ) {
+        [self rz_addTarget:self action:@selector(updateFullName) forKeyPathChanges:@[RZDB_KP(RZUser, firstName), RZDB_KP(RZUser, lastName)]];
+        
         NSData *data = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:fileName ofType:@"json"]];
         NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];
         
@@ -29,21 +33,12 @@
     return self;
 }
 
-- (void)setFirstName:(NSString *)firstName
-{
-    _firstName = [firstName copy];
-    
-    self.fullName = [firstName stringByAppendingFormat:@" %@", self.lastName];
-}
-
-- (void)setLastName:(NSString *)lastName
-{
-    _lastName = [lastName copy];
-    
-    self.fullName = [self.firstName stringByAppendingFormat:@" %@", lastName];
-}
-
 #pragma mark - private methods
+
+- (void)updateFullName
+{
+    self.fullName = [self.firstName stringByAppendingFormat:@" %@", self.lastName];
+}
 
 - (void)importValuesFromDict:(NSDictionary *)dict
 {
