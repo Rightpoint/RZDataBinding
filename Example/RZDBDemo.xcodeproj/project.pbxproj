@@ -1,0 +1,370 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D41F4FDB1A5346EF00D0BA2D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = D41F4FD71A5346EF00D0BA2D /* LaunchScreen.xib */; };
+		D41F4FDC1A5346EF00D0BA2D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D41F4FD91A5346EF00D0BA2D /* Main.storyboard */; };
+		D4B8C89F1A5C3C0E00148F68 /* NSObject+RZDataBinding.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C89E1A5C3C0E00148F68 /* NSObject+RZDataBinding.m */; };
+		D4B8C8A31A5C47EC00148F68 /* UIColor+RZHexColor.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C8A21A5C47EC00148F68 /* UIColor+RZHexColor.m */; };
+		D4B8C8A61A5C4A0700148F68 /* UIImage+RZColor.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C8A51A5C4A0700148F68 /* UIImage+RZColor.m */; };
+		D4B8C8A91A5C57B400148F68 /* RZUserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C8A81A5C57B400148F68 /* RZUserViewController.m */; };
+		D4C5F3FF1A39F5A100CC6FB3 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D4C5F3FE1A39F5A100CC6FB3 /* main.m */; };
+		D4C5F4021A39F5A100CC6FB3 /* RZAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D4C5F4011A39F5A100CC6FB3 /* RZAppDelegate.m */; };
+		D4C5F4051A39F5A100CC6FB3 /* RZTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D4C5F4041A39F5A100CC6FB3 /* RZTableViewController.m */; };
+		D4C5F40A1A39F5A100CC6FB3 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D4C5F4091A39F5A100CC6FB3 /* Images.xcassets */; };
+		D4C5F4241A39F64E00CC6FB3 /* RZUser.m in Sources */ = {isa = PBXBuildFile; fileRef = D4C5F4231A39F64E00CC6FB3 /* RZUser.m */; };
+		D4C5F42B1A39F8F200CC6FB3 /* user1.json in Resources */ = {isa = PBXBuildFile; fileRef = D4C5F42A1A39F8F200CC6FB3 /* user1.json */; };
+		D4C5F42D1A39F99F00CC6FB3 /* user2.json in Resources */ = {isa = PBXBuildFile; fileRef = D4C5F42C1A39F99F00CC6FB3 /* user2.json */; };
+		D4C5F42F1A39FA0000CC6FB3 /* user3.json in Resources */ = {isa = PBXBuildFile; fileRef = D4C5F42E1A39FA0000CC6FB3 /* user3.json */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		D41F4FD81A5346EF00D0BA2D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = SOURCE_ROOT; };
+		D41F4FDA1A5346EF00D0BA2D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = SOURCE_ROOT; };
+		D4B8C89D1A5C3C0E00148F68 /* NSObject+RZDataBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+RZDataBinding.h"; path = "../RZDataBinding/NSObject+RZDataBinding.h"; sourceTree = "<group>"; };
+		D4B8C89E1A5C3C0E00148F68 /* NSObject+RZDataBinding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSObject+RZDataBinding.m"; path = "../RZDataBinding/NSObject+RZDataBinding.m"; sourceTree = "<group>"; };
+		D4B8C8A11A5C47EC00148F68 /* UIColor+RZHexColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIColor+RZHexColor.h"; path = "Utils/UIColor+RZHexColor.h"; sourceTree = "<group>"; };
+		D4B8C8A21A5C47EC00148F68 /* UIColor+RZHexColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIColor+RZHexColor.m"; path = "Utils/UIColor+RZHexColor.m"; sourceTree = "<group>"; };
+		D4B8C8A41A5C4A0700148F68 /* UIImage+RZColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIImage+RZColor.h"; path = "Utils/UIImage+RZColor.h"; sourceTree = "<group>"; };
+		D4B8C8A51A5C4A0700148F68 /* UIImage+RZColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIImage+RZColor.m"; path = "Utils/UIImage+RZColor.m"; sourceTree = "<group>"; };
+		D4B8C8A71A5C57B400148F68 /* RZUserViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RZUserViewController.h; sourceTree = "<group>"; };
+		D4B8C8A81A5C57B400148F68 /* RZUserViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RZUserViewController.m; sourceTree = "<group>"; };
+		D4C5F3F91A39F5A100CC6FB3 /* RZDBDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = RZDBDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D4C5F3FD1A39F5A100CC6FB3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D4C5F3FE1A39F5A100CC6FB3 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		D4C5F4001A39F5A100CC6FB3 /* RZAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RZAppDelegate.h; sourceTree = "<group>"; };
+		D4C5F4011A39F5A100CC6FB3 /* RZAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RZAppDelegate.m; sourceTree = "<group>"; };
+		D4C5F4031A39F5A100CC6FB3 /* RZTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RZTableViewController.h; sourceTree = "<group>"; };
+		D4C5F4041A39F5A100CC6FB3 /* RZTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RZTableViewController.m; sourceTree = "<group>"; };
+		D4C5F4091A39F5A100CC6FB3 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		D4C5F4221A39F64E00CC6FB3 /* RZUser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RZUser.h; sourceTree = "<group>"; };
+		D4C5F4231A39F64E00CC6FB3 /* RZUser.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RZUser.m; sourceTree = "<group>"; };
+		D4C5F42A1A39F8F200CC6FB3 /* user1.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = user1.json; sourceTree = "<group>"; };
+		D4C5F42C1A39F99F00CC6FB3 /* user2.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = user2.json; sourceTree = "<group>"; };
+		D4C5F42E1A39FA0000CC6FB3 /* user3.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = user3.json; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D4C5F3F61A39F5A100CC6FB3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D4B8C8A01A5C47D200148F68 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				D4B8C8A11A5C47EC00148F68 /* UIColor+RZHexColor.h */,
+				D4B8C8A21A5C47EC00148F68 /* UIColor+RZHexColor.m */,
+				D4B8C8A41A5C4A0700148F68 /* UIImage+RZColor.h */,
+				D4B8C8A51A5C4A0700148F68 /* UIImage+RZColor.m */,
+			);
+			name = Utils;
+			sourceTree = "<group>";
+		};
+		D4C5F3F01A39F5A100CC6FB3 = {
+			isa = PBXGroup;
+			children = (
+				D4C5F4281A39F6CC00CC6FB3 /* RZDataBinding */,
+				D4C5F3FB1A39F5A100CC6FB3 /* RZDBDemo */,
+				D4C5F3FA1A39F5A100CC6FB3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D4C5F3FA1A39F5A100CC6FB3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D4C5F3F91A39F5A100CC6FB3 /* RZDBDemo.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D4C5F3FB1A39F5A100CC6FB3 /* RZDBDemo */ = {
+			isa = PBXGroup;
+			children = (
+				D4C5F4001A39F5A100CC6FB3 /* RZAppDelegate.h */,
+				D4C5F4011A39F5A100CC6FB3 /* RZAppDelegate.m */,
+				D4C5F4031A39F5A100CC6FB3 /* RZTableViewController.h */,
+				D4C5F4041A39F5A100CC6FB3 /* RZTableViewController.m */,
+				D4B8C8A71A5C57B400148F68 /* RZUserViewController.h */,
+				D4B8C8A81A5C57B400148F68 /* RZUserViewController.m */,
+				D4C5F4221A39F64E00CC6FB3 /* RZUser.h */,
+				D4C5F4231A39F64E00CC6FB3 /* RZUser.m */,
+				D4B8C8A01A5C47D200148F68 /* Utils */,
+				D41F4FD71A5346EF00D0BA2D /* LaunchScreen.xib */,
+				D41F4FD91A5346EF00D0BA2D /* Main.storyboard */,
+				D4C5F4091A39F5A100CC6FB3 /* Images.xcassets */,
+				D4C5F4291A39F8DF00CC6FB3 /* Resources */,
+				D4C5F3FC1A39F5A100CC6FB3 /* Supporting Files */,
+			);
+			path = RZDBDemo;
+			sourceTree = "<group>";
+		};
+		D4C5F3FC1A39F5A100CC6FB3 /* Supporting Files */ = {
+			isa = PBXGroup;
+			children = (
+				D4C5F3FD1A39F5A100CC6FB3 /* Info.plist */,
+				D4C5F3FE1A39F5A100CC6FB3 /* main.m */,
+			);
+			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		D4C5F4281A39F6CC00CC6FB3 /* RZDataBinding */ = {
+			isa = PBXGroup;
+			children = (
+				D4B8C89D1A5C3C0E00148F68 /* NSObject+RZDataBinding.h */,
+				D4B8C89E1A5C3C0E00148F68 /* NSObject+RZDataBinding.m */,
+			);
+			name = RZDataBinding;
+			sourceTree = "<group>";
+		};
+		D4C5F4291A39F8DF00CC6FB3 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				D4C5F42A1A39F8F200CC6FB3 /* user1.json */,
+				D4C5F42C1A39F99F00CC6FB3 /* user2.json */,
+				D4C5F42E1A39FA0000CC6FB3 /* user3.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D4C5F3F81A39F5A100CC6FB3 /* RZDBDemo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D4C5F41C1A39F5A100CC6FB3 /* Build configuration list for PBXNativeTarget "RZDBDemo" */;
+			buildPhases = (
+				D4C5F3F51A39F5A100CC6FB3 /* Sources */,
+				D4C5F3F61A39F5A100CC6FB3 /* Frameworks */,
+				D4C5F3F71A39F5A100CC6FB3 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = RZDBDemo;
+			productName = RZDBDemo;
+			productReference = D4C5F3F91A39F5A100CC6FB3 /* RZDBDemo.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D4C5F3F11A39F5A100CC6FB3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0610;
+				ORGANIZATIONNAME = Raizlabs;
+				TargetAttributes = {
+					D4C5F3F81A39F5A100CC6FB3 = {
+						CreatedOnToolsVersion = 6.1;
+					};
+				};
+			};
+			buildConfigurationList = D4C5F3F41A39F5A100CC6FB3 /* Build configuration list for PBXProject "RZDBDemo" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D4C5F3F01A39F5A100CC6FB3;
+			productRefGroup = D4C5F3FA1A39F5A100CC6FB3 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D4C5F3F81A39F5A100CC6FB3 /* RZDBDemo */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D4C5F3F71A39F5A100CC6FB3 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D41F4FDB1A5346EF00D0BA2D /* LaunchScreen.xib in Resources */,
+				D4C5F42D1A39F99F00CC6FB3 /* user2.json in Resources */,
+				D4C5F42F1A39FA0000CC6FB3 /* user3.json in Resources */,
+				D41F4FDC1A5346EF00D0BA2D /* Main.storyboard in Resources */,
+				D4C5F42B1A39F8F200CC6FB3 /* user1.json in Resources */,
+				D4C5F40A1A39F5A100CC6FB3 /* Images.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D4C5F3F51A39F5A100CC6FB3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D4C5F4051A39F5A100CC6FB3 /* RZTableViewController.m in Sources */,
+				D4C5F4021A39F5A100CC6FB3 /* RZAppDelegate.m in Sources */,
+				D4B8C89F1A5C3C0E00148F68 /* NSObject+RZDataBinding.m in Sources */,
+				D4B8C8A91A5C57B400148F68 /* RZUserViewController.m in Sources */,
+				D4C5F4241A39F64E00CC6FB3 /* RZUser.m in Sources */,
+				D4C5F3FF1A39F5A100CC6FB3 /* main.m in Sources */,
+				D4B8C8A61A5C4A0700148F68 /* UIImage+RZColor.m in Sources */,
+				D4B8C8A31A5C47EC00148F68 /* UIColor+RZHexColor.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		D41F4FD71A5346EF00D0BA2D /* LaunchScreen.xib */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D41F4FD81A5346EF00D0BA2D /* Base */,
+			);
+			name = LaunchScreen.xib;
+			sourceTree = "<group>";
+		};
+		D41F4FD91A5346EF00D0BA2D /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D41F4FDA1A5346EF00D0BA2D /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		D4C5F41A1A39F5A100CC6FB3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		D4C5F41B1A39F5A100CC6FB3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D4C5F41D1A39F5A100CC6FB3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				INFOPLIST_FILE = RZDBDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		D4C5F41E1A39F5A100CC6FB3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
+				INFOPLIST_FILE = RZDBDemo/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D4C5F3F41A39F5A100CC6FB3 /* Build configuration list for PBXProject "RZDBDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D4C5F41A1A39F5A100CC6FB3 /* Debug */,
+				D4C5F41B1A39F5A100CC6FB3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D4C5F41C1A39F5A100CC6FB3 /* Build configuration list for PBXNativeTarget "RZDBDemo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D4C5F41D1A39F5A100CC6FB3 /* Debug */,
+				D4C5F41E1A39F5A100CC6FB3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D4C5F3F11A39F5A100CC6FB3 /* Project object */;
+}
