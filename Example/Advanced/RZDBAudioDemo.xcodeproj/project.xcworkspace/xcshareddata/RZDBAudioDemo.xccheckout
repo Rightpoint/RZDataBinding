@@ -5,20 +5,20 @@
 	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
 	<false/>
 	<key>IDESourceControlProjectIdentifier</key>
-	<string>AA94FE28-CB65-42AB-BB69-B724F123B72E</string>
+	<string>A20BE7E8-C57D-4BE2-B1C3-8F700E7C64F4</string>
 	<key>IDESourceControlProjectName</key>
-	<string>RZDBTests</string>
+	<string>RZDBAudioDemo</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
 		<key>9C2CC04C44703DDF84F80B557779C3E0C7ED35AA</key>
 		<string>https://github.com/jvisenti/RZDataBinding.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>Tests/RZDBTests.xcodeproj</string>
+	<string>Example/Advanced/RZDBAudioDemo.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
 		<key>9C2CC04C44703DDF84F80B557779C3E0C7ED35AA</key>
-		<string>../../..</string>
+		<string>../../../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://github.com/jvisenti/RZDataBinding.git</string>

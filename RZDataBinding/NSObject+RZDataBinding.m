@@ -34,10 +34,6 @@
 @class RZDBObserver;
 @class RZDBObserverContainer;
 
-RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity = ^NSValue* (NSValue *value) {
-    return value;
-};
-
 // public change keys
 NSString* const kRZDBChangeKeyObject  = @"RZDBChangeObject";
 NSString* const kRZDBChangeKeyOld     = @"RZDBChangeOld";
@@ -49,8 +45,6 @@ static NSString* const kRZDBChangeKeyBoundKey           = @"_RZDBChangeBoundKey"
 static NSString* const kRZDBChangeKeyBindingFunctionKey = @"_RZDBChangeBindingFunction";
 
 static NSString* const kRZDBDefaultSelectorPrefix = @"_rz_default_";
-
-static NSString* const kRZDBKeyBindingExceptionFormat = @"RZDataBinding failed to bind key:%@ to key path:%@ of object:%@. Reason: %@";
 
 static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
@@ -143,40 +137,28 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 - (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object
 {
-    NSParameterAssert(key);
-    NSParameterAssert(foreignKeyPath);
-    
-    if ( object != nil ) {
-        @try {
-            [self setValue:[object valueForKeyPath:foreignKeyPath] forKey:key];
-        }
-        @catch (NSException *exception) {
-            @throw [NSString stringWithFormat:kRZDBKeyBindingExceptionFormat, key, foreignKeyPath, [object description], exception.reason];
-        }
-        
-        [object _rz_addTarget:self action:@selector(_rz_observeBoundKeyChange:) boundKey:key bindingFunction:nil forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld];
-    }
+    [self rz_bindKey:key toKeyPath:foreignKeyPath ofObject:object withFunction:nil];
 }
 
-- (void)rz_bindKey:(NSString *)key toKeyPathValue:(NSString *)foreignKeyPath ofObject:(id)object withFunction:(RZDBKeyBindingFunction)bindingFunction
+- (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object withFunction:(RZDBKeyBindingFunction)bindingFunction
 {
     NSParameterAssert(key);
     NSParameterAssert(foreignKeyPath);
     
     if ( object != nil ) {
-        bindingFunction = bindingFunction ?: kRZDBKeyBindingFunctionIdentity;
-        
         @try {
-            if ( ![[object valueForKeyPath:foreignKeyPath] isKindOfClass:[NSValue class]] ) {
-                @throw [NSException exceptionWithName:nil reason:[NSString stringWithFormat:@"The data type of value key path must be a  primitive type or NSValue subclasses when using %@.", NSStringFromSelector(_cmd)] userInfo:nil];
+            id val = [object valueForKeyPath:foreignKeyPath];
+            
+            if ( bindingFunction != nil ) {
+                val = bindingFunction(val);
             }
             
-            [self setValue:bindingFunction([object valueForKeyPath:foreignKeyPath]) forKey:key];
+            [self setValue:val forKey:key];
         }
         @catch (NSException *exception) {
-            @throw [NSString stringWithFormat:kRZDBKeyBindingExceptionFormat, key, foreignKeyPath, [object description], exception.reason];
+            @throw [NSString stringWithFormat:@"RZDataBinding failed to bind key:%@ to key path:%@ of object:%@. Reason: %@", key, foreignKeyPath, [object description], exception.reason];
         }
-    
+        
         [object _rz_addTarget:self action:@selector(_rz_observeBoundKeyChange:) boundKey:key bindingFunction:bindingFunction forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld];
     }
 }
@@ -270,9 +252,12 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     NSString *boundKey = change[kRZDBChangeKeyBoundKey];
     
     if ( boundKey != nil ) {
+        id value = change[kRZDBChangeKeyNew];
         RZDBKeyBindingFunction bindingFunction = change[kRZDBChangeKeyBindingFunctionKey];
         
-        id value = (bindingFunction != nil) ? bindingFunction(change[kRZDBChangeKeyNew]) : change[kRZDBChangeKeyNew];
+        if ( bindingFunction != nil ) {
+            value = bindingFunction(value);
+        }
         
         [self setValue:value forKey:boundKey];
     }

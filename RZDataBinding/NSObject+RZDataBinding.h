@@ -26,7 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-@import Foundation;
+#import <Foundation/Foundation.h>
 
 /**
  *  The value for this key is the object that changed. This key is always present.
@@ -55,23 +55,14 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
  *
  *  @return The value to set for the bound key. Ideally the returned value should depend solely on the input value.
  */
-typedef id (^RZDBKeyBindingFunction)(NSValue *value);
-
-/**
- *  The identity function.
- */
-OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
-
-// convenience macros for creating keys and keypaths
-#define RZDBKey(k) NSStringFromSelector(@selector(k))
-#define RZDBKeyPath(kp) @#kp
+typedef id (^RZDBKeyBindingFunction)(id value);
 
 /**
  *  Set this to 1 (recommended) to enable automatic cleanup of observers on object deallocation.
  *  If enabled, it is safe to observe or bind to weak references, and there is need to call rz_removeTarget
  *  or rz_unbindKey before targets or observed objects are deallocated. To achieve automatic cleanup,
  *  RZDB swizzles the dealloc method to ensure observers are properly invalidated. There are other ways of implementing similar
- *  behavior, but we found this to be both the safest and most reliable.
+ *  behavior, but we found this to be both the safest and most reliable in production.
  *
  *  If set to 0 (not recommended), objects MUST remove themselves as targets and unbind their keys from any observed objects before being deallocated.
  *  Failure to do so will result in crashes (just like standard KVO). Additionally, you should not add a target to or bind keys to 
@@ -81,6 +72,26 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
  */
 #define RZDB_AUTOMATIC_CLEANUP 1
 
+/**
+ *  Convenience for creating keypaths. Also validates the keypath before creating it when in debug mode.
+ *
+ *  @param c The name of the class to validate keypath against.
+ *  @param p The keypath to create.
+ *
+ *  @return An NSString containing the keypath.
+ *
+ *  @example RZDB_KP(NSObject, description.length) would return @"description.length"
+ */
+#if DEBUG
+#define RZDB_KP(c, p) ({\
+c *_rzdb_keypath_obj __unused; \
+typeof(_rzdb_keypath_obj.p) _rzdb_keypath_prop __unused; \
+@#p; \
+})
+#else
+#define RZDB_KP(c, p) (@#p)
+#endif
+
 @interface NSObject (RZDataBinding)
 
 /**
@@ -89,6 +100,8 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
  *  @param target  The object on which to call the action selector. Must be non-nil. This object is not retained.
  *  @param action  The selector to call on the target. Must not be NULL. The method must take either zero or exactly one parameter, an NSDictionary, and have a void return type. If the method has an NSDictionary parameter, the dictionary will contain values for the appropriate RZDBChangeKeys. If keys are absent, they can be assumed to be nil. Values will not be NSNull.
  *  @param keyPath The key path of the receiver for which changes should trigger an action. Must be KVC compliant.
+ *
+ *  @see RZDB_KP macro for creating keypaths.
  */
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath;
 
@@ -99,6 +112,8 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
  *  @param action  The selector to call on the target. Must not be NULL. The method must take either zero or exactly one parameter, an NSDictionary, and have a void return type. If the method has an NSDictionary parameter, the dictionary will contain values for the appropriate RZDBChangeKeys. If keys are absent, they can be assumed to be nil. Values will not be NSNull.
  *  @param keyPath The key path of the receiver for which changes should trigger an action. Must be KVC compliant.
  *  @param callImmediately If YES, the action is also called immediately before this method returns. In this case the change dictionary, if present, will not contain a value for kRZDBChangeKeyOld.
+ *
+ *  @see RZDB_KP macro for creating keypaths.
  */
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately;
 
@@ -108,6 +123,8 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
  *  @param target   The object on which to call the action selector. Must be non-nil. This object is not retained.
  *  @param action   The selector to call on the target. Must not be NULL. See rz_addTarget documentation for more details.
  *  @param keyPaths An array of key paths that should trigger an action. Each key path must be KVC compliant.
+ *
+ *  @see RZDB_KP macro for creating keypaths.
  */
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths;
 
@@ -119,6 +136,8 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
  *  @param keyPath The key path to remove the target/action pair for.
  *
  *  @note If RZDB_AUTOMATIC_CLEANUP is enabled, then there is obligation to call this method before either the target or receiver are deallocated.
+ *
+ *  @see RZDB_KP macro for creating keypaths.
  */
 - (void)rz_removeTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath;
 
@@ -129,7 +148,7 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
  *  @param foreignKeyPath A key path of another object to which the receiver's key value should be bound. Must be KVC compliant.
  *  @param object         An object with a key path that the receiver should bind to.
  *
- *  @note This method binds the value of a key directly to a foreign key path. If you are binding values and wish to apply a function to values before they are set, use the similar rz_bindKey method. @see rz_bindKey:toKeyPathValue:ofObject:withFunction.
+ *  @see RZDB_KP macro for creating keypaths.
  */
 - (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object;
 
@@ -139,13 +158,11 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
  *  @param key            The receiver's key whose value should be bound to the value of a foreign key path. Must be KVC compliant.
  *  @param foreignKeyPath A key path of another object to which the receiver's key value should be bound. Must be KVC compliant.
  *  @param object         An object with a key path that the receiver should bind to.
- *  @param bindingFunction The function to apply to changed values before setting the value of the bound key. If nil, the identity function is assumed, but then there is no difference from regular rz_bindKey.
+ *  @param bindingFunction The function to apply to changed values before setting the value of the bound key. If nil, the identity function is assumed, making this method identical to regular rz_bindKey.
  *
- *  @note This method can only be used to bind keys and keypaths that are either primitive types or NSValue classes. Attempting to bind objects with incorrect data types will throw an exception.
- *
- *  @see rz_bindKey:toKeyPath:ofObject: to bind keys and key paths of arbitrary types.
+ *  @see RZDB_KP macro for creating keypaths.
  */
-- (void)rz_bindKey:(NSString *)key toKeyPathValue:(NSString *)foreignKeyPath ofObject:(id)object withFunction:(RZDBKeyBindingFunction)bindingFunction;
+- (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object withFunction:(RZDBKeyBindingFunction)bindingFunction;
 
 /**
  *  Unbinds the given key of the receiver from the key path of another object.
@@ -155,6 +172,8 @@ OBJC_EXTERN RZDBKeyBindingFunction const kRZDBKeyBindingFunctionIdentity;
  *  @param object         The object that the receiver should be unbound from.
  *
  *  @note If RZDB_AUTOMATIC_CLEANUP is enabled, then there is no obligation to call this method before either the receiver or the foreign object are deallocated.
+ *
+ *  @see RZDB_KP macro for creating keypaths.
  */
 - (void)rz_unbindKey:(NSString *)key fromKeyPath:(NSString *)foreignKeyPath ofObject:(id)object;
 

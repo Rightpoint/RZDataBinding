@@ -9,15 +9,29 @@
          <BuildActionEntry
             buildForTesting = "YES"
             buildForRunning = "YES"
+            buildForProfiling = "YES"
+            buildForArchiving = "YES"
+            buildForAnalyzing = "YES">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "D4B8C86D1A5C2D2200148F68"
+               BuildableName = "RZDBAudioDemo.app"
+               BlueprintName = "RZDBAudioDemo"
+               ReferencedContainer = "container:RZDBAudioDemo.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "YES"
             buildForProfiling = "NO"
             buildForArchiving = "NO"
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D49BB2BF19CB866D000DEC83"
-               BuildableName = "RZDBTests.xctest"
-               BlueprintName = "RZDBTests"
-               ReferencedContainer = "container:RZDBTests.xcodeproj">
+               BlueprintIdentifier = "D4B8C8861A5C2D2200148F68"
+               BuildableName = "RZDBAudioDemoTests.xctest"
+               BlueprintName = "RZDBAudioDemoTests"
+               ReferencedContainer = "container:RZDBAudioDemo.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -32,20 +46,20 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "D49BB2BF19CB866D000DEC83"
-               BuildableName = "RZDBTests.xctest"
-               BlueprintName = "RZDBTests"
-               ReferencedContainer = "container:RZDBTests.xcodeproj">
+               BlueprintIdentifier = "D4B8C8861A5C2D2200148F68"
+               BuildableName = "RZDBAudioDemoTests.xctest"
+               BlueprintName = "RZDBAudioDemoTests"
+               ReferencedContainer = "container:RZDBAudioDemo.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D49BB2BF19CB866D000DEC83"
-            BuildableName = "RZDBTests.xctest"
-            BlueprintName = "RZDBTests"
-            ReferencedContainer = "container:RZDBTests.xcodeproj">
+            BlueprintIdentifier = "D4B8C86D1A5C2D2200148F68"
+            BuildableName = "RZDBAudioDemo.app"
+            BlueprintName = "RZDBAudioDemo"
+            ReferencedContainer = "container:RZDBAudioDemo.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </TestAction>
@@ -58,15 +72,15 @@
       ignoresPersistentStateOnLaunch = "NO"
       debugDocumentVersioning = "YES"
       allowLocationSimulation = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D49BB2BF19CB866D000DEC83"
-            BuildableName = "RZDBTests.xctest"
-            BlueprintName = "RZDBTests"
-            ReferencedContainer = "container:RZDBTests.xcodeproj">
+            BlueprintIdentifier = "D4B8C86D1A5C2D2200148F68"
+            BuildableName = "RZDBAudioDemo.app"
+            BlueprintName = "RZDBAudioDemo"
+            ReferencedContainer = "container:RZDBAudioDemo.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -76,15 +90,15 @@
       useCustomWorkingDirectory = "NO"
       buildConfiguration = "Release"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "D49BB2BF19CB866D000DEC83"
-            BuildableName = "RZDBTests.xctest"
-            BlueprintName = "RZDBTests"
-            ReferencedContainer = "container:RZDBTests.xcodeproj">
+            BlueprintIdentifier = "D4B8C86D1A5C2D2200148F68"
+            BuildableName = "RZDBAudioDemo.app"
+            BlueprintName = "RZDBAudioDemo"
+            ReferencedContainer = "container:RZDBAudioDemo.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
