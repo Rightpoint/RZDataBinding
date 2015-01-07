@@ -11,12 +11,6 @@
 #import "NSObject+RZDataBinding.h"
 #import "UIColor+RZHexColor.h"
 
-@interface RZUserViewController ()
-
-@property (assign, nonatomic) uint32_t currentHex;
-
-@end
-
 @implementation RZUserViewController
 
 - (void)viewDidLoad
@@ -31,15 +25,18 @@
         return [value stringValue];
     }];
     
+    [self.user rz_bindKey:RZDB_KP(RZUser, age) toKeyPath:RZDB_KP(UIStepper, value) ofObject:self.ageStepper];
+    
     self.rSlider.value = ((self.user.favoriteColorHex & 0xFF0000) >> 16) / 255.0f;
     self.gSlider.value = ((self.user.favoriteColorHex & 0xFF00) >> 8) / 255.0f;
     self.bSlider.value = (self.user.favoriteColorHex & 0xFF) / 255.0f;
-    
-    [self updateHex];
 
-    [self.colorView rz_bindKey:RZDB_KP(UIView, backgroundColor) toKeyPath:RZDB_KP(RZUserViewController, currentHex) ofObject:self withFunction:^id(id value) {
+    [self.colorView rz_bindKey:RZDB_KP(UIView, backgroundColor) toKeyPath:RZDB_KP(RZUser, favoriteColorHex) ofObject:self.user withFunction:^id(id value) {
         return [UIColor rz_hexColor:(uint32_t)[value integerValue]];
     }];
+    
+    [self.firstNameField addTarget:self action:@selector(firstNameChanged) forControlEvents:UIControlEventEditingChanged];
+    [self.lastNameField addTarget:self action:@selector(lastNameChanged) forControlEvents:UIControlEventEditingChanged];
 }
 
 - (IBAction)updateHex
@@ -48,19 +45,29 @@
     uint32_t g = (uint8_t)(self.gSlider.value * 255.0f) << 8;
     uint32_t b = (uint8_t)(self.bSlider.value * 255.0f);
 
-    self.currentHex = (r | g | b);
+    self.user.favoriteColorHex = (r | g | b);
 }
 
-- (IBAction)donePressed
+- (BOOL)textFieldShouldReturn:(UITextField *)textField
+{
+    if ( textField == self.firstNameField ) {
+        [self.lastNameField becomeFirstResponder];
+    }
+    else {
+        [textField resignFirstResponder];
+    }
+    
+    return YES;
+}
+
+- (void)firstNameChanged
 {
     self.user.firstName = self.firstNameField.text;
+}
+
+- (void)lastNameChanged
+{
     self.user.lastName = self.lastNameField.text;
-    
-    self.user.age = self.ageStepper.value;
-    
-    self.user.favoriteColorHex = self.currentHex;
-    
-    [self.navigationController popViewControllerAnimated:YES];
 }
 
 @end

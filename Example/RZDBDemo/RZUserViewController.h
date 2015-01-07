@@ -9,7 +9,7 @@
 @import UIKit;
 #import "RZUser.h"
 
-@interface RZUserViewController : UIViewController
+@interface RZUserViewController : UIViewController <UITextFieldDelegate>
 
 @property (weak, nonatomic) RZUser *user;
 
