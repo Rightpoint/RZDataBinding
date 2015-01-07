@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>19035F2F-7D0B-4E04-8FB0-00BAAEB7A056</string>
+	<key>IDESourceControlProjectName</key>
+	<string>RZDBDemo</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>9C2CC04C44703DDF84F80B557779C3E0C7ED35AA</key>
+		<string>github.com:jvisenti/DataBinding.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Example/RZDBDemo.xcodeproj</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>9C2CC04C44703DDF84F80B557779C3E0C7ED35AA</key>
+		<string>../../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>github.com:jvisenti/DataBinding.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>111</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>9C2CC04C44703DDF84F80B557779C3E0C7ED35AA</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>9C2CC04C44703DDF84F80B557779C3E0C7ED35AA</string>
+			<key>IDESourceControlWCCName</key>
+			<string>DataBinding</string>
+		</dict>
+	</array>
+</dict>
+</plist>
