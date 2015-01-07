@@ -19,7 +19,7 @@ An example project is available in the Example directory. You can quickly check 
 
 `pod try RZDataBinding`
 
-Or download the zip form github and run it manually.
+Or download the zip from github and run it manually.
 
 <p align="center">
 <img src="http://cl.ly/image/152x112l0i2n/rzdb.gif"
