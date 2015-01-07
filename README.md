@@ -1,11 +1,25 @@
-RZDataBinding
-===========
+# RZDataBinding
+
+[![Version](https://img.shields.io/cocoapods/v/RZDataBinding.svg?style=flat)](http://cocoadocs.org/docsets/RZDataBinding)
+
 <p align="center">
 <img src="http://cl.ly/image/1r0I0x401W2m/chain.png"
 alt="RZDataBinding">
 </p>
 ## Overview
-`RZDataBinding` is a framework designed to help maintain data integrity in your iOS or OSX app. It is built using the standard Key-Value Observation (KVO) framework, but is safer and provides additional functionality. Like KVO, `RZDataBinding` helps to avoid endless delegate chains by establishing direct callbacks for when an object changes state.
+RZDataBinding is a framework designed to help maintain data integrity in your iOS or OSX app. It is built using the standard Key-Value Observation (KVO) framework, but is safer and provides additional functionality. Like KVO, RZDataBinding helps to avoid endless delegate chains by establishing direct callbacks for when an object changes state.
+
+## Installation
+Install using [CocoaPods](http://cocoapods.org) (recommended) by adding the following line to your Podfile:
+
+`pod "RZDataBinding"`
+
+## Demo Project
+An example project is available in the Example directory. You can quickly check it out with
+
+`pod try RZDataBinding`
+
+Or download the zip form github and run it manually. The demo shows a basic usage of RZDataBinding, but is by no means the canonical or most advanced use case. 
 
 ##Usage
 **Register a callback for when the keypath of an object changes:**
@@ -35,7 +49,7 @@ alt="RZDataBinding">
         ofObject:(id)object
         withFunction:(RZDBKeyBindingFunction)bindingFunction;
 ```
-Targets can be removed and keys unbound with corresponding removal methods, but unlike with standard KVO, you are not obligated to do so. `RZDataBinding` will automatically cleanup observers before objects are deallocated. 
+Targets can be removed and keys unbound with corresponding removal methods, but unlike with standard KVO, you are not obligated to do so. RZDataBinding will automatically cleanup observers before objects are deallocated. 
 
 ## Why not use plain KVO?
 Consider the following code, which calls `nameChanged:` when a user object's name changes, and reload a collection view when the user's preferences change:
@@ -93,10 +107,16 @@ static void* const MyKVOContext = (void *)&MyKVOContext;
                forKeyPathChange:@"preferences"];
 }
 ```
-Aside from the obvious reduction in code, the `RZDataBinding` implementation demonstrates several other wins:
+Aside from the obvious reduction in code, the RZDataBinding implementation demonstrates several other wins:
 
 1. No need to manage different KVO contexts and check which object/keypath changed
 2. No need to implement an instance method, meaning *any* object can be added as a target
 3. No need to teardown before deallocation (standard KVO crashes if you fail to do this)
 
-`RZDataBinding` also provides a convenience macro to create keypaths that are checked at compile time for validity (not shown in this example). No more unwieldy `NSStringFromSelector(@selector(foo:))`!
+RZDataBinding also provides a convenience macro to create keypaths that are checked at compile time for validity (not shown in this example). No more unwieldy `NSStringFromSelector(@selector(foo:))`!
+
+## Author
+Rob Visentin, rob.visentin@raizlabs.com
+
+## License
+RZDataBinding is available under the MIT license. See the LICENSE file for more info.
