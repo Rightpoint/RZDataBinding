@@ -19,7 +19,14 @@ An example project is available in the Example directory. You can quickly check 
 
 `pod try RZDataBinding`
 
-Or download the zip form github and run it manually. The demo shows a basic usage of RZDataBinding, but is by no means the canonical or most advanced use case. 
+Or download the zip form github and run it manually.
+
+<p align="center">
+<img src="http://cl.ly/image/152x112l0i2n/rzdb.gif"
+alt="RZDataBinding">
+</p>
+
+The demo shows a basic usage of RZDataBinding, but is by no means the canonical or most advanced use case. 
 
 ##Usage
 **Register a callback for when the keypath of an object changes:**
