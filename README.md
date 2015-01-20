@@ -14,6 +14,8 @@ Install using [CocoaPods](http://cocoapods.org) (recommended) by adding the foll
 
 `pod "RZDataBinding"`
 
+Alternatively, download the repository and add the contents of the RZDataBinding directory to your project.
+
 ## Demo Project
 An example project is available in the Example directory. You can quickly check it out with
 
