@@ -92,6 +92,9 @@ static void* const MyKVOContext = (void *)&MyKVOContext;
             }
         }
     }
+    else {
+        [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
+    }
 }
 
 - (void)dealloc
