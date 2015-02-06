@@ -222,10 +222,10 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         [target rz_setDependentObservers:dependentObservers];
     }
 
-    [observer setTarget:target action:action boundKey:boundKey bindingFunction:bindingFunction];
-
     [registeredObservers addObject:observer];
     [[target rz_dependentObservers] addObserver:observer];
+
+    [observer setTarget:target action:action boundKey:boundKey bindingFunction:bindingFunction];
 }
 
 - (void)rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath
