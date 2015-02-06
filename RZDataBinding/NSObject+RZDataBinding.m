@@ -75,8 +75,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 @property (copy, nonatomic) NSString *keyPath;
 @property (assign, nonatomic) NSKeyValueObservingOptions observationOptions;
 
-@property (assign, nonatomic) __unsafe_unretained id target;
-@property (assign, nonatomic) SEL action;
+@property (strong, nonatomic) NSInvocation *invocation;
 @property (copy, nonatomic) NSString *boundKey;
 
 @property (copy, nonatomic) RZDBKeyBindingFunction bindingFunction;
@@ -156,7 +155,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
             [self setValue:val forKey:key];
         }
         @catch (NSException *exception) {
-            @throw [NSString stringWithFormat:@"RZDataBinding failed to bind key:%@ to key path:%@ of object:%@. Reason: %@", key, foreignKeyPath, [object description], exception.reason];
+            [[NSException exceptionWithName:nil reason:[NSString stringWithFormat:@"RZDataBinding failed to bind key:%@ to key path:%@ of object:%@. Reason: %@", key, foreignKeyPath, [object description], exception.reason] userInfo:nil] raise];
         }
         
         [object rz_addTarget:self action:@selector(rz_observeBoundKeyChange:) boundKey:key bindingFunction:bindingFunction forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld];
@@ -222,10 +221,10 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         dependentObservers = [[RZDBObserverContainer alloc] init];
         [target rz_setDependentObservers:dependentObservers];
     }
-    
+
     [registeredObservers addObject:observer];
     [[target rz_dependentObservers] addObserver:observer];
-    
+
     [observer setTarget:target action:action boundKey:boundKey bindingFunction:bindingFunction];
 }
 
@@ -234,8 +233,8 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     NSMutableArray *registeredObservers = [self rz_registeredObservers];
     
     [[registeredObservers copy] enumerateObjectsUsingBlock:^(RZDBObserver *observer, NSUInteger idx, BOOL *stop) {
-        BOOL targetsEqual   = (target == observer.target);
-        BOOL actionsEqual   = (action == NULL || action == observer.action);
+        BOOL targetsEqual   = (target == observer.invocation.target);
+        BOOL actionsEqual   = (action == NULL || action == observer.invocation.selector);
         BOOL boundKeysEqual = (boundKey == observer.boundKey || [boundKey isEqualToString:observer.boundKey]);
         BOOL keyPathsEqual  = [keyPath isEqualToString:observer.keyPath];
         
@@ -326,8 +325,12 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 - (void)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction
 {
-    self.target = target;
-    self.action = action;
+    NSMethodSignature *methodSig = [target methodSignatureForSelector:action];
+
+    self.invocation = [NSInvocation invocationWithMethodSignature:methodSig];
+    self.invocation.target = target;
+    self.invocation.selector = action;
+
     self.boundKey = boundKey;
     self.bindingFunction = bindingFunction;
     
@@ -337,14 +340,14 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ( context == kRZDBKVOContext ) {
-        NSMethodSignature *signature = [self.target methodSignatureForSelector:self.action];
-        
-        if ( signature.numberOfArguments > 2 ) {
+        if ( self.invocation.methodSignature.numberOfArguments > 2 ) {
             NSDictionary *changeDict = [self changeDictForKVOChange:change];
-            ((void(*)(id, SEL, id))objc_msgSend)(self.target, self.action, changeDict);
+
+            [self.invocation setArgument:&changeDict atIndex:2];
+            [self.invocation invoke];
         }
         else {
-            ((void(*)(id, SEL))objc_msgSend)(self.target, self.action);
+            [self.invocation invoke];
         }
     }
 }
@@ -382,7 +385,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 - (void)invalidate
 {
-    [[self.target rz_dependentObservers] removeObserver:self];
+    [[self.invocation.target rz_dependentObservers] removeObserver:self];
     [[self.observedObject rz_registeredObservers] removeObject:self];
     
     @try {
@@ -391,7 +394,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     @catch (NSException *exception) {}
     
     self.observedObject = nil;
-    self.target = nil;
+    self.invocation = nil;
 }
 
 @end

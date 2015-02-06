@@ -70,7 +70,9 @@ typedef id (^RZDBKeyBindingFunction)(id value);
  *  If you choose to disable global automatic cleanup by setting this to 0, you may still use the RZDBObservableObject as a base class to enable
  *  class-specific automatic cleanup.
  */
+#ifndef RZDB_AUTOMATIC_CLEANUP
 #define RZDB_AUTOMATIC_CLEANUP 1
+#endif
 
 /**
  *  Convenience for creating keypaths. Also validates the keypath before creating it when in debug mode.
