@@ -82,7 +82,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 - (instancetype)initWithObservedObject:(NSObject *)observedObject keyPath:(NSString *)keyPath observationOptions:(NSKeyValueObservingOptions)observingOptions;
 
-- (void)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction;
+- (BOOL)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction;
 
 - (void)invalidate;
 
@@ -222,10 +222,10 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         [target rz_setDependentObservers:dependentObservers];
     }
 
-    [registeredObservers addObject:observer];
-    [[target rz_dependentObservers] addObserver:observer];
-
-    [observer setTarget:target action:action boundKey:boundKey bindingFunction:bindingFunction];
+    if (  [observer setTarget:target action:action boundKey:boundKey bindingFunction:bindingFunction] ) {
+        [registeredObservers addObject:observer];
+        [[target rz_dependentObservers] addObserver:observer];
+    }
 }
 
 - (void)rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath
@@ -323,7 +323,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     return self;
 }
 
-- (void)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction
+- (BOOL)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction
 {
     NSMethodSignature *methodSig = [target methodSignatureForSelector:action];
 
@@ -333,8 +333,17 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
     self.boundKey = boundKey;
     self.bindingFunction = bindingFunction;
-    
-    [self.observedObject addObserver:self forKeyPath:self.keyPath options:self.observationOptions context:kRZDBKVOContext];
+
+    BOOL success = YES;
+
+    @try {
+        [self.observedObject addObserver:self forKeyPath:self.keyPath options:self.observationOptions context:kRZDBKVOContext];
+    }
+    @catch (NSException *exception) {
+        success = NO;
+    }
+
+    return success;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
