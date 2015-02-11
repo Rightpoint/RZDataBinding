@@ -155,7 +155,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
             [self setValue:val forKey:key];
         }
         @catch (NSException *exception) {
-            [[NSException exceptionWithName:nil reason:[NSString stringWithFormat:@"RZDataBinding failed to bind key:%@ to key path:%@ of object:%@. Reason: %@", key, foreignKeyPath, [object description], exception.reason] userInfo:nil] raise];
+            [NSException raise:NSInvalidArgumentException format:@"RZDataBinding failed to bind key:%@ to key path:%@ of object:%@. Reason: %@", key, foreignKeyPath, [object description], exception.reason];
         }
         
         [object rz_addTarget:self action:@selector(rz_observeBoundKeyChange:) boundKey:key bindingFunction:bindingFunction forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld];
