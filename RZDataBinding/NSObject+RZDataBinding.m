@@ -155,7 +155,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
             [self setValue:val forKey:key];
         }
         @catch (NSException *exception) {
-            [NSException raise:NSInvalidArgumentException format:@"RZDataBinding failed to bind key:%@ to key path:%@ of object:%@. Reason: %@", key, foreignKeyPath, [object description], exception.reason];
+            [NSException raise:NSInvalidArgumentException format:@"RZDataBinding cannot bind key:%@ to key path:%@ of object:%@. Reason: %@", key, foreignKeyPath, [object description], exception.reason];
         }
         
         [object rz_addTarget:self action:@selector(rz_observeBoundKeyChange:) boundKey:key bindingFunction:bindingFunction forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld];
@@ -336,11 +336,14 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
     BOOL success = YES;
 
+    // Some objects like NSArray do not support -addObserver:forKeyPath:options:
+    // Instead of crashing, treat these objects as objects that have no KVO-compliant properties.
     @try {
         [self.observedObject addObserver:self forKeyPath:self.keyPath options:self.observationOptions context:kRZDBKVOContext];
     }
     @catch (NSException *exception) {
         success = NO;
+        RZDBLogException(@"RZDataBinding failed to add target:%@ to object:%@ for key path:%@. Reason: %@", target, self.observedObject, self.keyPath, exception.reason);
     }
 
     return success;
@@ -396,11 +399,15 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 {
     [[self.invocation.target rz_dependentObservers] removeObserver:self];
     [[self.observedObject rz_registeredObservers] removeObject:self];
-    
+
+    // KVO throws an exception when removing an observer that was never added.
+    // This should never be a problem given how things are setup, but make sure to avoid a crash.
     @try {
         [self.observedObject removeObserver:self forKeyPath:self.keyPath context:kRZDBKVOContext];
     }
-    @catch (NSException *exception) {}
+    @catch (NSException *exception) {
+        RZDBLogException(@"RZDataBinding attempted to remove an observer from object:%@, but the observer was never added. This shouldn't have happened, but won't affect anything going forward.", self.observedObject);
+    }
     
     self.observedObject = nil;
     self.invocation = nil;

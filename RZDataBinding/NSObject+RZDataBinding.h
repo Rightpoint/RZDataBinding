@@ -75,6 +75,16 @@ typedef id (^RZDBKeyBindingFunction)(id value);
 #endif
 
 /**
+ *  The method that will log exceptions caugh in try/catch block. These are non-fatal exceptions to RZDataBinding,
+ *  but may be useful in debugging. You might choose for example to `#define RZDBLogException NSLog`.
+ *  The method defined must take exactly two parameters, a format string, and a variable list of arguments.
+ *  By default, these messages are not logged.
+ */
+#ifndef RZDBLogException
+#define RZDBLogException(e, ...)
+#endif
+
+/**
  *  Convenience for creating keypaths. Also validates the keypath before creating it when in debug mode.
  *
  *  @param c The name of the class to validate keypath against.
