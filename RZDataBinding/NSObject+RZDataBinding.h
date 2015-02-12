@@ -75,13 +75,13 @@ typedef id (^RZDBKeyBindingFunction)(id value);
 #endif
 
 /**
- *  The method that will log exceptions caugh in try/catch block. These are non-fatal exceptions to RZDataBinding,
- *  but may be useful in debugging. You might choose for example to `#define RZDBLogException NSLog`.
+ *  The method that should be used to log errors in RZDataBinding that are non-fatal,
+ *  but may be useful in debugging. You might choose for example to `#define RZDBLogException DDLogInfo`.
  *  The method defined must take exactly two parameters, a format string, and a variable list of arguments.
- *  By default, these messages are not logged.
+ *  By default, log messages are sent using NSLog.
  */
-#ifndef RZDBLogException
-#define RZDBLogException(e, ...)
+#ifndef RZDBLog
+#define RZDBLog(format, ...) NSLog
 #endif
 
 /**

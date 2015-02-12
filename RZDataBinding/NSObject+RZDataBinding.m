@@ -343,7 +343,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     }
     @catch (NSException *exception) {
         success = NO;
-        RZDBLogException(@"RZDataBinding failed to add target:%@ to object:%@ for key path:%@. Reason: %@", target, self.observedObject, self.keyPath, exception.reason);
+        RZDBLog(@"RZDataBinding failed to add target:%@ to object:%@ for key path:%@. Reason: %@", target, self.observedObject, self.keyPath, exception.reason);
     }
 
     return success;
@@ -406,7 +406,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         [self.observedObject removeObserver:self forKeyPath:self.keyPath context:kRZDBKVOContext];
     }
     @catch (NSException *exception) {
-        RZDBLogException(@"RZDataBinding attempted to remove an observer from object:%@, but the observer was never added. This shouldn't have happened, but won't affect anything going forward.", self.observedObject);
+        RZDBLog(@"RZDataBinding attempted to remove an observer from object:%@, but the observer was never added. This shouldn't have happened, but won't affect anything going forward.", self.observedObject);
     }
     
     self.observedObject = nil;
