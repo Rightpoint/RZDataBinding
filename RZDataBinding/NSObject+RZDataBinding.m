@@ -82,7 +82,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 - (instancetype)initWithObservedObject:(NSObject *)observedObject keyPath:(NSString *)keyPath observationOptions:(NSKeyValueObservingOptions)observingOptions;
 
-- (BOOL)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction;
+- (void)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction;
 
 - (void)invalidate;
 
@@ -222,10 +222,10 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         [target rz_setDependentObservers:dependentObservers];
     }
 
-    if (  [observer setTarget:target action:action boundKey:boundKey bindingFunction:bindingFunction] ) {
-        [registeredObservers addObject:observer];
-        [[target rz_dependentObservers] addObserver:observer];
-    }
+    [registeredObservers addObject:observer];
+    [[target rz_dependentObservers] addObserver:observer];
+
+    [observer setTarget:target action:action boundKey:boundKey bindingFunction:bindingFunction];
 }
 
 - (void)rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath
@@ -323,7 +323,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     return self;
 }
 
-- (BOOL)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction
+- (void)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction
 {
     NSMethodSignature *methodSig = [target methodSignatureForSelector:action];
 
@@ -334,19 +334,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     self.boundKey = boundKey;
     self.bindingFunction = bindingFunction;
 
-    BOOL success = YES;
-
-    // Some objects like NSArray do not support -addObserver:forKeyPath:options:
-    // Instead of crashing, treat these objects as objects that have no KVO-compliant properties.
-    @try {
-        [self.observedObject addObserver:self forKeyPath:self.keyPath options:self.observationOptions context:kRZDBKVOContext];
-    }
-    @catch (NSException *exception) {
-        success = NO;
-        RZDBLog(@"RZDataBinding failed to add target:%@ to object:%@ for key path:%@. Reason: %@", target, self.observedObject, self.keyPath, exception.reason);
-    }
-
-    return success;
+    [self.observedObject addObserver:self forKeyPath:self.keyPath options:self.observationOptions context:kRZDBKVOContext];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
