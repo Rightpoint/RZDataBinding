@@ -70,7 +70,19 @@ typedef id (^RZDBKeyBindingFunction)(id value);
  *  If you choose to disable global automatic cleanup by setting this to 0, you may still use the RZDBObservableObject as a base class to enable
  *  class-specific automatic cleanup.
  */
+#ifndef RZDB_AUTOMATIC_CLEANUP
 #define RZDB_AUTOMATIC_CLEANUP 1
+#endif
+
+/**
+ *  The method that should be used to log errors in RZDataBinding that are non-fatal,
+ *  but may be useful in debugging. You might choose for example to `#define RZDBLogException DDLogInfo`.
+ *  The method defined must take exactly two parameters, a format string, and a variable list of arguments.
+ *  By default, log messages are sent using NSLog.
+ */
+#ifndef RZDBLog
+#define RZDBLog(format, ...) NSLog
+#endif
 
 /**
  *  Convenience for creating keypaths. Also validates the keypath before creating it when in debug mode.
