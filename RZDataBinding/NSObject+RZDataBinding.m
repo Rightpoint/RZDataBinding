@@ -343,11 +343,11 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         if ( self.invocation.methodSignature.numberOfArguments > 2 ) {
             NSDictionary *changeDict = [self changeDictForKVOChange:change];
 
-            [self.invocation setArgument:&changeDict atIndex:2];
-            [self.invocation invoke];
+            // NSInvocation is unsafe for sending object arguments. Use objc_msgSend instead.
+            ((void(*)(id, SEL, NSDictionary *))objc_msgSend)(self.invocation.target, self.invocation.selector, changeDict);
         }
         else {
-            [self.invocation invoke];
+            ((void(*)(id, SEL))objc_msgSend)(self.invocation.target, self.invocation.selector);
         }
     }
 }
