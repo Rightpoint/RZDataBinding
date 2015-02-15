@@ -347,7 +347,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
             ((void(*)(id, SEL, NSDictionary *))objc_msgSend)(self.invocation.target, self.invocation.selector, changeDict);
         }
         else {
-            ((void(*)(id, SEL))objc_msgSend)(self.invocation.target, self.invocation.selector);
+            [self.invocation invoke];
         }
     }
 }
