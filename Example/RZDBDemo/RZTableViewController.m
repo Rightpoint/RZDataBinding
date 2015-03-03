@@ -50,14 +50,14 @@
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"RZUserCell"];    
     RZUser *user = self.users[indexPath.row];
     
-    [cell.textLabel rz_bindKey:RZDB_KP(UILabel *, text) toKeyPath:RZDB_KP(RZUser *, fullName) ofObject:user];
+    [cell.textLabel rz_bindKey:RZDB_KP(UILabel, text) toKeyPath:RZDB_KP(RZUser, fullName) ofObject:user];
     
-    [cell.imageView rz_bindKey:RZDB_KP(UIImageView *, image) toKeyPath:RZDB_KP(RZUser *, favoriteColorHex) ofObject:user withFunction:^id(id value) {
+    [cell.imageView rz_bindKey:RZDB_KP(UIImageView, image) toKeyPath:RZDB_KP(RZUser, favoriteColorHex) ofObject:user withFunction:^id(id value) {
         UIColor *color = [UIColor rz_hexColor:(uint32_t)[value integerValue]];
         return [UIImage rz_imageWithColor:color size:CGSizeMake(35.0f, 35.0f)];
     }];
     
-    [cell.detailTextLabel rz_bindKey:RZDB_KP(UILabel *, text) toKeyPath:RZDB_KP(RZUser *, age) ofObject:user withFunction:^id(id value) {
+    [cell.detailTextLabel rz_bindKey:RZDB_KP(UILabel, text) toKeyPath:RZDB_KP(RZUser, age) ofObject:user withFunction:^id(id value) {
         return [value stringValue];
     }];
     
