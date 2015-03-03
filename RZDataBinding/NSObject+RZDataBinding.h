@@ -76,12 +76,12 @@ typedef id (^RZDBKeyBindingFunction)(id value);
 
 /**
  *  The method that should be used to log errors in RZDataBinding that are non-fatal,
- *  but may be useful in debugging. You might choose for example to `#define RZDBLogException DDLogInfo`.
+ *  but may be useful in debugging. You might choose for example to `#define RZDBLog DDLogInfo`.
  *  The method defined must take exactly two parameters, a format string, and a variable list of arguments.
  *  By default, log messages are sent using NSLog.
  */
 #ifndef RZDBLog
-#define RZDBLog(format, ...) NSLog
+#define RZDBLog NSLog
 #endif
 
 /**
@@ -96,8 +96,8 @@ typedef id (^RZDBKeyBindingFunction)(id value);
  */
 #if DEBUG
 #define RZDB_KP(c, p) ({\
-c *_rzdb_keypath_obj __unused; \
-typeof(_rzdb_keypath_obj.p) _rzdb_keypath_prop __unused; \
+c *_rzdb_keypath_obj; \
+__unused __typeof(_rzdb_keypath_obj.p) _rzdb_keypath_prop; \
 @#p; \
 })
 #else
