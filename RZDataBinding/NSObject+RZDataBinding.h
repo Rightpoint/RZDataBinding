@@ -93,9 +93,9 @@ typedef id (^RZDBKeyBindingFunction)(id value);
  *
  *  @return An NSString containing the keypath.
  *
- *  @example RZDB_KP(NSObject *, description.length) -> @"description.length"
- *           RZDB_KP_OBJ(MyLabel, text)              -> @"text"
- *           RZDB_KP_SELF(user.firstName)            -> @"user.firstName"
+ *  @example RZDB_KP(NSObject, description.length) -> @"description.length"
+ *           RZDB_KP_OBJ(MyLabel, text)            -> @"text"
+ *           RZDB_KP_SELF(user.firstName)          -> @"user.firstName"
  */
 #if DEBUG
 #define RZDB_KP(Classname, keypath) ({\
