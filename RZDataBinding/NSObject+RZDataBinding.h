@@ -28,6 +28,8 @@
 
 #import <Foundation/Foundation.h>
 
+#pragma mark - Macros and Definitions
+
 /**
  *  The value for this key is the object that changed. This key is always present.
  */
@@ -76,33 +78,45 @@ typedef id (^RZDBKeyBindingFunction)(id value);
 
 /**
  *  The method that should be used to log errors in RZDataBinding that are non-fatal,
- *  but may be useful in debugging. You might choose for example to `#define RZDBLogException DDLogInfo`.
+ *  but may be useful in debugging. You might choose for example to `#define RZDBLog DDLogInfo`.
  *  The method defined must take exactly two parameters, a format string, and a variable list of arguments.
  *  By default, log messages are sent using NSLog.
  */
 #ifndef RZDBLog
-#define RZDBLog(format, ...) NSLog
+#define RZDBLog NSLog
 #endif
 
 /**
- *  Convenience for creating keypaths. Also validates the keypath before creating it when in debug mode.
+ *  Convenience macros for creating keypaths. An invalid keypath will throw a compile-time error when compiling in debug mode.
  *
- *  @param c The name of the class to validate keypath against.
- *  @param p The keypath to create.
+ *  The first parameter of these macros is used only for compile-time validation of the keypath.
  *
  *  @return An NSString containing the keypath.
  *
- *  @example RZDB_KP(NSObject, description.length) would return @"description.length"
+ *  @example RZDB_KP(NSObject, description.length) -> @"description.length"
+ *           RZDB_KP_OBJ(MyLabel, text)            -> @"text"
+ *           RZDB_KP_SELF(user.firstName)          -> @"user.firstName"
  */
 #if DEBUG
-#define RZDB_KP(c, p) ({\
-c *_rzdb_keypath_obj __unused; \
-typeof(_rzdb_keypath_obj.p) _rzdb_keypath_prop __unused; \
-@#p; \
+#define RZDB_KP(Classname, keypath) ({\
+Classname *_rzdb_keypath_obj; \
+__unused __typeof(_rzdb_keypath_obj.keypath) _rzdb_keypath_prop; \
+@#keypath; \
+})
+
+#define RZDB_KP_OBJ(object, keypath) ({\
+__typeof(object) _rzdb_keypath_obj; \
+__unused __typeof(_rzdb_keypath_obj.keypath) _rzdb_keypath_prop; \
+@#keypath; \
 })
 #else
-#define RZDB_KP(c, p) (@#p)
+#define RZDB_KP(Classname, keypath) (@#keypath)
+#define RZDB_KP_OBJ RZDB_KP
 #endif
+
+#define RZDB_KP_SELF(keypath) RZDB_KP_OBJ(self, keypath)
+
+#pragma mark - NSObject+RZDataBinding interface
 
 @interface NSObject (RZDataBinding)
 
@@ -190,6 +204,8 @@ typeof(_rzdb_keypath_obj.p) _rzdb_keypath_prop __unused; \
 - (void)rz_unbindKey:(NSString *)key fromKeyPath:(NSString *)foreignKeyPath ofObject:(id)object;
 
 @end
+
+#pragma mark - RZDBObservableObject interface
 
 /**
  *  A base class that automatically cleans up the appropriate observers before being deallocated, replicating the behavior of RZDB_AUTOMATIC_CLEANUP.

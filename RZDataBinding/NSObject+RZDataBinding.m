@@ -394,7 +394,7 @@ static SEL kRZDBDefautDeallocSelector;
     @try {
         [self.observedObject removeObserver:self forKeyPath:self.keyPath context:kRZDBKVOContext];
     }
-    @catch (NSException *exception) {
+    @catch (__unused NSException *exception) {
         RZDBLog(@"RZDataBinding attempted to remove an observer from object:%@, but the observer was never added. This shouldn't have happened, but won't affect anything going forward.", self.observedObject);
     }
     
