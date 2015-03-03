@@ -22,7 +22,7 @@
 {
     self = [super init];
     if ( self ) {
-        [self rz_addTarget:self action:@selector(updateFullName) forKeyPathChanges:@[RZDB_KP(RZUser, firstName), RZDB_KP(RZUser, lastName)]];
+        [self rz_addTarget:self action:@selector(updateFullName) forKeyPathChanges:@[RZDB_KP_SELF(firstName), RZDB_KP_SELF(lastName)]];
         
         NSData *data = [NSData dataWithContentsOfFile:[[NSBundle mainBundle] pathForResource:fileName ofType:@"json"]];
         NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:kNilOptions error:nil];

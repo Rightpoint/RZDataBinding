@@ -21,17 +21,17 @@
     self.lastNameField.text = self.user.lastName;
     
     self.ageStepper.value = self.user.age;
-    [self.ageLabel rz_bindKey:RZDB_KP(UILabel, text) toKeyPath:RZDB_KP(UIStepper, value) ofObject:self.ageStepper withFunction:^id(id value) {
+    [self.ageLabel rz_bindKey:RZDB_KP(UILabel *, text) toKeyPath:RZDB_KP(UIStepper *, value) ofObject:self.ageStepper withFunction:^id(id value) {
         return [value stringValue];
     }];
     
-    [self.user rz_bindKey:RZDB_KP(RZUser, age) toKeyPath:RZDB_KP(UIStepper, value) ofObject:self.ageStepper];
+    [self.user rz_bindKey:RZDB_KP(RZUser *, age) toKeyPath:RZDB_KP(UIStepper *, value) ofObject:self.ageStepper];
     
     self.rSlider.value = ((self.user.favoriteColorHex & 0xFF0000) >> 16) / 255.0f;
     self.gSlider.value = ((self.user.favoriteColorHex & 0xFF00) >> 8) / 255.0f;
     self.bSlider.value = (self.user.favoriteColorHex & 0xFF) / 255.0f;
 
-    [self.colorView rz_bindKey:RZDB_KP(UIView, backgroundColor) toKeyPath:RZDB_KP(RZUser, favoriteColorHex) ofObject:self.user withFunction:^id(id value) {
+    [self.colorView rz_bindKey:RZDB_KP(UIView *, backgroundColor) toKeyPath:RZDB_KP(RZUser *, favoriteColorHex) ofObject:self.user withFunction:^id(id value) {
         return [UIColor rz_hexColor:(uint32_t)[value integerValue]];
     }];
     
