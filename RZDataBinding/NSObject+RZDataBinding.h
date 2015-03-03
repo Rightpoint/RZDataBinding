@@ -98,16 +98,22 @@ typedef id (^RZDBKeyBindingFunction)(id value);
  *           RZDB_KP_SELF(user.firstName)            -> @"user.firstName"
  */
 #if DEBUG
-#define RZDB_KP(type, keypath) ({\
-type _rzdb_keypath_obj; \
+#define RZDB_KP(Classname, keypath) ({\
+Classname *_rzdb_keypath_obj; \
+__unused __typeof(_rzdb_keypath_obj.keypath) _rzdb_keypath_prop; \
+@#keypath; \
+})
+
+#define RZDB_KP_OBJ(object, keypath) ({\
+__typeof(object) _rzdb_keypath_obj; \
 __unused __typeof(_rzdb_keypath_obj.keypath) _rzdb_keypath_prop; \
 @#keypath; \
 })
 #else
-#define RZDB_KP(classname, keypath) (@#keypath)
+#define RZDB_KP(Classname, keypath) (@#keypath)
+#define RZDB_KP_OBJ RZDB_KP
 #endif
 
-#define RZDB_KP_OBJ(object, keypath) RZDB_KP(__typeof(object), keypath)
 #define RZDB_KP_SELF(keypath) RZDB_KP_OBJ(self, keypath)
 
 #pragma mark - NSObject+RZDataBinding interface
