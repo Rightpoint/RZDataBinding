@@ -15,6 +15,7 @@
 		D49BB2C019CB866D000DEC83 /* RZDBTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RZDBTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D49BB2C419CB866D000DEC83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D49BB2C519CB866D000DEC83 /* RZDBTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RZDBTests.m; sourceTree = "<group>"; };
+		D4ABA1BE1AB9E5D200220A1A /* RZDBMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBMacros.h; path = ../RZDataBinding/RZDBMacros.h; sourceTree = "<group>"; };
 		D4B8C8301A5C2B8F00148F68 /* NSObject+RZDataBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+RZDataBinding.h"; path = "../RZDataBinding/NSObject+RZDataBinding.h"; sourceTree = "<group>"; };
 		D4B8C8311A5C2B8F00148F68 /* NSObject+RZDataBinding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSObject+RZDataBinding.m"; path = "../RZDataBinding/NSObject+RZDataBinding.m"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -33,6 +34,7 @@
 		D49BB2B519CB862A000DEC83 = {
 			isa = PBXGroup;
 			children = (
+				D4ABA1BE1AB9E5D200220A1A /* RZDBMacros.h */,
 				D4B8C8301A5C2B8F00148F68 /* NSObject+RZDataBinding.h */,
 				D4B8C8311A5C2B8F00148F68 /* NSObject+RZDataBinding.m */,
 				D49BB2C219CB866D000DEC83 /* RZDBTests */,
@@ -176,7 +178,7 @@
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"DEBUG=1",
 					"$(inherited)",
@@ -223,6 +225,7 @@
 					"$(inherited)",
 				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
