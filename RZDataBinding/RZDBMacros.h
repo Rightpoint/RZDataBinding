@@ -50,7 +50,7 @@ __unused __typeof(_rzdb_keypath_obj.keypath) _rzdb_keypath_prop; \
 })
 #else
 #define RZDB_KP(Classname, keypath) (@#keypath)
-#define RZDB_KP_OBJ RZDB_KP
+#define RZDB_KP_OBJ(self, keypath) (@#keypath)
 #endif
 
 #define RZDB_KP_SELF(keypath) RZDB_KP_OBJ(self, keypath)
