@@ -144,15 +144,44 @@ __unused __typeof(_rzdb_keypath_obj.keypath) _rzdb_keypath_prop; \
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately;
 
 /**
+ *  Register a selector to be called on a given target whenever keyPath changes on the receiver.
+ *
+ *  @param target  The object on which to call the action selector. Must be non-nil. This object is not retained.
+ *  @param action  The selector to call on the target. Must not be NULL. The method must take either zero or exactly one parameter, an NSDictionary, and have a void return type. If the method has an NSDictionary parameter, the dictionary will contain values for the appropriate RZDBChangeKeys. If keys are absent, they can be assumed to be nil. Values will not be NSNull.
+ *  @param keyPath The key path of the receiver for which changes should trigger an action. Must be KVC compliant.
+ *  @param callImmediately If YES, the action is added to the callback queue. If callback queue is nil, the action is called immediately on the current queue before this method returns. In this case the change dictionary, if present, will not contain a value for kRZDBChangeKeyOld.
+ *  @param callbackQueue The operation queue on which actions should be called. If non-nil, actions are coalesced by runloop cycle, and the action is executed once on the callback queue. If nil, no coalescing occurs, and actions are sent immediately on whatever queue the change occurs.
+ *
+ *  @see RZDB_KP macro for creating keypaths.
+ */
+- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately callbackQueue:(NSOperationQueue *)callbackQueue;
+
+/**
  *  A convenience method that calls rz_addTarget:action:forKeyPathChange: for each keyPath in the keyPaths array.
  *
  *  @param target   The object on which to call the action selector. Must be non-nil. This object is not retained.
  *  @param action   The selector to call on the target. Must not be NULL. See rz_addTarget documentation for more details.
  *  @param keyPaths An array of key paths that should trigger an action. Each key path must be KVC compliant.
  *
+ *  @note The action is not called immediately.
+ *
  *  @see RZDB_KP macro for creating keypaths.
  */
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths;
+
+/**
+ *  A convenience method that calls rz_addTarget:action:forKeyPathChange: for each keyPath in the keyPaths array.
+ *
+ *  @param target   The object on which to call the action selector. Must be non-nil. This object is not retained.
+ *  @param action   The selector to call on the target. Must not be NULL. See rz_addTarget documentation for more details.
+ *  @param keyPaths An array of key paths that should trigger an action. Each key path must be KVC compliant.
+ *  @param callbackQueue The operation queue on which actions should be called. If non-nil, actions are coalesced by runloop cycle, and the action is executed once on the callback queue. If nil, no coalescing occurs, and actions are sent immediately on whatever queue the change occurs.
+ *
+ *  @note The action is not called immediately.
+ *
+ *  @see RZDB_KP macro for creating keypaths.
+ */
+- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths callbackQueue:(NSOperationQueue *)callbackQueue;
 
 /**
  *  Removes previously registered target/action pairs so that the actions are no longer called when the receiver changes value for keyPath.

@@ -110,22 +110,34 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately
 {
+    [self rz_addTarget:target action:action forKeyPathChange:keyPath callImmediately:callImmediately callbackQueue:nil];
+}
+
+- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately callbackQueue:(NSOperationQueue *)callbackQueue
+{
+    // TODO: handle the callbackQueue parameter
+
     NSParameterAssert(target);
     NSParameterAssert(action);
-    
+
     NSKeyValueObservingOptions observationOptions = NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld;
-    
+
     if ( callImmediately ) {
         observationOptions |= NSKeyValueObservingOptionInitial;
     }
-    
+
     [self rz_addTarget:target action:action boundKey:nil bindingFunction:nil forKeyPath:keyPath withOptions:observationOptions];
 }
 
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths
 {
+    [self rz_addTarget:target action:action forKeyPathChanges:keyPaths callbackQueue:nil];
+}
+
+- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths callbackQueue:(NSOperationQueue *)callbackQueue
+{
     [keyPaths enumerateObjectsUsingBlock:^(NSString *keyPath, NSUInteger idx, BOOL *stop) {
-        [self rz_addTarget:target action:action forKeyPathChange:keyPath];
+        [self rz_addTarget:target action:action forKeyPathChange:keyPath callImmediately:NO callbackQueue:callbackQueue];
     }];
 }
 
