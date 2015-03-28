@@ -118,6 +118,46 @@
     XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
 }
 
+- (void)testCoalesceThreading
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Done"];
+    NSArray *testObjects = @[[RZDBTestObject new],
+                             [RZDBTestObject new],
+                             [RZDBTestObject new],
+                             [RZDBTestObject new],
+                             [RZDBTestObject new]];
+
+    RZDBTestObject *observer = [RZDBTestObject new];
+
+    dispatch_queue_t q = dispatch_queue_create("concurrent", DISPATCH_QUEUE_CONCURRENT);
+
+    dispatch_suspend(q);
+    // Create 500 addTarget actions
+    for ( NSUInteger i = 0; i < 500; i++ ) {
+        dispatch_async(q, ^{
+            RZDBTestObject *t = [testObjects objectAtIndex:arc4random() % testObjects.count];
+
+            [t rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(t, string), RZDB_KP_OBJ(t, callbackCalls)] callbackQueue:[NSOperationQueue mainQueue]];
+
+        });
+    }
+    // Create 5000 triggers
+    for ( NSUInteger i = 0; i < 5000; i++ ) {
+        dispatch_async(q, ^{
+            RZDBTestObject *t = [testObjects objectAtIndex:arc4random() % testObjects.count];
+            t.string = @"New Value";
+        });
+    }
+    dispatch_resume(q);
+
+    dispatch_async(q, ^{
+        [expectation fulfill];
+    });
+    [self waitForExpectationsWithTimeout:1 handler:^(NSError *error) {
+        // Ideally, all observers would be triggered once
+    }];
+}
+
 - (void)testKeyBinding
 {
     RZDBTestObject *testObj = [RZDBTestObject new];
