@@ -128,31 +128,29 @@
                              [RZDBTestObject new]];
 
     RZDBTestObject *observer = [RZDBTestObject new];
+    NSOperationQueue *q = [[NSOperationQueue alloc] init];
 
-    dispatch_queue_t q = dispatch_queue_create("concurrent", DISPATCH_QUEUE_CONCURRENT);
-
-    dispatch_suspend(q);
     // Create 500 addTarget actions
     for ( NSUInteger i = 0; i < 500; i++ ) {
-        dispatch_async(q, ^{
+        [q addOperationWithBlock:^{
             RZDBTestObject *t = [testObjects objectAtIndex:arc4random() % testObjects.count];
 
-            [t rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(t, string), RZDB_KP_OBJ(t, callbackCalls)] callbackQueue:[NSOperationQueue mainQueue]];
+            [t rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(t, string), RZDB_KP_OBJ(t, callbackCalls)]];
 
-        });
+        }];
     }
     // Create 5000 triggers
     for ( NSUInteger i = 0; i < 5000; i++ ) {
-        dispatch_async(q, ^{
+        [q addOperationWithBlock:^{
             RZDBTestObject *t = [testObjects objectAtIndex:arc4random() % testObjects.count];
             t.string = @"New Value";
-        });
+        }];
     }
-    dispatch_resume(q);
 
-    dispatch_async(q, ^{
+    [q addOperationWithBlock:^{
         [expectation fulfill];
-    });
+    }];
+    
     [self waitForExpectationsWithTimeout:1 handler:^(NSError *error) {
         // Ideally, all observers would be triggered once
     }];
