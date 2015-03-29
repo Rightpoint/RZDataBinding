@@ -550,6 +550,11 @@ static SEL kRZDBDefautDeallocSelector;
     }
 }
 
+- (void)main
+{
+    // no-op
+}
+
 @end
 
 @implementation RZDBCallbackOperation
