@@ -129,6 +129,43 @@
 
     RZDBTestObject *observer = [RZDBTestObject new];
     NSOperationQueue *q = [[NSOperationQueue alloc] init];
+    q.maxConcurrentOperationCount = 1;
+
+    // Create 500 addTarget actions
+    for ( NSUInteger i = 0; i < 500; i++ ) {
+        RZDBTestObject *t = [testObjects objectAtIndex:i % testObjects.count];
+
+        [t rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(t, string)] callbackQueue:[NSOperationQueue currentQueue]];
+
+    }
+    // Create 5000 triggers
+    [q addOperationWithBlock:^{
+        for ( NSUInteger i = 0; i < 5000; i++ ) {
+            RZDBTestObject *t = [testObjects objectAtIndex:arc4random() % testObjects.count];
+            t.string = @"New Value";
+        }
+        [q addOperationWithBlock:^{
+            [expectation fulfill];
+        }];
+    }];
+
+
+    [self waitForExpectationsWithTimeout:50 handler:^(NSError *error) {
+        XCTAssert([observer callbackCalls] == 1);
+    }];
+}
+
+- (void)testCoalesceThreadAbuse
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Done"];
+    NSArray *testObjects = @[[RZDBTestObject new],
+                             [RZDBTestObject new],
+                             [RZDBTestObject new],
+                             [RZDBTestObject new],
+                             [RZDBTestObject new]];
+
+    RZDBTestObject *observer = [RZDBTestObject new];
+    NSOperationQueue *q = [[NSOperationQueue alloc] init];
 
     // Create 500 addTarget actions
     for ( NSUInteger i = 0; i < 500; i++ ) {
@@ -150,11 +187,14 @@
     [q addOperationWithBlock:^{
         [expectation fulfill];
     }];
-    
+    // There's not much state that we can validate here, however, we are mutating
+    // things enough that if there was a synchronization issue with the data structures
+    // we should of crashed by now.
     [self waitForExpectationsWithTimeout:1 handler:^(NSError *error) {
         // Ideally, all observers would be triggered once
     }];
 }
+
 
 - (void)testKeyBinding
 {
