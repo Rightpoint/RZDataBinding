@@ -53,6 +53,11 @@ __unused __typeof(_rzdb_keypath_obj.keypath) _rzdb_keypath_prop; \
 #define RZDB_KP_OBJ(self, keypath) (@#keypath)
 #endif
 
+/**
+ *  @note This macro will implicitly retain self from within blocks while running in debug mode.
+ *  The safe way to generate a keypath on self from  within a block 
+ *  is to define a weak reference to self outside the block, and then use RZDB_KP_OBJ(weakSelf, keypath).
+ */
 #define RZDB_KP_SELF(keypath) RZDB_KP_OBJ(self, keypath)
 
 /**
