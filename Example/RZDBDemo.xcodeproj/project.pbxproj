@@ -26,6 +26,7 @@
 /* Begin PBXFileReference section */
 		D41F4FD81A5346EF00D0BA2D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = SOURCE_ROOT; };
 		D41F4FDA1A5346EF00D0BA2D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = SOURCE_ROOT; };
+		D4ABA1C01AB9F90800220A1A /* RZDBMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RZDBMacros.h; path = ../RZDataBinding/RZDBMacros.h; sourceTree = "<group>"; };
 		D4B8C89D1A5C3C0E00148F68 /* NSObject+RZDataBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+RZDataBinding.h"; path = "../RZDataBinding/NSObject+RZDataBinding.h"; sourceTree = "<group>"; };
 		D4B8C89E1A5C3C0E00148F68 /* NSObject+RZDataBinding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSObject+RZDataBinding.m"; path = "../RZDataBinding/NSObject+RZDataBinding.m"; sourceTree = "<group>"; };
 		D4B8C8A11A5C47EC00148F68 /* UIColor+RZHexColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIColor+RZHexColor.h"; path = "Utils/UIColor+RZHexColor.h"; sourceTree = "<group>"; };
@@ -121,6 +122,7 @@
 		D4C5F4281A39F6CC00CC6FB3 /* RZDataBinding */ = {
 			isa = PBXGroup;
 			children = (
+				D4ABA1C01AB9F90800220A1A /* RZDBMacros.h */,
 				D4B8C89D1A5C3C0E00148F68 /* NSObject+RZDataBinding.h */,
 				D4B8C89E1A5C3C0E00148F68 /* NSObject+RZDataBinding.m */,
 			);
