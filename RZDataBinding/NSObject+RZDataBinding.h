@@ -195,35 +195,37 @@ typedef id (^RZDBKeyBindingFunction)(id value);
 
 @end
 
-#pragma mark - RZDBTransacton interface
+#pragma mark - RZDBCoalesce interface
 
 /**
- *  Transactions define a chunk of work that should be completed "atomically" with respect to RZDataBinding.
- *  That is, actions registered using the rz_addTarget:action: methods will be fired once, when the work is completed.
+ *  There may be chunks of work that should be completed "atomically" with respect to RZDataBinding.
+ *  That is, actions registered using the rz_addTarget:action: methods should be fired once, when the work is completed.
  *
- *  Transactions are are advanced feature that should generally only be used if you encounter a performance issue,
- *  or find some other requirement for event coalescing.
+ *  The RZDBCoalesce object provides class methods to manage event coalescing.
+ *
+ *  Coalescing is an advanced feature that should generally only be used if you encounter a performance issue,
+ *  or find some other requirement for it.
  */
-@interface RZDBTransaction : NSObject
+@interface RZDBCoalesce : NSObject
 
 /**
- *  Begin a new transaction for the current thread.
- *  Changes that occur during the transaction that would trigger actions registered with the 
- *  rz_addTarget:action: methods are instead coalesced and executed once when the transaction ends.
+ *  Begin coalescing events for the current thread.
+ *  Changes that occur during the coalesce that would trigger actions registered with the
+ *  rz_addTarget:action: methods are instead coalesced and executed once when the coalesce ends.
  *
  *  Every call to +begin MUST be balanced by a call to +commit on the same thread.
- *  It is fine to begin a transaction while already inside a transaction--
- *  the transaction will simply not end until both matching commits are hit.
+ *  It is fine to begin a coalesce while already coalescing--
+ *  the coalesce will simply not end until both matching commits are hit.
  *
- *  @note Bindings that occur during a transaction still occur immediately, and are not coalesced.
+ *  @note Bindings that occur during a coalesce still occur immediately.
  */
 + (void)begin;
 
 /**
- *  Commit the current transaction, sending all change callbacks that coalesced during the transaction.
- *  If this commit closes a nested transaction, callbacks are not sent until the outermost transaction is committed.
+ *  Commit the current coalesce, sending the coalesced change callbacks.
+ *  If this commit closes a nested coalesce, callbacks are not sent until the outermost coalesce is committed.
  *
- *  Calling this method from outside a transaction has no effect.
+ *  Calling this method from outside a coalesce has no effect.
  */
 + (void)commit;
 
@@ -231,11 +233,11 @@ typedef id (^RZDBKeyBindingFunction)(id value);
  *  Convenience method that first calls +begin, then executes the block, then calls +commit.
  *  You should prefer this method where possible to avoid programmer error (i.e. forgetting to call +commit).
  *
- *  @param transactionBlock The block to execute inside a transaction. Must be non-nil.
+ *  @param coalesceBlock The block to execute inside a coalesce. Must be non-nil.
  */
-+ (void)transactionWithBlock:(void (^)())transactionBlock;
++ (void)coalesceBlock:(void (^)())coalesceBlock;
 
-- (instancetype)init __attribute__((unavailable("Cannot instantiate RZDBTransaction directly. Use the class methods to control transactions.")));
+- (instancetype)init __attribute__((unavailable("Cannot instantiate RZDBCoalesce directly. Use the class methods instead.")));
 
 @end
 

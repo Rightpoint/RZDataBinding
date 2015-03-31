@@ -110,46 +110,46 @@
     XCTAssertTrue(observer.callbackCalls == 2, @"Callback called incorrect number of times. Expected:2 Actual:%i", (int)observer.callbackCalls);
 }
 
-- (void)testSimpleTransaction
+- (void)testSimpleCoalesce
 {
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
 
     [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
 
-    [RZDBTransaction transactionWithBlock:^{
+    [RZDBCoalesce coalesceBlock:^{
         testObj.string = @"test";
         testObj.callbackCalls = 0;
     }];
 
     XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
 
-    XCTAssertNoThrow([RZDBTransaction commit], @"Calling +commit outside a transaction shouldn't cause an exception.");
+    XCTAssertNoThrow([RZDBCoalesce commit], @"Calling +commit outside a coalesce shouldn't cause an exception.");
 }
 
-- (void)testNestedTransaction
+- (void)testNestedCoalesce
 {
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
 
     [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
 
-    [RZDBTransaction begin];
+    [RZDBCoalesce begin];
 
     testObj.string = @"test";
 
-    [RZDBTransaction begin];
+    [RZDBCoalesce begin];
     testObj.callbackCalls = 0;
-    [RZDBTransaction commit];
+    [RZDBCoalesce commit];
 
-    XCTAssertTrue(observer.callbackCalls == 0, @"Transaction should not have ended. Expected:0 callbacks Actual:%i", (int)observer.callbackCalls);
+    XCTAssertTrue(observer.callbackCalls == 0, @"Coalesce should not have ended. Expected:0 callbacks Actual:%i", (int)observer.callbackCalls);
 
-    [RZDBTransaction commit];
+    [RZDBCoalesce commit];
 
     XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
 }
 
-- (void)testBackgroundTransaction
+- (void)testBackgroundCoalesce
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Done"];
     NSArray *testObjects = @[[RZDBTestObject new],
@@ -169,12 +169,12 @@
     }
 
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        [RZDBTransaction begin];
+        [RZDBCoalesce begin];
         for ( NSUInteger i = 0; i < 5000; i++ ) {
             RZDBTestObject *t = [testObjects objectAtIndex:arc4random() % testObjects.count];
             t.string = @"New Value";
         }
-        [RZDBTransaction commit];
+        [RZDBCoalesce commit];
 
         [expectation fulfill];
     });

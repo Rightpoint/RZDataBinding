@@ -46,7 +46,7 @@ static NSString* const kRZDBChangeKeyBindingFunctionKey = @"_RZDBChangeBindingFu
 
 static NSString* const kRZDBDefaultSelectorPrefix = @"rzdb_default_";
 
-static NSString* const kRZDBTransactionStorageKey = @"RZDBTransaction";
+static NSString* const kRZDBCoalesceStorageKey = @"RZDBCoalesce";
 
 static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
@@ -123,9 +123,9 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 @end
 
-#pragma mark - RZDBTransaction private interface
+#pragma mark - RZDBCoalesce private interface
 
-@interface RZDBTransaction ()
+@interface RZDBCoalesce ()
 
 @property (assign, nonatomic) NSInteger beginCount;
 @property (strong, nonatomic, readonly) NSMutableArray *notifications;
@@ -402,7 +402,7 @@ static SEL kRZDBDefautDeallocSelector;
         RZDBNotification *notification = [RZDBNotification notificationForObserver:self change:changeDict];
 
         if ( self.boundKey == nil ) {
-            [RZDBTransaction addNotification:notification];
+            [RZDBCoalesce addNotification:notification];
         }
         else {
             [notification send];
@@ -568,16 +568,16 @@ static SEL kRZDBDefautDeallocSelector;
 
 @end
 
-#pragma mark - RZDBTransaction implementation
+#pragma mark - RZDBCoalesce implementation
 
-@implementation RZDBTransaction
+@implementation RZDBCoalesce
 
 + (void)begin
 {
-    RZDBTransaction *current = [self currentTransaction];
+    RZDBCoalesce *current = [self currentCoalesce];
 
     if ( current == nil ) {
-        [self setCurrentTransaction:[[self alloc] init]];
+        [self setCurrentCoalesce:[[self alloc] init]];
     }
     else {
         current.beginCount++;
@@ -586,46 +586,46 @@ static SEL kRZDBDefautDeallocSelector;
 
 + (void)commit
 {
-    RZDBTransaction *current = [self currentTransaction];
+    RZDBCoalesce *current = [self currentCoalesce];
     current.beginCount--;
 
     if ( current.beginCount == 0 ) {
-        [self setCurrentTransaction:nil];
-        [[current.notifications copy] enumerateObjectsUsingBlock:^(RZDBNotification *notification, NSUInteger idx, BOOL *stop) {
+        [self setCurrentCoalesce:nil];
+        [current.notifications enumerateObjectsUsingBlock:^(RZDBNotification *notification, NSUInteger idx, BOOL *stop) {
             [notification send];
         }];
     }
 }
 
-+ (void)transactionWithBlock:(void (^)())transactionBlock
++ (void)coalesceBlock:(void (^)())coalesceBlock
 {
-    NSParameterAssert(transactionBlock);
+    NSParameterAssert(coalesceBlock);
 
-    [RZDBTransaction begin];
-    transactionBlock();
-    [RZDBTransaction commit];
+    [RZDBCoalesce begin];
+    coalesceBlock();
+    [RZDBCoalesce commit];
 }
 
 #pragma mark - private methods
 
-+ (RZDBTransaction *)currentTransaction
++ (RZDBCoalesce *)currentCoalesce
 {
-    return [NSThread currentThread].threadDictionary[kRZDBTransactionStorageKey];
+    return [NSThread currentThread].threadDictionary[kRZDBCoalesceStorageKey];
 }
 
-+ (void)setCurrentTransaction:(RZDBTransaction *)current
++ (void)setCurrentCoalesce:(RZDBCoalesce *)current
 {
     if ( current != nil ) {
-        [NSThread currentThread].threadDictionary[kRZDBTransactionStorageKey] = current;
+        [NSThread currentThread].threadDictionary[kRZDBCoalesceStorageKey] = current;
     }
     else {
-        [[NSThread currentThread].threadDictionary removeObjectForKey:kRZDBTransactionStorageKey];
+        [[NSThread currentThread].threadDictionary removeObjectForKey:kRZDBCoalesceStorageKey];
     }
 }
 
 + (void)addNotification:(RZDBNotification *)notification
 {
-    RZDBTransaction *current = [self currentTransaction];
+    RZDBCoalesce *current = [self currentCoalesce];
 
     if ( current != nil ) {
         [current addNotification:notification];
