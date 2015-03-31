@@ -44,7 +44,9 @@ NSString* const kRZDBChangeKeyKeyPath = @"RZDBChangeKeyPath";
 static NSString* const kRZDBChangeKeyBoundKey           = @"_RZDBChangeBoundKey";
 static NSString* const kRZDBChangeKeyBindingFunctionKey = @"_RZDBChangeBindingFunction";
 
-static NSString* const kRZDBDefaultSelectorPrefix = @"rz_default_";
+static NSString* const kRZDBDefaultSelectorPrefix = @"rzdb_default_";
+
+static NSString* const kRZDBTransactionStorageKey = @"RZDBTransaction";
 
 static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
@@ -60,7 +62,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 - (RZDBObserverContainer *)rz_dependentObservers;
 - (void)rz_setDependentObservers:(RZDBObserverContainer *)dependentObservers;
 
-- (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options callbackQueue:(NSOperationQueue *)callbackQueue;
+- (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options callbackQueue:(dispatch_queue_t)callbackQueue;
 - (void)rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath;
 - (void)rz_observeBoundKeyChange:(NSDictionary *)change;
 - (void)rz_cleanupObservers;
@@ -82,7 +84,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 @property (copy, nonatomic) RZDBKeyBindingFunction bindingFunction;
 
-@property (strong, nonatomic) NSOperationQueue *callbackQueue;
+@property (strong, nonatomic) dispatch_queue_t callbackQueue;
 
 - (instancetype)initWithObservedObject:(NSObject *)observedObject keyPath:(NSString *)keyPath observationOptions:(NSKeyValueObservingOptions)observingOptions;
 
@@ -103,35 +105,31 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 @end
 
-#pragma mark - RZDBOperation interfaces
+#pragma mark - RZDBNotification interface
 
-@interface RZDBCoalesceOperation : NSOperation
-
-@property (strong, nonatomic) NSMutableSet *participatingQueues;
-
-- (void)addParticipatingQueue:(NSOperationQueue *)queue;
-- (void)removeParticipatingQueue:(NSOperationQueue *)queue;
-
-@end
-
-@interface RZDBCallbackOperation : NSOperation
+@interface RZDBNotification : NSObject
 
 @property (weak, nonatomic) id target;
 @property (assign, nonatomic) SEL action;
 
 @property (strong, nonatomic) NSMutableDictionary *changeDict;
 
+@property (strong, nonatomic) dispatch_queue_t queue;
+
++ (instancetype)notificationForObserver:(RZDBObserver *)observer change:(NSMutableDictionary *)change;
+
+- (void)send;
+
 @end
 
-@interface NSOperationQueue (RZDBOperations)
+#pragma mark - RZDBTransaction private interface
 
-- (RZDBCoalesceOperation *)rzdb_coalesceOperationCreateIfNeeded:(BOOL)create;
+@interface RZDBTransaction ()
 
-// currently unused, but may be exposed as public API at a later date
-- (void)rzdb_coalesceWait;
-- (void)rzdb_coalesceSignal;
+@property (assign, nonatomic) NSInteger beginCount;
+@property (strong, nonatomic, readonly) NSMutableArray *notifications;
 
-- (void)rzdb_addCallbackOperationWithTarget:(id)target action:(SEL)action changeDict:(NSMutableDictionary *)change;
++ (void)addNotification:(RZDBNotification *)notification;
 
 @end
 
@@ -149,7 +147,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     [self rz_addTarget:target action:action forKeyPathChange:keyPath callImmediately:callImmediately callbackQueue:nil];
 }
 
-- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately callbackQueue:(NSOperationQueue *)callbackQueue
+- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately callbackQueue:(dispatch_queue_t)callbackQueue
 {
     NSParameterAssert(target);
     NSParameterAssert(action);
@@ -168,7 +166,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     [self rz_addTarget:target action:action forKeyPathChanges:keyPaths callbackQueue:nil];
 }
 
-- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths callbackQueue:(NSOperationQueue *)callbackQueue
+- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths callbackQueue:(dispatch_queue_t)callbackQueue
 {
     [keyPaths enumerateObjectsUsingBlock:^(NSString *keyPath, NSUInteger idx, BOOL *stop) {
         [self rz_addTarget:target action:action forKeyPathChange:keyPath callImmediately:NO callbackQueue:callbackQueue];
@@ -250,7 +248,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     objc_setAssociatedObject(self, @selector(rz_dependentObservers), dependentObservers, OBJC_ASSOCIATION_RETAIN);
 }
 
-- (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options callbackQueue:(NSOperationQueue *)callbackQueue
+- (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options callbackQueue:(dispatch_queue_t)callbackQueue
 {
     @synchronized (self) {
         NSMutableArray *registeredObservers = [self rz_registeredObservers];
@@ -392,21 +390,19 @@ static SEL kRZDBDefautDeallocSelector;
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ( context == kRZDBKVOContext ) {
-        if ( self.methodSignature.numberOfArguments > 2 ) {
-            NSMutableDictionary *changeDict = [self changeDictForKVOChange:change];
+        NSMutableDictionary *changeDict = nil;
 
-            if ( self.callbackQueue != nil ) {
-                [self.callbackQueue rzdb_addCallbackOperationWithTarget:self.target action:self.action changeDict:changeDict];
-            }
-            else {
-                ((void(*)(id, SEL, NSDictionary *))objc_msgSend)(self.target, self.action, [changeDict copy]);
-            }
+        if ( self.methodSignature.numberOfArguments > 2 ) {
+            changeDict = [self changeDictForKVOChange:change];
         }
-        else  if ( self.callbackQueue != nil ) {
-            [self.callbackQueue rzdb_addCallbackOperationWithTarget:self.target action:self.action changeDict:nil];
+
+        RZDBNotification *notification = [RZDBNotification notificationForObserver:self change:changeDict];
+
+        if ( self.boundKey == nil ) {
+            [RZDBTransaction addNotification:notification];
         }
         else {
-            ((void(*)(id, SEL))objc_msgSend)(self.target, self.action);
+            [notification send];
         }
     }
 }
@@ -503,74 +499,35 @@ static SEL kRZDBDefautDeallocSelector;
 
 @end
 
-#pragma mark - RZDBOperation implementations
+#pragma mark - RZDBNotification implementation
 
-@implementation RZDBCoalesceOperation
+@implementation RZDBNotification
 
-- (BOOL)isReady
++ (instancetype)notificationForObserver:(RZDBObserver *)observer change:(NSMutableDictionary *)change
 {
-    @synchronized (self) {
-        return (self.participatingQueues != nil && self.participatingQueues.count == 0);
-    }
+    RZDBNotification *notification = [[self alloc] init];
+    notification.target = observer.target;
+    notification.action = observer.action;
+    notification.queue = observer.callbackQueue;
+    notification.changeDict = change;
+
+    return notification;
 }
-
-- (void)addParticipatingQueue:(NSOperationQueue *)queue
-{
-    @synchronized (self) {
-        BOOL ready = self.isReady;
-
-        if ( ready ) {
-            [self willChangeValueForKey:RZDB_KP_SELF(isReady)];
-        }
-
-        if ( self.participatingQueues == nil ) {
-            self.participatingQueues = [NSMutableSet set];
-        }
-
-        [self.participatingQueues addObject:queue];
-
-        if ( ready ) {
-            [self didChangeValueForKey:RZDB_KP_SELF(isReady)];
-        }
-    }
-}
-
-- (void)removeParticipatingQueue:(NSOperationQueue *)queue
-{
-    @synchronized (self) {
-        if ( self.participatingQueues.count == 1 && [self.participatingQueues containsObject:queue] ) {
-            [self willChangeValueForKey:RZDB_KP_SELF(isReady)];
-        }
-
-        [self.participatingQueues removeObject:queue];
-
-        if ( self.participatingQueues.count == 0 ) {
-            [self didChangeValueForKey:RZDB_KP_SELF(isReady)];
-        }
-    }
-}
-
-- (void)main
-{
-    // no-op
-}
-
-@end
-
-@implementation RZDBCallbackOperation
 
 - (BOOL)isEqual:(id)object
 {
     @synchronized (self) {
         BOOL equal = [super isEqual:object];
 
-        if ( !equal && [object isKindOfClass:[RZDBCallbackOperation class]] ) {
-            RZDBCallbackOperation *otherOp = (RZDBCallbackOperation *)object;
+        if ( !equal && [object isKindOfClass:[RZDBNotification class]] ) {
+            RZDBNotification *other = (RZDBNotification *)object;
 
-            equal = (self.target == otherOp.target && self.action == otherOp.action) &&
-                    (self.changeDict == otherOp.changeDict ||
-                     (self.changeDict[kRZDBChangeKeyObject] == otherOp.changeDict[kRZDBChangeKeyObject] &&
-                      [self.changeDict[kRZDBChangeKeyKeyPath] isEqualToString:otherOp.changeDict[kRZDBChangeKeyKeyPath]]
+            // Do the callback queues need to be equal?
+            equal = (self.target == other.target) &&
+                    (self.action == other.action) &&
+                    (self.changeDict == other.changeDict ||
+                     (self.changeDict[kRZDBChangeKeyObject] == other.changeDict[kRZDBChangeKeyObject] &&
+                      [self.changeDict[kRZDBChangeKeyKeyPath] isEqualToString:other.changeDict[kRZDBChangeKeyKeyPath]]
                      )
                     );
         }
@@ -579,98 +536,133 @@ static SEL kRZDBDefautDeallocSelector;
     }
 }
 
-- (void)main
+- (void)send
 {
     @synchronized (self) {
-        if ( self.changeDict != nil ) {
-            ((void(*)(id, SEL, NSDictionary *))objc_msgSend)(self.target, self.action, [self.changeDict copy]);
-        }
-        else {
-            ((void(*)(id, SEL))objc_msgSend)(self.target, self.action);
+        if ( self.target != nil && self.action != NULL ) {
+            void (^notificationBlock)();
+
+            if ( self.changeDict != nil ) {
+                notificationBlock = ^{
+                    ((void(*)(id, SEL, NSDictionary *))objc_msgSend)(self.target, self.action, [self.changeDict copy]);
+                };
+            }
+            else {
+                notificationBlock = ^{
+                    ((void(*)(id, SEL))objc_msgSend)(self.target, self.action);
+                };
+            }
+
+            if ( self.queue == nil ) {
+                notificationBlock();
+            }
+            else {
+                dispatch_async(self.queue, notificationBlock);
+            }
         }
     }
 }
 
 @end
 
-@implementation NSOperationQueue (RZDBOperations)
+#pragma mark - RZDBTransaction implementation
 
-- (RZDBCoalesceOperation *)rzdb_coalesceOperationCreateIfNeeded:(BOOL)create
+@implementation RZDBTransaction
+
++ (void)begin
+{
+    RZDBTransaction *current = [self currentTransaction];
+
+    if ( current == nil ) {
+        [self setCurrentTransaction:[[self alloc] init]];
+    }
+    else {
+        current.beginCount++;
+    }
+}
+
++ (void)commit
+{
+    RZDBTransaction *current = [self currentTransaction];
+    current.beginCount--;
+
+    if ( current.beginCount == 0 ) {
+        [self setCurrentTransaction:nil];
+        [[current.notifications copy] enumerateObjectsUsingBlock:^(RZDBNotification *notification, NSUInteger idx, BOOL *stop) {
+            [notification send];
+        }];
+    }
+}
+
++ (void)transactionWithBlock:(void (^)())transactionBlock
+{
+    NSParameterAssert(transactionBlock);
+
+    [RZDBTransaction begin];
+    transactionBlock();
+    [RZDBTransaction commit];
+}
+
+#pragma mark - private methods
+
++ (RZDBTransaction *)currentTransaction
+{
+    return [NSThread currentThread].threadDictionary[kRZDBTransactionStorageKey];
+}
+
++ (void)setCurrentTransaction:(RZDBTransaction *)current
+{
+    if ( current != nil ) {
+        [NSThread currentThread].threadDictionary[kRZDBTransactionStorageKey] = current;
+    }
+    else {
+        [[NSThread currentThread].threadDictionary removeObjectForKey:kRZDBTransactionStorageKey];
+    }
+}
+
++ (void)addNotification:(RZDBNotification *)notification
+{
+    RZDBTransaction *current = [self currentTransaction];
+
+    if ( current != nil ) {
+        [current addNotification:notification];
+    }
+    else {
+        [notification send];
+    }
+}
+
+- (instancetype)init
+{
+    self = [super init];
+    if ( self ) {
+        _beginCount = 1;
+        _notifications = [NSMutableArray array];
+    }
+
+    return self;
+}
+
+- (void)addNotification:(RZDBNotification *)notification
 {
     @synchronized (self) {
-        RZDBCoalesceOperation *coalesceOp = nil;
-
-        NSArray *operations = self.operations;
-        NSUInteger operationIdx = [operations indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-            return [obj isKindOfClass:[RZDBCoalesceOperation class]];
+        NSArray *notifications = [self.notifications copy];
+        NSUInteger existingIdx = [notifications indexOfObjectPassingTest:^BOOL(RZDBNotification *existing, NSUInteger idx, BOOL *stop) {
+            return [notification isEqual:existing];
         }];
 
-        if ( operationIdx != NSNotFound ) {
-            coalesceOp = operations[operationIdx];
-        }
-        else if ( create ) {
-            coalesceOp = [[RZDBCoalesceOperation alloc] init];
-            [self addOperation:coalesceOp];
-        }
-        
-        return coalesceOp;
-    }
-}
+        if ( existingIdx != NSNotFound ) {
+            RZDBNotification *existing = notifications[existingIdx];
 
-- (void)rzdb_coalesceWait
-{
-    @synchronized (self) {
-        RZDBCoalesceOperation *coalesceOp = [self rzdb_coalesceOperationCreateIfNeeded:YES];
-        [coalesceOp addParticipatingQueue:[NSOperationQueue currentQueue]];
-    }
-}
-
-- (void)rzdb_coalesceSignal
-{
-    @synchronized (self) {
-        RZDBCoalesceOperation *coalesceOp = [self rzdb_coalesceOperationCreateIfNeeded:NO];
-        [coalesceOp removeParticipatingQueue:[NSOperationQueue currentQueue]];
-    }
-}
-
-- (void)rzdb_addCallbackOperationWithTarget:(id)target action:(SEL)action changeDict:(NSMutableDictionary *)change
-{
-    @synchronized (self) {
-        RZDBCoalesceOperation *coalesceOp = [self rzdb_coalesceOperationCreateIfNeeded:YES];
-
-        NSOperationQueue *currentQueue = [NSOperationQueue currentQueue];
-
-        if ( ![coalesceOp.participatingQueues containsObject:currentQueue] ) {
-            [currentQueue addOperationWithBlock:^{
-                [coalesceOp removeParticipatingQueue:currentQueue];
-            }];
-
-            [coalesceOp addParticipatingQueue:currentQueue];
-        }
-
-        RZDBCallbackOperation *callbackOp = [[RZDBCallbackOperation alloc] init];
-        callbackOp.target = target;
-        callbackOp.action = action;
-        callbackOp.changeDict = change;
-
-        NSArray *operations = self.operations;
-        NSUInteger existingOpIdx = [operations indexOfObjectPassingTest:^BOOL(NSOperation *operation, NSUInteger idx, BOOL *stop) {
-            return [callbackOp isEqual:operation] && [operation.dependencies containsObject:coalesceOp];
-        }];
-
-        if ( existingOpIdx != NSNotFound ) {
-            RZDBCallbackOperation *existingOp = operations[existingOpIdx];
-
-            if ( change[kRZDBChangeKeyNew] != nil ) {
-                existingOp.changeDict[kRZDBChangeKeyNew] = change[kRZDBChangeKeyNew];
+            if ( notification.changeDict[kRZDBChangeKeyNew] != nil ) {
+                existing.changeDict[kRZDBChangeKeyNew] = notification.changeDict[kRZDBChangeKeyNew];
             }
             else {
-                [existingOp.changeDict removeObjectForKey:kRZDBChangeKeyNew];
+                [existing.changeDict removeObjectForKey:kRZDBChangeKeyNew];
             }
         }
         else {
-            [callbackOp addDependency:coalesceOp];
-            [self addOperation:callbackOp];
+            [self.notifications addObject:notification];
         }
     }
 }

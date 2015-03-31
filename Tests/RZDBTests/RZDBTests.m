@@ -103,22 +103,22 @@
     XCTAssertTrue(observer.callbackCalls == 2, @"Callback called incorrect number of times. Expected:2 Actual:%i", (int)observer.callbackCalls);
 }
 
-- (void)testCoalesce
+- (void)testSimpleTransaction
 {
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
 
-    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)] callbackQueue:[NSOperationQueue mainQueue]];
+    [RZDBTransaction transactionWithBlock:^{
+        [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
 
-    testObj.string = @"test";
-    testObj.callbackCalls = 0;
-
-    [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+        testObj.string = @"test";
+        testObj.callbackCalls = 0;
+    }];
 
     XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
 }
 
-- (void)testCoalesceThreading
+- (void)testBackgroundTransaction
 {
     XCTestExpectation *expectation = [self expectationWithDescription:@"Done"];
     NSArray *testObjects = @[[RZDBTestObject new],
@@ -128,73 +128,30 @@
                              [RZDBTestObject new]];
 
     RZDBTestObject *observer = [RZDBTestObject new];
-    NSOperationQueue *q = [[NSOperationQueue alloc] init];
-    q.maxConcurrentOperationCount = 1;
 
     // Create 500 addTarget actions
     for ( NSUInteger i = 0; i < 500; i++ ) {
         RZDBTestObject *t = [testObjects objectAtIndex:i % testObjects.count];
 
-        [t rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(t, string)] callbackQueue:[NSOperationQueue currentQueue]];
+        [t rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(t, string)] callbackQueue:dispatch_get_main_queue()];
 
     }
-    // Create 5000 triggers
-    [q addOperationWithBlock:^{
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [RZDBTransaction begin];
         for ( NSUInteger i = 0; i < 5000; i++ ) {
             RZDBTestObject *t = [testObjects objectAtIndex:arc4random() % testObjects.count];
             t.string = @"New Value";
         }
-        [q addOperationWithBlock:^{
-            [expectation fulfill];
-        }];
-    }];
+        [RZDBTransaction commit];
 
+        [expectation fulfill];
+    });
 
     [self waitForExpectationsWithTimeout:50 handler:^(NSError *error) {
-        XCTAssert([observer callbackCalls] == 1);
+        XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
     }];
 }
-
-- (void)testCoalesceThreadAbuse
-{
-    XCTestExpectation *expectation = [self expectationWithDescription:@"Done"];
-    NSArray *testObjects = @[[RZDBTestObject new],
-                             [RZDBTestObject new],
-                             [RZDBTestObject new],
-                             [RZDBTestObject new],
-                             [RZDBTestObject new]];
-
-    RZDBTestObject *observer = [RZDBTestObject new];
-    NSOperationQueue *q = [[NSOperationQueue alloc] init];
-
-    // Create 500 addTarget actions
-    for ( NSUInteger i = 0; i < 500; i++ ) {
-        [q addOperationWithBlock:^{
-            RZDBTestObject *t = [testObjects objectAtIndex:arc4random() % testObjects.count];
-
-            [t rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(t, string), RZDB_KP_OBJ(t, callbackCalls)]];
-
-        }];
-    }
-    // Create 5000 triggers
-    for ( NSUInteger i = 0; i < 5000; i++ ) {
-        [q addOperationWithBlock:^{
-            RZDBTestObject *t = [testObjects objectAtIndex:arc4random() % testObjects.count];
-            t.string = @"New Value";
-        }];
-    }
-
-    [q addOperationWithBlock:^{
-        [expectation fulfill];
-    }];
-    // There's not much state that we can validate here, however, we are mutating
-    // things enough that if there was a synchronization issue with the data structures
-    // we should of crashed by now.
-    [self waitForExpectationsWithTimeout:1 handler:^(NSError *error) {
-        // Ideally, all observers would be triggered once
-    }];
-}
-
 
 - (void)testKeyBinding
 {
