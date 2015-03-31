@@ -108,12 +108,36 @@
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
 
-    [RZDBTransaction transactionWithBlock:^{
-        [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
+    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
 
+    [RZDBTransaction transactionWithBlock:^{
         testObj.string = @"test";
         testObj.callbackCalls = 0;
     }];
+
+    XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
+
+    XCTAssertNoThrow([RZDBTransaction commit], @"Calling +commit outside a transaction shouldn't cause an exception.");
+}
+
+- (void)testNestedTransaction
+{
+    RZDBTestObject *testObj = [RZDBTestObject new];
+    RZDBTestObject *observer = [RZDBTestObject new];
+
+    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
+
+    [RZDBTransaction begin];
+
+    testObj.string = @"test";
+
+    [RZDBTransaction begin];
+    testObj.callbackCalls = 0;
+    [RZDBTransaction commit];
+
+    XCTAssertTrue(observer.callbackCalls == 0, @"Transaction should not have ended. Expected:0 callbacks Actual:%i", (int)observer.callbackCalls);
+
+    [RZDBTransaction commit];
 
     XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
 }
