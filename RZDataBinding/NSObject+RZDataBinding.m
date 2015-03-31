@@ -63,6 +63,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 - (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options;
 - (void)rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath;
 - (void)rz_observeBoundKeyChange:(NSDictionary *)change;
+- (void)rz_setBoundKey:(NSString *)key withValue:(id)value function:(RZDBKeyBindingFunction)function;
 - (void)rz_cleanupObservers;
 
 @end
@@ -147,12 +148,8 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     if ( object != nil ) {
         @try {
             id val = [object valueForKeyPath:foreignKeyPath];
-            
-            if ( bindingFunction != nil ) {
-                val = bindingFunction(val);
-            }
-            
-            [self setValue:val forKey:key];
+
+            [self rz_setBoundKey:key withValue:val function:bindingFunction];
         }
         @catch (NSException *exception) {
             [NSException raise:NSInvalidArgumentException format:@"RZDataBinding cannot bind key:%@ to key path:%@ of object:%@. Reason: %@", key, foreignKeyPath, [object description], exception.reason];
@@ -252,13 +249,21 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     
     if ( boundKey != nil ) {
         id value = change[kRZDBChangeKeyNew];
-        RZDBKeyBindingFunction bindingFunction = change[kRZDBChangeKeyBindingFunctionKey];
-        
-        if ( bindingFunction != nil ) {
-            value = bindingFunction(value);
-        }
-        
-        [self setValue:value forKey:boundKey];
+
+        [self rz_setBoundKey:boundKey withValue:value function:change[kRZDBChangeKeyBindingFunctionKey]];
+    }
+}
+
+- (void)rz_setBoundKey:(NSString *)key withValue:(id)value function:(RZDBKeyBindingFunction)function
+{
+    id currentValue = [self valueForKey:key];
+
+    if ( function != nil ) {
+        value = function(value);
+    }
+
+    if ( currentValue != value && ![currentValue isEqual:value] ) {
+        [self setValue:value forKey:key];
     }
 }
 
