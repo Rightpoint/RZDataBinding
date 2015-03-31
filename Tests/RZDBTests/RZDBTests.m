@@ -16,6 +16,7 @@
 
 @property (copy, nonatomic) NSString *string;
 @property (assign, nonatomic) NSInteger callbackCalls;
+@property (assign, nonatomic) NSInteger setStringCalls;
 
 - (void)changeCallback;
 - (void)changeCallbackWithDict:(NSDictionary *)dictionary;
@@ -33,6 +34,12 @@
 {
     self.callbackCalls++;
     self.string = dictionary[kRZDBChangeKeyNew];
+}
+
+- (void)setString:(NSString *)string
+{
+    _string = [string copy];
+    self.setStringCalls++;
 }
 
 @end
@@ -193,6 +200,24 @@
     [observer rz_unbindKey:RZDB_KP_OBJ(observer, string) fromKeyPath:RZDB_KP_OBJ(testObj, string) ofObject:testObj];
     testObj.string = @"test3";
     XCTAssertTrue([observer.string isEqualToString:@"test2"], @"String shouldn't change after keys are unbound");
+}
+
+- (void)testBindingEqualityCheck
+{
+    RZDBTestObject *testObj = [RZDBTestObject new];
+    RZDBTestObject *observer = [RZDBTestObject new];
+
+    observer.string = @"temp";
+    observer.setStringCalls = 0;
+
+    [observer rz_bindKey:RZDB_KP_OBJ(observer, string) toKeyPath:RZDB_KP_OBJ(testObj, string) ofObject:testObj];
+
+    for ( int i = 0; i < 100; i++ ) {
+        testObj.string = @"string";
+    }
+
+    // should be called once initially, and once when the keypath changes
+    XCTAssertTrue(observer.setStringCalls == 2, @"Binding triggered incorrect number of times. Expected:2 Actual:%i", (int)observer.setStringCalls);
 }
 
 - (void)testKeyBindingWithFunction
