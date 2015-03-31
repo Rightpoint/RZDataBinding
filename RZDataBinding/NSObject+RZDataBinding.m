@@ -232,7 +232,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 - (void)rz_setRegisteredObservers:(NSMutableArray *)registeredObservers
 {
-    objc_setAssociatedObject(self, @selector(rz_registeredObservers), registeredObservers, OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, @selector(rz_registeredObservers), registeredObservers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (RZDBObserverContainer *)rz_dependentObservers
@@ -242,7 +242,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 - (void)rz_setDependentObservers:(RZDBObserverContainer *)dependentObservers
 {
-    objc_setAssociatedObject(self, @selector(rz_dependentObservers), dependentObservers, OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, @selector(rz_dependentObservers), dependentObservers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
 - (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options callbackQueue:(dispatch_queue_t)callbackQueue
@@ -277,7 +277,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     @synchronized (self) {
         NSMutableArray *registeredObservers = [self rz_registeredObservers];
 
-        [[registeredObservers copy] enumerateObjectsUsingBlock:^(RZDBObserver *observer, NSUInteger idx, BOOL *stop) {
+        [registeredObservers enumerateObjectsUsingBlock:^(RZDBObserver *observer, NSUInteger idx, BOOL *stop) {
             BOOL targetsEqual   = (target == observer.target);
             BOOL actionsEqual   = (action == NULL || action == observer.action);
             BOOL boundKeysEqual = (boundKey == observer.boundKey || [boundKey isEqualToString:observer.boundKey]);
@@ -519,49 +519,45 @@ static SEL kRZDBDefautDeallocSelector;
 
 - (BOOL)isEqual:(id)object
 {
-    @synchronized (self) {
-        BOOL equal = [super isEqual:object];
+    BOOL equal = [super isEqual:object];
 
-        if ( !equal && [object isKindOfClass:[RZDBNotification class]] ) {
-            RZDBNotification *other = (RZDBNotification *)object;
+    if ( !equal && [object isKindOfClass:[RZDBNotification class]] ) {
+        RZDBNotification *other = (RZDBNotification *)object;
 
-            // Do the callback queues need to be equal?
-            equal = (self.target == other.target) &&
-                    (self.action == other.action) &&
-                    (self.changeDict == other.changeDict ||
-                     (self.changeDict[kRZDBChangeKeyObject] == other.changeDict[kRZDBChangeKeyObject] &&
-                      [self.changeDict[kRZDBChangeKeyKeyPath] isEqualToString:other.changeDict[kRZDBChangeKeyKeyPath]]
-                     )
-                    );
-        }
-
-        return equal;
+        // Do the callback queues need to be equal?
+        equal = (self.target == other.target) &&
+                (self.action == other.action) &&
+                (self.changeDict == other.changeDict ||
+                 (self.changeDict[kRZDBChangeKeyObject] == other.changeDict[kRZDBChangeKeyObject] &&
+                  [self.changeDict[kRZDBChangeKeyKeyPath] isEqualToString:other.changeDict[kRZDBChangeKeyKeyPath]]
+                 )
+                );
     }
+
+    return equal;
 }
 
 - (void)send
 {
-    @synchronized (self) {
-        if ( self.target != nil && self.action != NULL ) {
-            void (^notificationBlock)();
+    if ( self.target != nil && self.action != NULL ) {
+        void (^notificationBlock)();
 
-            if ( self.changeDict != nil ) {
-                notificationBlock = ^{
-                    ((void(*)(id, SEL, NSDictionary *))objc_msgSend)(self.target, self.action, [self.changeDict copy]);
-                };
-            }
-            else {
-                notificationBlock = ^{
-                    ((void(*)(id, SEL))objc_msgSend)(self.target, self.action);
-                };
-            }
+        if ( self.changeDict != nil ) {
+            notificationBlock = ^{
+                ((void(*)(id, SEL, NSDictionary *))objc_msgSend)(self.target, self.action, [self.changeDict copy]);
+            };
+        }
+        else {
+            notificationBlock = ^{
+                ((void(*)(id, SEL))objc_msgSend)(self.target, self.action);
+            };
+        }
 
-            if ( self.queue == nil ) {
-                notificationBlock();
-            }
-            else {
-                dispatch_async(self.queue, notificationBlock);
-            }
+        if ( self.queue == nil ) {
+            notificationBlock();
+        }
+        else {
+            dispatch_async(self.queue, notificationBlock);
         }
     }
 }
@@ -648,25 +644,22 @@ static SEL kRZDBDefautDeallocSelector;
 
 - (void)addNotification:(RZDBNotification *)notification
 {
-    @synchronized (self) {
-        NSArray *notifications = [self.notifications copy];
-        NSUInteger existingIdx = [notifications indexOfObjectPassingTest:^BOOL(RZDBNotification *existing, NSUInteger idx, BOOL *stop) {
-            return [notification isEqual:existing];
-        }];
+    NSUInteger existingIdx = [self.notifications indexOfObjectPassingTest:^BOOL(RZDBNotification *existing, NSUInteger idx, BOOL *stop) {
+        return [notification isEqual:existing];
+    }];
 
-        if ( existingIdx != NSNotFound ) {
-            RZDBNotification *existing = notifications[existingIdx];
+    if ( existingIdx != NSNotFound ) {
+        RZDBNotification *existing = self.notifications[existingIdx];
 
-            if ( notification.changeDict[kRZDBChangeKeyNew] != nil ) {
-                existing.changeDict[kRZDBChangeKeyNew] = notification.changeDict[kRZDBChangeKeyNew];
-            }
-            else {
-                [existing.changeDict removeObjectForKey:kRZDBChangeKeyNew];
-            }
+        if ( notification.changeDict[kRZDBChangeKeyNew] != nil ) {
+            existing.changeDict[kRZDBChangeKeyNew] = notification.changeDict[kRZDBChangeKeyNew];
         }
         else {
-            [self.notifications addObject:notification];
+            [existing.changeDict removeObjectForKey:kRZDBChangeKeyNew];
         }
+    }
+    else {
+        [self.notifications addObject:notification];
     }
 }
 
