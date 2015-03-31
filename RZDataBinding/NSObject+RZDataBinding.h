@@ -197,12 +197,20 @@ typedef id (^RZDBKeyBindingFunction)(id value);
 
 #pragma mark - RZDBTransacton interface
 
+/**
+ *  Transactions define a chunk of work that should be completed "atomically" with respect to RZDataBinding.
+ *  That is, actions registered using the rz_addTarget:action: methods will be fired once, when the work is completed.
+ *
+ *  Transactions are are advanced feature that should generally only be used if you encounter a performance issue,
+ *  or find some other requirement for event coalescing.
+ */
 @interface RZDBTransaction : NSObject
 
 /**
  *  Begin a new transaction for the current thread.
  *  Changes that occur during the transaction that would trigger actions registered with the 
  *  rz_addTarget:action: methods are instead coalesced and executed once when the transaction ends.
+ *
  *  Every call to +begin MUST be balanced by a call to +commit on the same thread.
  *  It is fine to begin a transaction while already inside a transaction--
  *  the transaction will simply not end until both matching commits are hit.
@@ -214,6 +222,7 @@ typedef id (^RZDBKeyBindingFunction)(id value);
 /**
  *  Commit the current transaction, sending all change callbacks that coalesced during the transaction.
  *  If this commit closes a nested transaction, callbacks are not sent until the outermost transaction is committed.
+ *
  *  Calling this method from outside a transaction has no effect.
  */
 + (void)commit;
