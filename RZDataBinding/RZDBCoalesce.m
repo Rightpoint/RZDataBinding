@@ -107,11 +107,35 @@ static NSString* const kRZDBCoalesceStorageKey = @"RZDBCoalesce";
     [RZDBCoalesce commit];
 }
 
++ (void)setAutoCoalesceByRunloopOnMainThread:(BOOL)autoCoalesce
+{
+    objc_setAssociatedObject(self, @selector(autoCoalesceByRunloopOnMainThread), @(autoCoalesce), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
 #pragma mark - private methods
+
++ (BOOL)autoCoalesceByRunloopOnMainThread
+{
+    return [objc_getAssociatedObject(self, _cmd) boolValue];
+}
 
 + (RZDBCoalesce *)currentCoalesce
 {
     return [NSThread currentThread].threadDictionary[kRZDBCoalesceStorageKey];
+}
+
++ (RZDBCoalesce *)currentCoalesceBeginIfNeeded:(BOOL)begin
+{
+    RZDBCoalesce *current = [self currentCoalesce];
+
+    if ( current == nil && [NSThread isMainThread] && [self autoCoalesceByRunloopOnMainThread] ) {
+        [RZDBCoalesce begin];
+        [self performSelector:@selector(commit) withObject:nil afterDelay:0.0 inModes:@[NSRunLoopCommonModes]];
+
+        current = [self currentCoalesce];
+    }
+
+    return current;
 }
 
 + (void)setCurrentCoalesce:(RZDBCoalesce *)current
@@ -164,18 +188,27 @@ static NSString* const kRZDBCoalesceStorageKey = @"RZDBCoalesce";
 
 + (instancetype)notificationWithInvocation:(NSInvocation *)invocation
 {
-    RZDBNotification *notification = [[self alloc] init];
-    notification.target = invocation.target;
-    notification.action = invocation.selector;
+    RZDBNotification *notification = nil;
 
     NSMethodSignature *methodSig = invocation.methodSignature;
 
-    if ( methodSig.numberOfArguments > 2 && strcmp([methodSig getArgumentTypeAtIndex:3], @encode(id)) == 0 ) {
-        id arg1;
-        [invocation getArgument:(__bridge void *)(arg1) atIndex:3];
+    // rzdb callbacks must have void return type, and
+    // if there are any arguments, the first and only argument must be a dictionary
+    if ( methodSig.methodReturnLength == 0 && (methodSig.numberOfArguments == 2 || methodSig.numberOfArguments == 3) ) {
+        notification = [[self alloc] init];
+        notification.target = invocation.target;
+        notification.action = invocation.selector;
 
-        if ( [arg1 isKindOfClass:[NSDictionary class]] ) {
-            notification.changeDict = arg1;
+        if ( methodSig.numberOfArguments == 3 && strcmp([methodSig getArgumentTypeAtIndex:2], @encode(id)) == 0 ) {
+            __unsafe_unretained id arg1;
+            [invocation getArgument:&arg1 atIndex:2];
+
+            if ( [arg1 isKindOfClass:[NSDictionary class]] ) {
+                notification.changeDict = [arg1 mutableCopy];
+            }
+            else {
+                notification = nil;
+            }
         }
     }
 
@@ -252,16 +285,23 @@ static NSString* const kRZDBCoalesceStorageKey = @"RZDBCoalesce";
 
 - (void)forwardInvocation:(NSInvocation *)invocation
 {
-    RZDBCoalesce *currentCoalesce = [RZDBCoalesce currentCoalesce];
+    invocation.target = self.representedObject;
 
-    if ( currentCoalesce != nil && invocation.methodSignature.methodReturnLength == 0 ) {
-        invocation.target = self.representedObject;
-        
+    RZDBCoalesce *currentCoalesce = [RZDBCoalesce currentCoalesceBeginIfNeeded:YES];
+
+    if ( currentCoalesce != nil ) {
+        // notificaton will be non-nil for a valid RZDataBinding callback
         RZDBNotification *notification = [RZDBNotification notificationWithInvocation:invocation];
-        [currentCoalesce addNotification:notification];
+
+        if ( notification != nil ) {
+            [currentCoalesce addNotification:notification];
+        }
+        else {
+            [invocation invoke];
+        }
     }
     else {
-        [invocation invokeWithTarget:self.representedObject];
+        [invocation invoke];
     }
 }
 

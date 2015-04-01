@@ -104,6 +104,19 @@
 + (void)coalesceBlock:(void (^)())coalesceBlock;
 
 /**
+ *  Set to YES to automatically begin/commit RZDBCoalesce events by runloop cycle on the main thread.
+ *  If you are usng callbacks that support coalescing, and if most change events happen on the main thread,
+ *  then turning this on can be a nice optimization.
+ *
+ *  Automatic mainthread coalescing is NO by default.
+ *
+ *  @param autoCoalesce Whether the main thread should automatically coalesce by runloop cycle.
+ *
+ *  @see NSObject+RZDBCoalesce for how to support coalesced callbacks.
+ */
++ (void)setAutoCoalesceByRunloopOnMainThread:(BOOL)autoCoalesce;
+
+/**
  *  Cannot instantiate RZDBCoalesce directly. Use the class methods instead.
  */
 - (instancetype)init __attribute__((unavailable("Cannot instantiate RZDBCoalesce directly. Use the class methods instead.")));
