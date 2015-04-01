@@ -30,8 +30,26 @@
 
 #pragma mark - NSObject+RZDBCoalesce interface
 
+/**
+ *  Provides an interface for supporting coalesced data binding callbacks.
+ */
 @interface NSObject (RZDBCoalesce)
 
+/**
+ *  Returns a proxy object that will participate in coalescing events.
+ *
+ *  Use [target rz_coalesceProxy] as the target of the rz_addTarget:action: methods to support
+ *  coalescing for a target/action pair. If the callback occurs during a an RZDBCoalesce event, it will be
+ *  coalesced and deferred until the end RZDBCoalesce is committed.
+ *
+ *  @note You should generally not call methods on the coalesce proxy directly. 
+ *  The proxy will treat any 0-arg or 1-dictionary-arg methods with no return type as RZDB callbacks,
+ *  and coalesce them accordingly.
+ *
+ *  @see RZDBCoalesce for how to begin/end coalesce events.
+ *
+ *  @return A proxy object to use as a data binding target in the rz_addTarget:action: methods.
+ */
 - (id)rz_coalesceProxy;
 
 @end
@@ -40,25 +58,30 @@
 
 /**
  *  There may be chunks of work that should be completed "atomically" with respect to RZDataBinding.
- *  That is, actions registered using the rz_addTarget:action: methods should be fired once, when the work is completed.
+ *  That is, actions registered using the rz_addTarget:action: methods that support coalescing
+ *  will be fired once, when the work is completed.
  *
- *  The RZDBCoalesce object provides class methods to manage event coalescing.
+ *  The RZDBCoalesce object provides class methods to manage coalescing events.
  *
  *  Coalescing is an advanced feature that should generally only be used if you encounter a performance issue,
  *  or find some other requirement for it.
+ *
+ *  @see NSObject+RZDBCoalesce for how to support coalesced callbacks.
  */
 @interface RZDBCoalesce : NSObject
 
 /**
  *  Begin coalescing events for the current thread.
- *  Changes that occur during the coalesce that would trigger actions registered with the
- *  rz_addTarget:action: methods are instead coalesced and executed once when the coalesce ends.
+ *  Changes that occur during the coalesce that would trigger actions registered to coalesce proxies with
+ *  the rz_addTarget:action: methods are instead coalesced and executed once when the coalesce ends.
  *
  *  Every call to +begin MUST be balanced by a call to +commit on the same thread.
  *  It is fine to begin a coalesce while already coalescing--
  *  the coalesce will simply not end until both matching commits are hit.
  *
  *  @note Bindings that occur during a coalesce still occur immediately.
+ *
+ *  @see NSObject+RZDBCoalesce for how to support coalesced callbacks.
  */
 + (void)begin;
 
@@ -75,6 +98,8 @@
  *  You should prefer this method where possible to avoid programmer error (i.e. forgetting to call +commit).
  *
  *  @param coalesceBlock The block to execute inside a coalesce. Must be non-nil.
+ *
+ *  @see NSObject+RZDBCoalesce for how to support coalesced callbacks.
  */
 + (void)coalesceBlock:(void (^)())coalesceBlock;
 
