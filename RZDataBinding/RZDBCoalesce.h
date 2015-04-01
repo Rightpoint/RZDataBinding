@@ -43,7 +43,7 @@
  *  coalesced and deferred until the end RZDBCoalesce is committed.
  *
  *  @note You should generally not call methods on the coalesce proxy directly. 
- *  The proxy will treat any 0-arg or 1-dictionary-arg methods with no return type as RZDB callbacks,
+ *  The proxy will treat any 0-arg or 1-dictionary-arg methods with void return type as RZDB callbacks,
  *  and coalesce them accordingly.
  *
  *  @see RZDBCoalesce for how to begin/end coalesce events.
