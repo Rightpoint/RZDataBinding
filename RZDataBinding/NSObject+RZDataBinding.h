@@ -131,7 +131,7 @@ typedef id (^RZDBKeyBindingFunction)(id value);
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths;
 
 /**
- *  A convenience method that calls rz_addTarget:action:forKeyPathChange: for each keyPath in the keyPaths array.
+ *  A convenience method that calls rz_addTarget:action:forKeyPathChange:callbackQueue: for each keyPath in the keyPaths array.
  *
  *  @param target   The object on which to call the action selector. Must be non-nil. This object is not retained.
  *  @param action   The selector to call on the target. Must not be NULL. See rz_addTarget documentation for more details.

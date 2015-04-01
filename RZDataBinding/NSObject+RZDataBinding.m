@@ -486,12 +486,8 @@ static SEL kRZDBDefautDeallocSelector;
 - (void)removeObserver:(RZDBObserver *)observer
 {
     @synchronized (self) {
-        __block NSUInteger observerIndex = NSNotFound;
-        [[self.observers allObjects] enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-            if ( obj == observer ) {
-                observerIndex = idx;
-                *stop = YES;
-            }
+        NSUInteger observerIndex = [[self.observers allObjects] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+            return obj == observer;
         }];
 
         if ( observerIndex != NSNotFound ) {
