@@ -128,6 +128,23 @@
     XCTAssertNoThrow([RZDBCoalesce commit], @"Calling +commit outside a coalesce shouldn't cause an exception.");
 }
 
+- (void)testCoalesceWithCallbackDict
+{
+    RZDBTestObject *testObj = [RZDBTestObject new];
+    RZDBTestObject *observer = [RZDBTestObject new];
+
+    [testObj rz_addTarget:[observer rz_coalesceProxy] action:@selector(changeCallbackWithDict:) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
+
+    [RZDBCoalesce coalesceBlock:^{
+        testObj.string = @"test";
+        testObj.string = @"test2";
+    }];
+
+    XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
+
+    XCTAssertTrue([observer.string isEqualToString:@"test2"], @"Coalesced callback called with incorrect final value.");
+}
+
 - (void)testNestedCoalesce
 {
     RZDBTestObject *testObj = [RZDBTestObject new];
@@ -183,6 +200,27 @@
     [self waitForExpectationsWithTimeout:50 handler:^(NSError *error) {
         XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
     }];
+}
+
+- (void)testAutoCoalesce
+{
+    [RZDBCoalesce setAutoCoalesceByRunloopOnMainThread:YES];
+
+    RZDBTestObject *testObj = [RZDBTestObject new];
+    RZDBTestObject *observer = [RZDBTestObject new];
+
+    [testObj rz_addTarget:[observer rz_coalesceProxy] action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
+
+    testObj.string = @"test";
+    testObj.callbackCalls = 0;
+
+    XCTAssertTrue(observer.callbackCalls == 0, @"Coalesce should not have ended. Expected:0 callbacks Actual:%i", (int)observer.callbackCalls);
+
+    [[NSRunLoop mainRunLoop] runUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.1]];
+
+    XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
+
+    [RZDBCoalesce setAutoCoalesceByRunloopOnMainThread:NO];
 }
 
 - (void)testKeyBinding
