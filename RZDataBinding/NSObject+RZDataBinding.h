@@ -105,19 +105,6 @@ typedef id (^RZDBKeyBindingFunction)(id value);
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately;
 
 /**
- *  Register a selector to be called on a given target whenever keyPath changes on the receiver.
- *
- *  @param target  The object on which to call the action selector. Must be non-nil. This object is not retained.
- *  @param action  The selector to call on the target. Must not be NULL. The method must take either zero or exactly one parameter, an NSDictionary, and have a void return type. If the method has an NSDictionary parameter, the dictionary will contain values for the appropriate RZDBChangeKeys. If keys are absent, they can be assumed to be nil. Values will not be NSNull.
- *  @param keyPath The key path of the receiver for which changes should trigger an action. Must be KVC compliant.
- *  @param callImmediately If YES, the action is dispatched asychronously on the callback queue. If callback queue is nil, the action is called immediately on the current queue before this method returns. In this case the change dictionary, if present, will not contain a value for kRZDBChangeKeyOld.
- *  @param callbackQueue The queue on which actions should be called. If non-nil, actions are dispatched asynchronously on the callback queue. If nil, actions are sent immediately on whatever queue the change occurs.
- *
- *  @see RZDB_KP macro for creating keypaths.
- */
-- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately callbackQueue:(dispatch_queue_t)callbackQueue;
-
-/**
  *  A convenience method that calls rz_addTarget:action:forKeyPathChange: for each keyPath in the keyPaths array.
  *
  *  @param target   The object on which to call the action selector. Must be non-nil. This object is not retained.
@@ -129,20 +116,6 @@ typedef id (^RZDBKeyBindingFunction)(id value);
  *  @see RZDB_KP macro for creating keypaths.
  */
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths;
-
-/**
- *  A convenience method that calls rz_addTarget:action:forKeyPathChange:callbackQueue: for each keyPath in the keyPaths array.
- *
- *  @param target   The object on which to call the action selector. Must be non-nil. This object is not retained.
- *  @param action   The selector to call on the target. Must not be NULL. See rz_addTarget documentation for more details.
- *  @param keyPaths An array of key paths that should trigger an action. Each key path must be KVC compliant.
- *  @param callbackQueue The queue on which actions should be called. If non-nil, actions are dispatched asynchronously on the callback queue. If nil, actions are sent immediately on whatever queue the change occurs.
- *
- *  @note The action is not called immediately.
- *
- *  @see RZDB_KP macro for creating keypaths.
- */
-- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths callbackQueue:(dispatch_queue_t)callbackQueue;
 
 /**
  *  Removes previously registered target/action pairs so that the actions are no longer called when the receiver changes value for keyPath.
@@ -192,52 +165,6 @@ typedef id (^RZDBKeyBindingFunction)(id value);
  *  @see RZDB_KP macro for creating keypaths.
  */
 - (void)rz_unbindKey:(NSString *)key fromKeyPath:(NSString *)foreignKeyPath ofObject:(id)object;
-
-@end
-
-#pragma mark - RZDBCoalesce interface
-
-/**
- *  There may be chunks of work that should be completed "atomically" with respect to RZDataBinding.
- *  That is, actions registered using the rz_addTarget:action: methods should be fired once, when the work is completed.
- *
- *  The RZDBCoalesce object provides class methods to manage event coalescing.
- *
- *  Coalescing is an advanced feature that should generally only be used if you encounter a performance issue,
- *  or find some other requirement for it.
- */
-@interface RZDBCoalesce : NSObject
-
-/**
- *  Begin coalescing events for the current thread.
- *  Changes that occur during the coalesce that would trigger actions registered with the
- *  rz_addTarget:action: methods are instead coalesced and executed once when the coalesce ends.
- *
- *  Every call to +begin MUST be balanced by a call to +commit on the same thread.
- *  It is fine to begin a coalesce while already coalescing--
- *  the coalesce will simply not end until both matching commits are hit.
- *
- *  @note Bindings that occur during a coalesce still occur immediately.
- */
-+ (void)begin;
-
-/**
- *  Commit the current coalesce, sending the coalesced change callbacks.
- *  If this commit closes a nested coalesce, callbacks are not sent until the outermost coalesce is committed.
- *
- *  Calling this method from outside a coalesce has no effect.
- */
-+ (void)commit;
-
-/**
- *  Convenience method that first calls +begin, then executes the block, then calls +commit.
- *  You should prefer this method where possible to avoid programmer error (i.e. forgetting to call +commit).
- *
- *  @param coalesceBlock The block to execute inside a coalesce. Must be non-nil.
- */
-+ (void)coalesceBlock:(void (^)())coalesceBlock;
-
-- (instancetype)init __attribute__((unavailable("Cannot instantiate RZDBCoalesce directly. Use the class methods instead.")));
 
 @end
 

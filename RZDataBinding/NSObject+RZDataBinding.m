@@ -46,8 +46,6 @@ static NSString* const kRZDBChangeKeyBindingFunctionKey = @"_RZDBChangeBindingFu
 
 static NSString* const kRZDBDefaultSelectorPrefix = @"rzdb_default_";
 
-static NSString* const kRZDBCoalesceStorageKey = @"RZDBCoalesce";
-
 static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 #define RZDBNotNull(obj) ((obj) != nil && ![(obj) isEqual:[NSNull null]])
@@ -62,7 +60,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 - (RZDBObserverContainer *)rz_dependentObservers;
 - (void)rz_setDependentObservers:(RZDBObserverContainer *)dependentObservers;
 
-- (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options callbackQueue:(dispatch_queue_t)callbackQueue;
+- (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options;
 - (void)rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath;
 - (void)rz_observeBoundKeyChange:(NSDictionary *)change;
 - (void)rz_setBoundKey:(NSString *)key withValue:(id)value function:(RZDBKeyBindingFunction)function;
@@ -85,8 +83,6 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 @property (copy, nonatomic) RZDBKeyBindingFunction bindingFunction;
 
-@property (strong, nonatomic) dispatch_queue_t callbackQueue;
-
 - (instancetype)initWithObservedObject:(NSObject *)observedObject keyPath:(NSString *)keyPath observationOptions:(NSKeyValueObservingOptions)observingOptions;
 
 - (void)setTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction;
@@ -106,34 +102,6 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 @end
 
-#pragma mark - RZDBNotification interface
-
-@interface RZDBNotification : NSObject
-
-@property (weak, nonatomic) id target;
-@property (assign, nonatomic) SEL action;
-
-@property (strong, nonatomic) NSMutableDictionary *changeDict;
-
-@property (strong, nonatomic) dispatch_queue_t queue;
-
-+ (instancetype)notificationForObserver:(RZDBObserver *)observer change:(NSMutableDictionary *)change;
-
-- (void)send;
-
-@end
-
-#pragma mark - RZDBCoalesce private interface
-
-@interface RZDBCoalesce ()
-
-@property (assign, nonatomic) NSInteger beginCount;
-@property (strong, nonatomic, readonly) NSMutableArray *notifications;
-
-+ (void)addNotification:(RZDBNotification *)notification;
-
-@end
-
 #pragma mark - RZDataBinding implementation
 
 @implementation NSObject (RZDataBinding)
@@ -145,11 +113,6 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately
 {
-    [self rz_addTarget:target action:action forKeyPathChange:keyPath callImmediately:callImmediately callbackQueue:nil];
-}
-
-- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath callImmediately:(BOOL)callImmediately callbackQueue:(dispatch_queue_t)callbackQueue
-{
     NSParameterAssert(target);
     NSParameterAssert(action);
 
@@ -159,18 +122,13 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         observationOptions |= NSKeyValueObservingOptionInitial;
     }
 
-    [self rz_addTarget:target action:action boundKey:nil bindingFunction:nil forKeyPath:keyPath withOptions:observationOptions callbackQueue:callbackQueue];
+    [self rz_addTarget:target action:action boundKey:nil bindingFunction:nil forKeyPath:keyPath withOptions:observationOptions];
 }
 
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths
 {
-    [self rz_addTarget:target action:action forKeyPathChanges:keyPaths callbackQueue:nil];
-}
-
-- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths callbackQueue:(dispatch_queue_t)callbackQueue
-{
     [keyPaths enumerateObjectsUsingBlock:^(NSString *keyPath, NSUInteger idx, BOOL *stop) {
-        [self rz_addTarget:target action:action forKeyPathChange:keyPath callImmediately:NO callbackQueue:callbackQueue];
+        [self rz_addTarget:target action:action forKeyPathChange:keyPath callImmediately:NO];
     }];
 }
 
@@ -199,7 +157,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
             [NSException raise:NSInvalidArgumentException format:@"RZDataBinding cannot bind key:%@ to key path:%@ of object:%@. Reason: %@", key, foreignKeyPath, [object description], exception.reason];
         }
         
-        [object rz_addTarget:self action:@selector(rz_observeBoundKeyChange:) boundKey:key bindingFunction:bindingFunction forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld callbackQueue:nil];
+        [object rz_addTarget:self action:@selector(rz_observeBoundKeyChange:) boundKey:key bindingFunction:bindingFunction forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld];
     }
 }
 
@@ -245,7 +203,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     objc_setAssociatedObject(self, @selector(rz_dependentObservers), dependentObservers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 
-- (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options callbackQueue:(dispatch_queue_t)callbackQueue
+- (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options
 {
     @synchronized (self) {
         NSMutableArray *registeredObservers = [self rz_registeredObservers];
@@ -256,7 +214,6 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         }
 
         RZDBObserver *observer = [[RZDBObserver alloc] initWithObservedObject:self keyPath:keyPath observationOptions:options];
-        observer.callbackQueue = callbackQueue;
 
         RZDBObserverContainer *dependentObservers = [target rz_dependentObservers];
 
@@ -393,24 +350,18 @@ static SEL kRZDBDefautDeallocSelector;
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ( context == kRZDBKVOContext ) {
-        NSMutableDictionary *changeDict = nil;
-
         if ( self.methodSignature.numberOfArguments > 2 ) {
-            changeDict = [self changeDictForKVOChange:change];
-        }
+            NSDictionary *changeDict = [self changeDictForKVOChange:change];
 
-        RZDBNotification *notification = [RZDBNotification notificationForObserver:self change:changeDict];
-
-        if ( self.boundKey == nil ) {
-            [RZDBCoalesce addNotification:notification];
+            ((void(*)(id, SEL, NSDictionary *))objc_msgSend)(self.target, self.action, changeDict);
         }
         else {
-            [notification send];
+            ((void(*)(id, SEL))objc_msgSend)(self.target, self.action);
         }
     }
 }
 
-- (NSMutableDictionary *)changeDictForKVOChange:(NSDictionary *)kvoChange
+- (NSDictionary *)changeDictForKVOChange:(NSDictionary *)kvoChange
 {
     NSMutableDictionary *changeDict = [NSMutableDictionary dictionary];
     
@@ -438,7 +389,7 @@ static SEL kRZDBDefautDeallocSelector;
         changeDict[kRZDBChangeKeyBindingFunctionKey] = self.bindingFunction;
     }
     
-    return changeDict;
+    return [changeDict copy];
 }
 
 - (void)invalidate
@@ -493,169 +444,6 @@ static SEL kRZDBDefautDeallocSelector;
         if ( observerIndex != NSNotFound ) {
             [self.observers removePointerAtIndex:observerIndex];
         }
-    }
-}
-
-@end
-
-#pragma mark - RZDBNotification implementation
-
-@implementation RZDBNotification
-
-+ (instancetype)notificationForObserver:(RZDBObserver *)observer change:(NSMutableDictionary *)change
-{
-    RZDBNotification *notification = [[self alloc] init];
-    notification.target = observer.target;
-    notification.action = observer.action;
-    notification.queue = observer.callbackQueue;
-    notification.changeDict = change;
-
-    return notification;
-}
-
-- (BOOL)isEqual:(id)object
-{
-    BOOL equal = [super isEqual:object];
-
-    if ( !equal && [object isKindOfClass:[RZDBNotification class]] ) {
-        RZDBNotification *other = (RZDBNotification *)object;
-
-        // Do the callback queues need to be equal?
-        equal = (self.target == other.target) &&
-                (self.action == other.action) &&
-                (self.changeDict == other.changeDict ||
-                 (self.changeDict[kRZDBChangeKeyObject] == other.changeDict[kRZDBChangeKeyObject] &&
-                  [self.changeDict[kRZDBChangeKeyKeyPath] isEqualToString:other.changeDict[kRZDBChangeKeyKeyPath]]
-                 )
-                );
-    }
-
-    return equal;
-}
-
-- (void)send
-{
-    if ( self.target != nil && self.action != NULL ) {
-        void (^notificationBlock)();
-
-        if ( self.changeDict != nil ) {
-            notificationBlock = ^{
-                ((void(*)(id, SEL, NSDictionary *))objc_msgSend)(self.target, self.action, [self.changeDict copy]);
-            };
-        }
-        else {
-            notificationBlock = ^{
-                ((void(*)(id, SEL))objc_msgSend)(self.target, self.action);
-            };
-        }
-
-        if ( self.queue == nil ) {
-            notificationBlock();
-        }
-        else {
-            dispatch_async(self.queue, notificationBlock);
-        }
-    }
-}
-
-@end
-
-#pragma mark - RZDBCoalesce implementation
-
-@implementation RZDBCoalesce
-
-+ (void)begin
-{
-    RZDBCoalesce *current = [self currentCoalesce];
-
-    if ( current == nil ) {
-        [self setCurrentCoalesce:[[self alloc] init]];
-    }
-    else {
-        current.beginCount++;
-    }
-}
-
-+ (void)commit
-{
-    RZDBCoalesce *current = [self currentCoalesce];
-    current.beginCount--;
-
-    if ( current.beginCount == 0 ) {
-        [self setCurrentCoalesce:nil];
-        [current.notifications enumerateObjectsUsingBlock:^(RZDBNotification *notification, NSUInteger idx, BOOL *stop) {
-            [notification send];
-        }];
-    }
-}
-
-+ (void)coalesceBlock:(void (^)())coalesceBlock
-{
-    NSParameterAssert(coalesceBlock);
-
-    [RZDBCoalesce begin];
-    coalesceBlock();
-    [RZDBCoalesce commit];
-}
-
-#pragma mark - private methods
-
-+ (RZDBCoalesce *)currentCoalesce
-{
-    return [NSThread currentThread].threadDictionary[kRZDBCoalesceStorageKey];
-}
-
-+ (void)setCurrentCoalesce:(RZDBCoalesce *)current
-{
-    if ( current != nil ) {
-        [NSThread currentThread].threadDictionary[kRZDBCoalesceStorageKey] = current;
-    }
-    else {
-        [[NSThread currentThread].threadDictionary removeObjectForKey:kRZDBCoalesceStorageKey];
-    }
-}
-
-+ (void)addNotification:(RZDBNotification *)notification
-{
-    RZDBCoalesce *current = [self currentCoalesce];
-
-    if ( current != nil ) {
-        [current addNotification:notification];
-    }
-    else {
-        [notification send];
-    }
-}
-
-- (instancetype)init
-{
-    self = [super init];
-    if ( self ) {
-        _beginCount = 1;
-        _notifications = [NSMutableArray array];
-    }
-
-    return self;
-}
-
-- (void)addNotification:(RZDBNotification *)notification
-{
-    NSUInteger existingIdx = [self.notifications indexOfObjectPassingTest:^BOOL(RZDBNotification *existing, NSUInteger idx, BOOL *stop) {
-        return [notification isEqual:existing];
-    }];
-
-    if ( existingIdx != NSNotFound ) {
-        RZDBNotification *existing = self.notifications[existingIdx];
-
-        if ( notification.changeDict[kRZDBChangeKeyNew] != nil ) {
-            existing.changeDict[kRZDBChangeKeyNew] = notification.changeDict[kRZDBChangeKeyNew];
-        }
-        else {
-            [existing.changeDict removeObjectForKey:kRZDBChangeKeyNew];
-        }
-    }
-    else {
-        [self.notifications addObject:notification];
     }
 }
 

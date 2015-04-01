@@ -8,6 +8,7 @@
 @import XCTest;
 
 #import "NSObject+RZDataBinding.h"
+#import "RZDBCoalesce.h"
 
 /**
  *  Change the base class to RZDBObservableObject to run tests with RZDB_AUTOMATIC_CLEANUP disabled
@@ -115,7 +116,7 @@
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
 
-    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
+    [testObj rz_addTarget:[observer rz_coalesceProxy] action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
 
     [RZDBCoalesce coalesceBlock:^{
         testObj.string = @"test";
@@ -132,7 +133,7 @@
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
 
-    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
+    [testObj rz_addTarget:[observer rz_coalesceProxy] action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
 
     [RZDBCoalesce begin];
 
@@ -164,7 +165,7 @@
     for ( NSUInteger i = 0; i < 500; i++ ) {
         RZDBTestObject *t = [testObjects objectAtIndex:i % testObjects.count];
 
-        [t rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(t, string)] callbackQueue:dispatch_get_main_queue()];
+        [t rz_addTarget:[observer rz_coalesceProxy] action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(t, string)]];
 
     }
 
