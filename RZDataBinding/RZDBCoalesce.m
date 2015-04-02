@@ -130,7 +130,15 @@ static NSString* const kRZDBCoalesceStorageKey = @"RZDBCoalesce";
 
     if ( current == nil && [NSThread isMainThread] && [self autoCoalesceByRunloopOnMainThread] ) {
         [RZDBCoalesce begin];
-        [self performSelector:@selector(commit) withObject:nil afterDelay:0.0 inModes:@[NSRunLoopCommonModes]];
+
+        // before timer observers are fired at the start of a runloop cycle
+        CFRunLoopObserverRef observer = CFRunLoopObserverCreateWithHandler(NULL, kCFRunLoopBeforeTimers, false, 0, ^(CFRunLoopObserverRef obs, CFRunLoopActivity activity) {
+            [RZDBCoalesce commit];
+            CFRunLoopRemoveObserver(CFRunLoopGetCurrent(), obs, kCFRunLoopCommonModes);
+        });
+
+        CFRunLoopAddObserver(CFRunLoopGetCurrent(), observer, kCFRunLoopCommonModes);
+        CFRelease(observer);
 
         current = [self currentCoalesce];
     }
