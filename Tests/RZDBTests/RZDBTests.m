@@ -111,6 +111,23 @@
     XCTAssertTrue(observer.callbackCalls == 2, @"Callback called incorrect number of times. Expected:2 Actual:%i", (int)observer.callbackCalls);
 }
 
+- (void)testAsynchronousRegistration
+{
+    RZDBTestObject *testObj = [RZDBTestObject new];
+    RZDBTestObject *observer = [RZDBTestObject new];
+
+    for ( NSUInteger i = 0; i < 500000; i++ ) {
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            if ( arc4random() % 2 == 0 ) {
+                [testObj rz_addTarget:observer action:@selector(testCallback) forKeyPathChange:RZDB_KP_OBJ(testObj, string)];
+            }
+            else {
+                [testObj rz_removeTarget:observer action:@selector(testCallback) forKeyPathChange:RZDB_KP_OBJ(testObj, string)];
+            }
+        });
+    }
+}
+
 - (void)testSimpleCoalesce
 {
     RZDBTestObject *testObj = [RZDBTestObject new];
