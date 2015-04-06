@@ -205,28 +205,33 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 - (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingFunction:(RZDBKeyBindingFunction)bindingFunction forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options
 {
+    NSMutableArray *registeredObservers = nil;
+    RZDBObserverContainer *dependentObservers = nil;
+
     @synchronized (self) {
-        NSMutableArray *registeredObservers = [self rz_registeredObservers];
+        registeredObservers = [self rz_registeredObservers];
 
         if ( registeredObservers == nil ) {
             registeredObservers = [NSMutableArray array];
             [self rz_setRegisteredObservers:registeredObservers];
         }
+    }
 
-        RZDBObserver *observer = [[RZDBObserver alloc] initWithObservedObject:self keyPath:keyPath observationOptions:options];
-
-        RZDBObserverContainer *dependentObservers = [target rz_dependentObservers];
+    @synchronized (target) {
+        dependentObservers = [target rz_dependentObservers];
 
         if ( dependentObservers == nil ) {
             dependentObservers = [[RZDBObserverContainer alloc] init];
             [target rz_setDependentObservers:dependentObservers];
         }
-
-        [registeredObservers addObject:observer];
-        [[target rz_dependentObservers] addObserver:observer];
-
-        [observer setTarget:target action:action boundKey:boundKey bindingFunction:bindingFunction];
     }
+
+    RZDBObserver *observer = [[RZDBObserver alloc] initWithObservedObject:self keyPath:keyPath observationOptions:options];
+
+    [registeredObservers addObject:observer];
+    [dependentObservers addObserver:observer];
+
+    [observer setTarget:target action:action boundKey:boundKey bindingFunction:bindingFunction];
 }
 
 - (void)rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath
