@@ -8,6 +8,7 @@
 @import XCTest;
 
 #import "NSObject+RZDataBinding.h"
+#import "RZDBCoalesce.h"
 
 /**
  *  Change the base class to RZDBObservableObject to run tests with RZDB_AUTOMATIC_CLEANUP disabled
@@ -108,6 +109,97 @@
     testObj.callbackCalls = 0;
     
     XCTAssertTrue(observer.callbackCalls == 2, @"Callback called incorrect number of times. Expected:2 Actual:%i", (int)observer.callbackCalls);
+}
+
+- (void)testSimpleCoalesce
+{
+    RZDBTestObject *testObj = [RZDBTestObject new];
+    RZDBTestObject *observer = [RZDBTestObject new];
+
+    [testObj rz_addTarget:[observer rz_coalesceProxy] action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
+
+    [RZDBCoalesce coalesceBlock:^{
+        testObj.string = @"test";
+        testObj.callbackCalls = 0;
+    }];
+
+    XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
+
+    XCTAssertNoThrow([RZDBCoalesce commit], @"Calling +commit outside a coalesce shouldn't cause an exception.");
+}
+
+- (void)testCoalesceWithCallbackDict
+{
+    RZDBTestObject *testObj = [RZDBTestObject new];
+    RZDBTestObject *observer = [RZDBTestObject new];
+
+    [testObj rz_addTarget:[observer rz_coalesceProxy] action:@selector(changeCallbackWithDict:) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
+
+    [RZDBCoalesce coalesceBlock:^{
+        testObj.string = @"test";
+        testObj.string = @"test2";
+    }];
+
+    XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
+
+    XCTAssertTrue([observer.string isEqualToString:@"test2"], @"Coalesced callback called with incorrect final value.");
+}
+
+- (void)testNestedCoalesce
+{
+    RZDBTestObject *testObj = [RZDBTestObject new];
+    RZDBTestObject *observer = [RZDBTestObject new];
+
+    [testObj rz_addTarget:[observer rz_coalesceProxy] action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
+
+    [RZDBCoalesce begin];
+
+    testObj.string = @"test";
+
+    [RZDBCoalesce begin];
+    testObj.callbackCalls = 0;
+    [RZDBCoalesce commit];
+
+    XCTAssertTrue(observer.callbackCalls == 0, @"Coalesce should not have ended. Expected:0 callbacks Actual:%i", (int)observer.callbackCalls);
+
+    [RZDBCoalesce commit];
+
+    XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
+}
+
+- (void)testBackgroundCoalesce
+{
+    XCTestExpectation *expectation = [self expectationWithDescription:@"Done"];
+    NSArray *testObjects = @[[RZDBTestObject new],
+                             [RZDBTestObject new],
+                             [RZDBTestObject new],
+                             [RZDBTestObject new],
+                             [RZDBTestObject new]];
+
+    RZDBTestObject *observer = [RZDBTestObject new];
+
+    // Create 500 addTarget actions
+    for ( NSUInteger i = 0; i < 500; i++ ) {
+        RZDBTestObject *t = [testObjects objectAtIndex:i % testObjects.count];
+
+        [t rz_addTarget:[observer rz_coalesceProxy] action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(t, string)]];
+
+    }
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        [RZDBCoalesce begin];
+        for ( NSUInteger i = 0; i < 5000; i++ ) {
+            RZDBTestObject *t = [testObjects objectAtIndex:arc4random() % testObjects.count];
+            t.string = @"New Value";
+        }
+        [RZDBCoalesce commit];
+
+        [expectation fulfill];
+    });
+
+    [self waitForExpectationsWithTimeout:50 handler:^(NSError *error) {
+        XCTAssertTrue(observer.callbackCalls == 1, @"Callback called incorrect number of times. Expected:1 Actual:%i", (int)observer.callbackCalls);
+    }];
 }
 
 - (void)testKeyBinding
