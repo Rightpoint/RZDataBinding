@@ -107,43 +107,11 @@ static NSString* const kRZDBCoalesceStorageKey = @"RZDBCoalesce";
     [RZDBCoalesce commit];
 }
 
-+ (void)setAutoCoalesceByRunloopOnMainThread:(BOOL)autoCoalesce
-{
-    objc_setAssociatedObject(self, @selector(autoCoalesceByRunloopOnMainThread), @(autoCoalesce), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
 #pragma mark - private methods
-
-+ (BOOL)autoCoalesceByRunloopOnMainThread
-{
-    return [objc_getAssociatedObject(self, _cmd) boolValue];
-}
 
 + (RZDBCoalesce *)currentCoalesce
 {
     return [NSThread currentThread].threadDictionary[kRZDBCoalesceStorageKey];
-}
-
-+ (RZDBCoalesce *)currentCoalesceBeginIfNeeded:(BOOL)begin
-{
-    RZDBCoalesce *current = [self currentCoalesce];
-
-    if ( current == nil && [NSThread isMainThread] && [self autoCoalesceByRunloopOnMainThread] ) {
-        [RZDBCoalesce begin];
-
-        // before timer observers are fired at the start of a runloop cycle
-        CFRunLoopObserverRef observer = CFRunLoopObserverCreateWithHandler(NULL, kCFRunLoopBeforeTimers, false, 0, ^(CFRunLoopObserverRef obs, CFRunLoopActivity activity) {
-            [RZDBCoalesce commit];
-            CFRunLoopRemoveObserver(CFRunLoopGetCurrent(), obs, kCFRunLoopCommonModes);
-        });
-
-        CFRunLoopAddObserver(CFRunLoopGetCurrent(), observer, kCFRunLoopCommonModes);
-        CFRelease(observer);
-
-        current = [self currentCoalesce];
-    }
-
-    return current;
 }
 
 + (void)setCurrentCoalesce:(RZDBCoalesce *)current
@@ -262,14 +230,16 @@ static NSString* const kRZDBCoalesceStorageKey = @"RZDBCoalesce";
 
 - (id)rz_coalesceProxy
 {
-    id proxy = objc_getAssociatedObject(self, _cmd);
+    @synchronized (self) {
+        id proxy = objc_getAssociatedObject(self, _cmd);
 
-    if ( proxy == nil ) {
-        proxy = [RZDBCoalesceProxy proxyForObject:self];
-        objc_setAssociatedObject(self, _cmd, proxy, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        if ( proxy == nil ) {
+            proxy = [RZDBCoalesceProxy proxyForObject:self];
+            objc_setAssociatedObject(self, _cmd, proxy, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }
+
+        return proxy;
     }
-
-    return proxy;
 }
 
 @end
@@ -295,7 +265,7 @@ static NSString* const kRZDBCoalesceStorageKey = @"RZDBCoalesce";
 {
     invocation.target = self.representedObject;
 
-    RZDBCoalesce *currentCoalesce = [RZDBCoalesce currentCoalesceBeginIfNeeded:YES];
+    RZDBCoalesce *currentCoalesce = [RZDBCoalesce currentCoalesce];
 
     if ( currentCoalesce != nil ) {
         // notificaton will be non-nil for a valid RZDataBinding callback
