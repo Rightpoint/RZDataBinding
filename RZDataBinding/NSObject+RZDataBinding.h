@@ -111,6 +111,8 @@ typedef id (^RZDBKeyBindingFunction)(id value);
  *  @param action   The selector to call on the target. Must not be NULL. See rz_addTarget documentation for more details.
  *  @param keyPaths An array of key paths that should trigger an action. Each key path must be KVC compliant.
  *
+ *  @note The action is not called immediately.
+ *
  *  @see RZDB_KP macro for creating keypaths.
  */
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths;
