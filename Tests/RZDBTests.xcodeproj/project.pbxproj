@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D49BB2C619CB866D000DEC83 /* RZDBTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D49BB2C519CB866D000DEC83 /* RZDBTests.m */; };
+		D4A85E971ACC38CD003827BA /* RZDBCoalesce.m in Sources */ = {isa = PBXBuildFile; fileRef = D4A85E961ACC38CD003827BA /* RZDBCoalesce.m */; };
 		D4B8C8321A5C2B8F00148F68 /* NSObject+RZDataBinding.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C8311A5C2B8F00148F68 /* NSObject+RZDataBinding.m */; };
 /* End PBXBuildFile section */
 
@@ -15,6 +16,8 @@
 		D49BB2C019CB866D000DEC83 /* RZDBTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RZDBTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D49BB2C419CB866D000DEC83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D49BB2C519CB866D000DEC83 /* RZDBTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RZDBTests.m; sourceTree = "<group>"; };
+		D4A85E951ACC38CD003827BA /* RZDBCoalesce.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBCoalesce.h; path = ../RZDataBinding/RZDBCoalesce.h; sourceTree = "<group>"; };
+		D4A85E961ACC38CD003827BA /* RZDBCoalesce.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RZDBCoalesce.m; path = ../RZDataBinding/RZDBCoalesce.m; sourceTree = "<group>"; };
 		D4ABA1BE1AB9E5D200220A1A /* RZDBMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBMacros.h; path = ../RZDataBinding/RZDBMacros.h; sourceTree = "<group>"; };
 		D4B8C8301A5C2B8F00148F68 /* NSObject+RZDataBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+RZDataBinding.h"; path = "../RZDataBinding/NSObject+RZDataBinding.h"; sourceTree = "<group>"; };
 		D4B8C8311A5C2B8F00148F68 /* NSObject+RZDataBinding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSObject+RZDataBinding.m"; path = "../RZDataBinding/NSObject+RZDataBinding.m"; sourceTree = "<group>"; };
@@ -37,6 +40,8 @@
 				D4ABA1BE1AB9E5D200220A1A /* RZDBMacros.h */,
 				D4B8C8301A5C2B8F00148F68 /* NSObject+RZDataBinding.h */,
 				D4B8C8311A5C2B8F00148F68 /* NSObject+RZDataBinding.m */,
+				D4A85E951ACC38CD003827BA /* RZDBCoalesce.h */,
+				D4A85E961ACC38CD003827BA /* RZDBCoalesce.m */,
 				D49BB2C219CB866D000DEC83 /* RZDBTests */,
 				D49BB2C119CB866D000DEC83 /* Products */,
 			);
@@ -133,6 +138,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D49BB2C619CB866D000DEC83 /* RZDBTests.m in Sources */,
+				D4A85E971ACC38CD003827BA /* RZDBCoalesce.m in Sources */,
 				D4B8C8321A5C2B8F00148F68 /* NSObject+RZDataBinding.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -143,6 +149,7 @@
 		D49BB2BA19CB862A000DEC83 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = 0;
 				ONLY_ACTIVE_ARCH = YES;
 			};
 			name = Debug;
@@ -150,6 +157,7 @@
 		D49BB2BB19CB862A000DEC83 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_OPTIMIZATION_LEVEL = s;
 			};
 			name = Release;
 		};
