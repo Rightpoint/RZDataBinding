@@ -54,6 +54,8 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 @interface NSObject (RZDataBinding_Private)
 
++ (BOOL)rz_isPrimitiveProperty:(NSString *)propertyName;
+
 - (NSMutableArray *)rz_registeredObservers;
 - (void)rz_setRegisteredObservers:(NSMutableArray *)registeredObservers;
 
@@ -183,6 +185,58 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 @implementation NSObject (RZDataBinding_Private)
 
++ (BOOL)rz_isPrimitiveProperty:(NSString *)propertyName
+{
+    id primitive = objc_getAssociatedObject(self, _cmd);
+
+    if ( primitive == nil ) {
+        objc_property_t property = NULL;
+
+        Class class = self;
+        while ( class != nil && property == NULL ) {
+            property = class_getProperty(class, [propertyName UTF8String]);
+            class = class_getSuperclass(class);
+        }
+
+        BOOL propertyIsPrimitive = NO;
+
+        if ( property != NULL ) {
+            char *propType = property_copyAttributeValue(property, "T");
+
+            switch ( propType[0] ) {
+                case _C_CHR:
+                case _C_UCHR:
+                case _C_INT:
+                case _C_UINT:
+                case _C_SHT:
+                case _C_USHT:
+                case _C_LNG:
+                case _C_ULNG:
+                case _C_LNG_LNG:
+                case _C_ULNG_LNG:
+                case _C_FLT:
+                case _C_DBL:
+                case _C_BOOL: {
+                    propertyIsPrimitive = YES;
+                    break;
+                }
+                    
+                default:
+                    break;
+            }
+
+            if ( propType != NULL ) {
+                free(propType);
+            }
+        }
+
+        primitive = @(propertyIsPrimitive);
+        objc_setAssociatedObject(self, _cmd, primitive, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+
+    return [primitive boolValue];
+}
+
 - (NSMutableArray *)rz_registeredObservers
 {
     return objc_getAssociatedObject(self, @selector(rz_registeredObservers));
@@ -272,6 +326,10 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
     if ( function != nil ) {
         value = function(value);
+    }
+
+    if ( value == nil && [[self class] rz_isPrimitiveProperty:key] ) {
+        value = @(0);
     }
 
     if ( currentValue != value && ![currentValue isEqual:value] ) {
