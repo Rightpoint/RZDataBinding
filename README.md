@@ -144,7 +144,7 @@ You should *always* use these macros instead of literal strings, because of the 
 
 ## Callback Coalescing (Advanced)
 
-RZDataBinding also offers an advanced feature for fine-tuning areas of your application that receive or send an extreme number of KVO notifications, which may be incur a performance cost. For example, a complex view might trigger an expensive layout operation whenever one of several properties change, and some work may require changing those properties several times before they settle to final values. In this case, RZDataBinding can treat blocks of work as an "atomic" event. That is, supported callbacks will be coalesced and sent once, when the work completes.
+RZDataBinding also provides a coalescing mechanism for fine-tuning areas of your application that receive or send an extreme number of KVO notifications, which may be incur a performance cost. For example, a complex view might trigger an expensive layout operation whenever one of several properties change. Or, some work may require changing properties several times before they settle to final values. In these kinds of cases, it may be beneficial to have RZDataBinding treat a block of work as an "atomic" event. That is, supported callbacks should be coalesced and sent once, when the work completes.
 
 [`RZDBCoalesce`](RZDataBinding/RZDBCoalesce.h) provides a block interface:
 
