@@ -187,7 +187,14 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 + (BOOL)rz_isPrimitiveProperty:(NSString *)propertyName
 {
-    id primitive = objc_getAssociatedObject(self, _cmd);
+    NSMutableDictionary *cachedValues = objc_getAssociatedObject(self, _cmd);
+
+    if ( cachedValues == nil ) {
+        cachedValues = [NSMutableDictionary dictionary];
+        objc_setAssociatedObject(self, _cmd, cachedValues, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+
+    id primitive = cachedValues[propertyName];
 
     if ( primitive == nil ) {
         objc_property_t property = NULL;
@@ -231,7 +238,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         }
 
         primitive = @(propertyIsPrimitive);
-        objc_setAssociatedObject(self, _cmd, primitive, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        cachedValues[propertyName] = primitive;
     }
 
     return [primitive boolValue];
