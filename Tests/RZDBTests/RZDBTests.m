@@ -237,7 +237,7 @@
     XCTAssertTrue([observer.string isEqualToString:@"test2"], @"String shouldn't change after keys are unbound");
 }
 
-- (void)testBindingEqualityCheck
+- (void)testKeyBindingEqualityCheck
 {
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
@@ -273,7 +273,20 @@
     XCTAssertTrue(observer.callbackCalls == 105, @"Value shouldn't change after keys are unbound.");
 }
 
-- (void)testBindingChains
+- (void)testKeyBindingPrimitiveWithNilValue
+{
+    RZDBTestObject *testObj = [RZDBTestObject new];
+    RZDBTestObject *observer = [RZDBTestObject new];
+
+    testObj.string = nil;
+    observer.callbackCalls = 1;
+
+    [observer rz_bindKey:RZDB_KP_OBJ(observer, callbackCalls) toKeyPath:RZDB_KP_OBJ(testObj, string.length) ofObject:testObj];
+
+    XCTAssertTrue(observer.callbackCalls == 0, @"Nil value should translate to 0 when bound to a primitive.");
+}
+
+- (void)testKeyBindingChains
 {
     RZDBTestObject *obj1 = [RZDBTestObject new];
     RZDBTestObject *obj2 = [RZDBTestObject new];
