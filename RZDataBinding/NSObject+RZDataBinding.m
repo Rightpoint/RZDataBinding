@@ -191,7 +191,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
     if ( cachedValues == nil ) {
         cachedValues = [NSMutableDictionary dictionary];
-        objc_setAssociatedObject(self, _cmd, cachedValues, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        objc_setAssociatedObject(self, _cmd, cachedValues, OBJC_ASSOCIATION_RETAIN);
     }
 
     id primitive = cachedValues[propertyName];
