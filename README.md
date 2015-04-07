@@ -125,7 +125,45 @@ Aside from the obvious reduction in code, the RZDataBinding implementation demon
 2. No need to implement an instance method, meaning *any* object can be added as a target
 3. No need to teardown before deallocation (standard KVO crashes if you fail to do this)
 
-RZDataBinding also provides a convenience macro to create keypaths that are checked at compile time for validity (not shown in this example). No more unwieldy `NSStringFromSelector(@selector(foo:))`!
+## Safe Keypaths
+
+RZDataBinding also provides [several convenience macros](RZDataBinding/RZDBMacros.h) to create type-safe keypaths. When running in `DEBUG` mode, invalid keypaths will generate a compiler error:
+
+``` obj-c
+// Creates the keypath @"text", ensuring it exists on objects of type UILabel
+RZDB_KP(UILabel, text);
+
+// Creates @"layer.cornerRadius", ensuring the keypath exists on myView
+RZDB_KP_OBJ(myView, layer.cornerRadius);
+
+// Creates @"session.user.name", ensuring the keypath exists on self
+RZDB_KP_SELF(session.user.name);
+```
+
+You should *always* use these macros instead of literal strings, because of the additional type checks they provide. Note that in production these macros simplify to literal string generation to avoid any additional overhead.
+
+## Callback Coalescing (Advanced)
+
+RZDataBinding also provides a coalescing mechanism for fine-tuning areas of your application that receive or send a high number of KVO notifications, which may be incur a performance cost. For example, a complex view might trigger an expensive layout operation whenever one of several properties change. Or, some work may require changing properties several times before they settle to final values. In these kinds of cases, it may be beneficial to have RZDataBinding treat a block of work as an "atomic" event. That is, supported callbacks should be coalesced and sent once, when the work completes.
+
+[`RZDBCoalesce`](RZDataBinding/RZDBCoalesce.h) provides a block interface:
+
+``` obj-c
+[RZDBCoalesce coalesceBlock:^{
+        // Callbacks within this block are coalesced,
+        // and sent are once, after the block completes
+}];
+```
+
+Callbacks are not coalesced by default, even within an `RZDBCoalesce` event. The `rz_addTarget:action:` methods can opt in to support coalescing by specifying a coalesce proxy as the callback target:
+
+``` obj-c
+[object rz_addTarget:[self rz_coalesceProxy] 
+              action:@selector(expensiveCallback) 
+    forKeyPathChange:RZDB_KP_OBJ(object, key.path)];
+```
+
+In this example, the intended target is `self`, but if a coalesce event is in progress these messages will be coalesced and deferred until the event completes. Note that only `rz_addTarget:action:` callbacks may support coalescing; bindings established with the `rz_bindKey:` methods will never be coalesced.
 
 ## Author
 Rob Visentin, rob.visentin@raizlabs.com
