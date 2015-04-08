@@ -52,13 +52,13 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyNew;
 OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
 
 /**
- *  A function that takes a value as a parameter and returns an object.
+ *  A transform that takes a value as a parameter and returns an object.
  *
  *  @param value The value that just changed on a foreign object for a bound key path.
  *
  *  @return The value to set for the bound key. Ideally the returned value should depend solely on the input value.
  */
-typedef id (^RZDBKeyBindingFunction)(id value);
+typedef id (^RZDBKeyBindingTransform)(id value);
 
 /**
  *  Set this to 1 (recommended) to enable automatic cleanup of observers on object deallocation.
@@ -142,16 +142,16 @@ typedef id (^RZDBKeyBindingFunction)(id value);
 - (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object;
 
 /**
- *  Binds the value of a given key of the receiver to the value of a key path of another object. When the key path of the object changes, the binding function is invoked and the bound key of the receiver is set to the function's return value. The receiver's value for the key will be set before this method returns.
+ *  Binds the value of a given key of the receiver to the value of a key path of another object. When the key path of the object changes, the binding transform is invoked and the bound key of the receiver is set to the transform's return value. The receiver's value for the key will be set before this method returns.
  *
  *  @param key            The receiver's key whose value should be bound to the value of a foreign key path. Must be KVC compliant.
  *  @param foreignKeyPath A key path of another object to which the receiver's key value should be bound. Must be KVC compliant.
  *  @param object         An object with a key path that the receiver should bind to.
- *  @param bindingFunction The function to apply to changed values before setting the value of the bound key. If nil, the identity function is assumed, making this method identical to regular rz_bindKey.
+ *  @param bindingTransform The transform to apply to changed values before setting the value of the bound key. If nil, the identity transform is assumed, making this method identical to regular rz_bindKey.
  *
  *  @see RZDB_KP macro for creating keypaths.
  */
-- (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object withFunction:(RZDBKeyBindingFunction)bindingFunction;
+- (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object withTransform:(RZDBKeyBindingTransform)bindingTransform;
 
 /**
  *  Unbinds the given key of the receiver from the key path of another object.

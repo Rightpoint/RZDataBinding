@@ -255,18 +255,18 @@
     XCTAssertTrue(observer.setStringCalls == 2, @"Binding triggered incorrect number of times. Expected:2 Actual:%i", (int)observer.setStringCalls);
 }
 
-- (void)testKeyBindingWithFunction
+- (void)testKeyBindingWithTransform
 {
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
     
     testObj.callbackCalls = 5;
     
-    [observer rz_bindKey:RZDB_KP_OBJ(observer, callbackCalls) toKeyPath:RZDB_KP_OBJ(testObj, callbackCalls) ofObject:testObj withFunction:^id (id value) {
+    [observer rz_bindKey:RZDB_KP_OBJ(observer, callbackCalls) toKeyPath:RZDB_KP_OBJ(testObj, callbackCalls) ofObject:testObj withTransform:^id (id value) {
         return @([(NSNumber *)value integerValue] + 100);
     }];
     
-    XCTAssertTrue(observer.callbackCalls == 105, @"Key binding function was not properly applied before setting value for key when key path changed.");
+    XCTAssertTrue(observer.callbackCalls == 105, @"Key binding transform was not properly applied before setting value for key when key path changed.");
     
     [observer rz_unbindKey:RZDB_KP_OBJ(observer, callbackCalls) fromKeyPath:RZDB_KP_OBJ(testObj, callbackCalls) ofObject:testObj];
     testObj.callbackCalls = 100;
