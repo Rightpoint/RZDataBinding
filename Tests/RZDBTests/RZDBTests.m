@@ -6,6 +6,7 @@
 //
 
 @import XCTest;
+@import CoreGraphics.CGGeometry;
 
 #import "RZDataBinding.h"
 
@@ -284,6 +285,48 @@
     obj1.string = @"test";
     
     XCTAssertTrue([obj3.string isEqualToString:obj2.string] && [obj2.string isEqualToString:obj1.string], @"Binding chain failed--values not equal");
+}
+
+- (void)testTransformConstants
+{
+    id value = nil;
+
+    value = kRZDBNilToZeroTransform(value);
+    XCTAssertTrue([value isEqual:@(0)]);
+
+    value = nil;
+    value = kRZDBNilToOneTransform(value);
+    XCTAssertTrue([value isEqual:@(1)]);
+
+    value = nil;
+    value = kRZDBNilToCGSizeZeroTransform(value);
+    CGSize size = (CGSize){1.0f, 1.0f};
+    [value getValue:&size];
+    XCTAssertTrue(CGSizeEqualToSize(size, CGSizeZero));
+
+    value = nil;
+    value = kRZDBNilToCGRectZeroTransform(value);
+    CGRect rect = (CGRect){1.0f, 1.0f, 1.0f, 1.0f};
+    [value getValue:&rect];
+    XCTAssertTrue(CGRectEqualToRect(rect, CGRectZero));
+
+    value = nil;
+    value = kRZDBNilToCGRectNullTransform(value);
+    rect = (CGRect){1.0f, 1.0f, 1.0f, 1.0f};
+    [value getValue:&rect];
+    XCTAssertTrue(CGRectIsNull(rect));
+
+    value = @(NO);
+    value = kRZDBLogicalNegateTransform(value);
+    XCTAssertTrue([value boolValue]);
+
+    value = @(0.25);
+    value = kRZDBOneMinusTransform(value);
+    XCTAssertTrue([value doubleValue] == 0.75);
+
+    value = @(0x1337);
+    value = kRZDBBitwiseComplementTransform(value);
+    XCTAssertTrue([value longLongValue] == ~0x1337);
 }
 
 - (void)testDeallocation
