@@ -300,19 +300,19 @@
 
     value = nil;
     value = kRZDBNilToCGSizeZeroTransform(value);
-    CGSize size = (CGSize){1.0f, 1.0f};
+    CGSize size = CGSizeMake(1.0f, 1.0f);
     [value getValue:&size];
     XCTAssertTrue(CGSizeEqualToSize(size, CGSizeZero));
 
     value = nil;
     value = kRZDBNilToCGRectZeroTransform(value);
-    CGRect rect = (CGRect){1.0f, 1.0f, 1.0f, 1.0f};
+    CGRect rect = CGRectMake(1.0f, 1.0f, 1.0f, 1.0f);
     [value getValue:&rect];
     XCTAssertTrue(CGRectEqualToRect(rect, CGRectZero));
 
     value = nil;
     value = kRZDBNilToCGRectNullTransform(value);
-    rect = (CGRect){1.0f, 1.0f, 1.0f, 1.0f};
+    rect = CGRectMake(1.0f, 1.0f, 1.0f, 1.0f);
     [value getValue:&rect];
     XCTAssertTrue(CGRectIsNull(rect));
 
