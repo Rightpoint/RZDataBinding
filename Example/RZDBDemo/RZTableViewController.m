@@ -9,7 +9,7 @@
 #import "RZTableViewController.h"
 #import "RZUserViewController.h"
 
-#import "NSObject+RZDataBinding.h"
+#import "RZDataBinding.h"
 #import "UIImage+RZColor.h"
 #import "UIColor+RZHexColor.h"
 
@@ -52,12 +52,12 @@
     
     [cell.textLabel rz_bindKey:RZDB_KP(UILabel, text) toKeyPath:RZDB_KP(RZUser, fullName) ofObject:user];
     
-    [cell.imageView rz_bindKey:RZDB_KP(UIImageView, image) toKeyPath:RZDB_KP(RZUser, favoriteColorHex) ofObject:user withFunction:^id(id value) {
+    [cell.imageView rz_bindKey:RZDB_KP(UIImageView, image) toKeyPath:RZDB_KP(RZUser, favoriteColorHex) ofObject:user withTransform:^id(id value) {
         UIColor *color = [UIColor rz_hexColor:(uint32_t)[value integerValue]];
         return [UIImage rz_imageWithColor:color size:CGSizeMake(35.0f, 35.0f)];
     }];
     
-    [cell.detailTextLabel rz_bindKey:RZDB_KP(UILabel, text) toKeyPath:RZDB_KP(RZUser, age) ofObject:user withFunction:^id(id value) {
+    [cell.detailTextLabel rz_bindKey:RZDB_KP(UILabel, text) toKeyPath:RZDB_KP(RZUser, age) ofObject:user withTransform:^id(id value) {
         return [value stringValue];
     }];
     
