@@ -26,8 +26,7 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#import <Foundation/Foundation.h>
-#import "RZDBMacros.h"
+#import "RZDBTransforms.h"
 
 #pragma mark - Constants and Definitions
 
@@ -50,15 +49,6 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyNew;
  *  The value for this key is the key path that changed value. This key is always present.
  */
 OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
-
-/**
- *  A transform that takes a value as a parameter and returns an object.
- *
- *  @param value The value that just changed on a foreign object for a bound key path.
- *
- *  @return The value to set for the bound key. Ideally the returned value should depend solely on the input value.
- */
-typedef id (^RZDBKeyBindingTransform)(id value);
 
 /**
  *  Set this to 1 (recommended) to enable automatic cleanup of observers on object deallocation.

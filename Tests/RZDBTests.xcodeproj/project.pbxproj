@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D49BB2C619CB866D000DEC83 /* RZDBTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D49BB2C519CB866D000DEC83 /* RZDBTests.m */; };
+		D4AA6DB11AD4C5F600BA2A9E /* RZDBTransforms.m in Sources */ = {isa = PBXBuildFile; fileRef = D4AA6DAF1AD4C5F600BA2A9E /* RZDBTransforms.m */; };
 		D4B8C8321A5C2B8F00148F68 /* NSObject+RZDataBinding.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C8311A5C2B8F00148F68 /* NSObject+RZDataBinding.m */; };
 		D4C790A51AD2C6D000ACD1CE /* RZDBCoalesce.m in Sources */ = {isa = PBXBuildFile; fileRef = D4C790A41AD2C6D000ACD1CE /* RZDBCoalesce.m */; };
 /* End PBXBuildFile section */
@@ -16,6 +17,9 @@
 		D49BB2C019CB866D000DEC83 /* RZDBTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RZDBTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D49BB2C419CB866D000DEC83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D49BB2C519CB866D000DEC83 /* RZDBTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RZDBTests.m; sourceTree = "<group>"; };
+		D4AA6DAE1AD4C54C00BA2A9E /* RZDataBinding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RZDataBinding.h; path = ../RZDataBinding/RZDataBinding.h; sourceTree = "<group>"; };
+		D4AA6DAF1AD4C5F600BA2A9E /* RZDBTransforms.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RZDBTransforms.m; path = ../RZDataBinding/RZDBTransforms.m; sourceTree = "<group>"; };
+		D4AA6DB01AD4C5F600BA2A9E /* RZDBTransforms.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBTransforms.h; path = ../RZDataBinding/RZDBTransforms.h; sourceTree = "<group>"; };
 		D4ABA1BE1AB9E5D200220A1A /* RZDBMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBMacros.h; path = ../RZDataBinding/RZDBMacros.h; sourceTree = "<group>"; };
 		D4B8C8301A5C2B8F00148F68 /* NSObject+RZDataBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+RZDataBinding.h"; path = "../RZDataBinding/NSObject+RZDataBinding.h"; sourceTree = "<group>"; };
 		D4B8C8311A5C2B8F00148F68 /* NSObject+RZDataBinding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSObject+RZDataBinding.m"; path = "../RZDataBinding/NSObject+RZDataBinding.m"; sourceTree = "<group>"; };
@@ -37,11 +41,14 @@
 		D49BB2B519CB862A000DEC83 = {
 			isa = PBXGroup;
 			children = (
+				D4AA6DAE1AD4C54C00BA2A9E /* RZDataBinding.h */,
 				D4ABA1BE1AB9E5D200220A1A /* RZDBMacros.h */,
-				D4B8C8301A5C2B8F00148F68 /* NSObject+RZDataBinding.h */,
-				D4B8C8311A5C2B8F00148F68 /* NSObject+RZDataBinding.m */,
+				D4AA6DB01AD4C5F600BA2A9E /* RZDBTransforms.h */,
+				D4AA6DAF1AD4C5F600BA2A9E /* RZDBTransforms.m */,
 				D4C790A31AD2C6D000ACD1CE /* RZDBCoalesce.h */,
 				D4C790A41AD2C6D000ACD1CE /* RZDBCoalesce.m */,
+				D4B8C8301A5C2B8F00148F68 /* NSObject+RZDataBinding.h */,
+				D4B8C8311A5C2B8F00148F68 /* NSObject+RZDataBinding.m */,
 				D49BB2C219CB866D000DEC83 /* RZDBTests */,
 				D49BB2C119CB866D000DEC83 /* Products */,
 			);
@@ -139,6 +146,7 @@
 			files = (
 				D49BB2C619CB866D000DEC83 /* RZDBTests.m in Sources */,
 				D4C790A51AD2C6D000ACD1CE /* RZDBCoalesce.m in Sources */,
+				D4AA6DB11AD4C5F600BA2A9E /* RZDBTransforms.m in Sources */,
 				D4B8C8321A5C2B8F00148F68 /* NSObject+RZDataBinding.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

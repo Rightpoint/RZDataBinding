@@ -30,6 +30,7 @@
 #import <objc/message.h>
 
 #import "NSObject+RZDataBinding.h"
+#import "RZDBMacros.h"
 
 @class RZDBObserver;
 @class RZDBObserverContainer;
