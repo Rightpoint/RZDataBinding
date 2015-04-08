@@ -127,6 +127,11 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
  *  @param foreignKeyPath A key path of another object to which the receiver's key value should be bound. Must be KVC compliant.
  *  @param object         An object with a key path that the receiver should bind to.
  *
+ *  @note If binding a primitive-type key to a keypath that may hit a nil object, you MUST use 
+ *  rz_bindKey:toKeyPath:ofObject:withTransform: instead. This is because attempting to set a nil
+ *  value to a primitive-type using KVC causes a crash. In this case it may be helpful to use 
+ *  one of the default RZDBTransforms.
+ *
  *  @see RZDB_KP macro for creating keypaths.
  */
 - (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object;
@@ -137,9 +142,10 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
  *  @param key            The receiver's key whose value should be bound to the value of a foreign key path. Must be KVC compliant.
  *  @param foreignKeyPath A key path of another object to which the receiver's key value should be bound. Must be KVC compliant.
  *  @param object         An object with a key path that the receiver should bind to.
- *  @param bindingTransform The transform to apply to changed values before setting the value of the bound key. If nil, the identity transform is assumed, making this method identical to regular rz_bindKey.
+ *  @param bindingTransform The transform to apply to changed values before setting the value of the bound key. If nil, the identity transform is assumed, making this method identical to regular rz_bindKey:.
+ *  You may use the constant RZDBTransforms provided for convenience.
  *
- *  @see RZDB_KP macro for creating keypaths.
+ *  @see RZDB_KP macro for creating keypaths, and RZDBTransforms for constant transforms.
  */
 - (void)rz_bindKey:(NSString *)key toKeyPath:(NSString *)foreignKeyPath ofObject:(id)object withTransform:(RZDBKeyBindingTransform)bindingTransform;
 
