@@ -9,7 +9,9 @@
 /* Begin PBXBuildFile section */
 		D41F4FDB1A5346EF00D0BA2D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = D41F4FD71A5346EF00D0BA2D /* LaunchScreen.xib */; };
 		D41F4FDC1A5346EF00D0BA2D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D41F4FD91A5346EF00D0BA2D /* Main.storyboard */; };
-		D4B8C89F1A5C3C0E00148F68 /* NSObject+RZDataBinding.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C89E1A5C3C0E00148F68 /* NSObject+RZDataBinding.m */; };
+		D4AD92B31AD5784C00AA80D1 /* NSObject+RZDataBinding.m in Sources */ = {isa = PBXBuildFile; fileRef = D4AD92AC1AD5784C00AA80D1 /* NSObject+RZDataBinding.m */; };
+		D4AD92B41AD5784C00AA80D1 /* RZDBCoalesce.m in Sources */ = {isa = PBXBuildFile; fileRef = D4AD92AF1AD5784C00AA80D1 /* RZDBCoalesce.m */; };
+		D4AD92B51AD5784C00AA80D1 /* RZDBTransforms.m in Sources */ = {isa = PBXBuildFile; fileRef = D4AD92B21AD5784C00AA80D1 /* RZDBTransforms.m */; };
 		D4B8C8A31A5C47EC00148F68 /* UIColor+RZHexColor.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C8A21A5C47EC00148F68 /* UIColor+RZHexColor.m */; };
 		D4B8C8A61A5C4A0700148F68 /* UIImage+RZColor.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C8A51A5C4A0700148F68 /* UIImage+RZColor.m */; };
 		D4B8C8A91A5C57B400148F68 /* RZUserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C8A81A5C57B400148F68 /* RZUserViewController.m */; };
@@ -26,9 +28,14 @@
 /* Begin PBXFileReference section */
 		D41F4FD81A5346EF00D0BA2D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = SOURCE_ROOT; };
 		D41F4FDA1A5346EF00D0BA2D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = SOURCE_ROOT; };
-		D4ABA1C01AB9F90800220A1A /* RZDBMacros.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RZDBMacros.h; path = ../RZDataBinding/RZDBMacros.h; sourceTree = "<group>"; };
-		D4B8C89D1A5C3C0E00148F68 /* NSObject+RZDataBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+RZDataBinding.h"; path = "../RZDataBinding/NSObject+RZDataBinding.h"; sourceTree = "<group>"; };
-		D4B8C89E1A5C3C0E00148F68 /* NSObject+RZDataBinding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSObject+RZDataBinding.m"; path = "../RZDataBinding/NSObject+RZDataBinding.m"; sourceTree = "<group>"; };
+		D4AD92AB1AD5784C00AA80D1 /* NSObject+RZDataBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+RZDataBinding.h"; path = "../RZDataBinding/NSObject+RZDataBinding.h"; sourceTree = "<group>"; };
+		D4AD92AC1AD5784C00AA80D1 /* NSObject+RZDataBinding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSObject+RZDataBinding.m"; path = "../RZDataBinding/NSObject+RZDataBinding.m"; sourceTree = "<group>"; };
+		D4AD92AD1AD5784C00AA80D1 /* RZDataBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDataBinding.h; path = ../RZDataBinding/RZDataBinding.h; sourceTree = "<group>"; };
+		D4AD92AE1AD5784C00AA80D1 /* RZDBCoalesce.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBCoalesce.h; path = ../RZDataBinding/RZDBCoalesce.h; sourceTree = "<group>"; };
+		D4AD92AF1AD5784C00AA80D1 /* RZDBCoalesce.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RZDBCoalesce.m; path = ../RZDataBinding/RZDBCoalesce.m; sourceTree = "<group>"; };
+		D4AD92B01AD5784C00AA80D1 /* RZDBMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBMacros.h; path = ../RZDataBinding/RZDBMacros.h; sourceTree = "<group>"; };
+		D4AD92B11AD5784C00AA80D1 /* RZDBTransforms.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBTransforms.h; path = ../RZDataBinding/RZDBTransforms.h; sourceTree = "<group>"; };
+		D4AD92B21AD5784C00AA80D1 /* RZDBTransforms.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RZDBTransforms.m; path = ../RZDataBinding/RZDBTransforms.m; sourceTree = "<group>"; };
 		D4B8C8A11A5C47EC00148F68 /* UIColor+RZHexColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIColor+RZHexColor.h"; path = "Utils/UIColor+RZHexColor.h"; sourceTree = "<group>"; };
 		D4B8C8A21A5C47EC00148F68 /* UIColor+RZHexColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIColor+RZHexColor.m"; path = "Utils/UIColor+RZHexColor.m"; sourceTree = "<group>"; };
 		D4B8C8A41A5C4A0700148F68 /* UIImage+RZColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIImage+RZColor.h"; path = "Utils/UIImage+RZColor.h"; sourceTree = "<group>"; };
@@ -122,9 +129,14 @@
 		D4C5F4281A39F6CC00CC6FB3 /* RZDataBinding */ = {
 			isa = PBXGroup;
 			children = (
-				D4ABA1C01AB9F90800220A1A /* RZDBMacros.h */,
-				D4B8C89D1A5C3C0E00148F68 /* NSObject+RZDataBinding.h */,
-				D4B8C89E1A5C3C0E00148F68 /* NSObject+RZDataBinding.m */,
+				D4AD92AB1AD5784C00AA80D1 /* NSObject+RZDataBinding.h */,
+				D4AD92AC1AD5784C00AA80D1 /* NSObject+RZDataBinding.m */,
+				D4AD92AD1AD5784C00AA80D1 /* RZDataBinding.h */,
+				D4AD92AE1AD5784C00AA80D1 /* RZDBCoalesce.h */,
+				D4AD92AF1AD5784C00AA80D1 /* RZDBCoalesce.m */,
+				D4AD92B01AD5784C00AA80D1 /* RZDBMacros.h */,
+				D4AD92B11AD5784C00AA80D1 /* RZDBTransforms.h */,
+				D4AD92B21AD5784C00AA80D1 /* RZDBTransforms.m */,
 			);
 			name = RZDataBinding;
 			sourceTree = "<group>";
@@ -213,13 +225,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				D4C5F4051A39F5A100CC6FB3 /* RZTableViewController.m in Sources */,
+				D4AD92B41AD5784C00AA80D1 /* RZDBCoalesce.m in Sources */,
 				D4C5F4021A39F5A100CC6FB3 /* RZAppDelegate.m in Sources */,
-				D4B8C89F1A5C3C0E00148F68 /* NSObject+RZDataBinding.m in Sources */,
 				D4B8C8A91A5C57B400148F68 /* RZUserViewController.m in Sources */,
 				D4C5F4241A39F64E00CC6FB3 /* RZUser.m in Sources */,
 				D4C5F3FF1A39F5A100CC6FB3 /* main.m in Sources */,
+				D4AD92B51AD5784C00AA80D1 /* RZDBTransforms.m in Sources */,
 				D4B8C8A61A5C4A0700148F68 /* UIImage+RZColor.m in Sources */,
 				D4B8C8A31A5C47EC00148F68 /* UIColor+RZHexColor.m in Sources */,
+				D4AD92B31AD5784C00AA80D1 /* NSObject+RZDataBinding.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
