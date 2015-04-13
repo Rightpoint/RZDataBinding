@@ -70,14 +70,14 @@ static void* const MyKVOContext = (void *)&MyKVOContext;
 - (void)setupKVO
 {
     [self.user addObserver:self
-               forKeyPath:@"name"
-               options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
-               context:MyKVOContext]; 
+                forKeyPath:@"name"
+                   options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew
+                   context:MyKVOContext]; 
                   
     [self.user addObserver:self
-               forKeyPath:@"preferences"
-               options:kNilOptions
-               context:MyKVOContext];
+                forKeyPath:@"preferences"
+                   options:kNilOptions
+                   context:MyKVOContext];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath
@@ -111,12 +111,12 @@ static void* const MyKVOContext = (void *)&MyKVOContext;
 - (void)setupKVO
 {
     [self.user rz_addTarget:self 
-               action:@selector(nameChanged:) 
-               forKeyPathChange:@"name"];
+                     action:@selector(nameChanged:) 
+           forKeyPathChange:@"name"];
     
     [self.user rz_addTarget:self.collectionView 
-               action:@selector(reloadData) 
-               forKeyPathChange:@"preferences"];
+                     action:@selector(reloadData) 
+           forKeyPathChange:@"preferences"];
 }
 ```
 Aside from the obvious reduction in code, the RZDataBinding implementation demonstrates several other wins:
