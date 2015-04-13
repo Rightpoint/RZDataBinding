@@ -10,9 +10,6 @@
 
 #import "RZDataBinding.h"
 
-/**
- *  Change the base class to RZDBObservableObject to run tests with RZDB_AUTOMATIC_CLEANUP disabled
- */
 @interface RZDBTestObject : NSObject
 
 @property (copy, nonatomic) NSString *string;
@@ -42,6 +39,13 @@
     _string = [string copy];
     self.setStringCalls++;
 }
+
+#if !RZDB_AUTOMATIC_CLEANUP
+- (void)dealloc
+{
+    [self rz_cleanupObservers];
+}
+#endif
 
 @end
 

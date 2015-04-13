@@ -65,7 +65,6 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 - (void)rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath;
 - (void)rz_observeBoundKeyChange:(NSDictionary *)change;
 - (void)rz_setBoundKey:(NSString *)key withValue:(id)value transform:(RZDBKeyBindingTransform)transform;
-- (void)rz_cleanupObservers;
 
 @end
 
@@ -165,17 +164,6 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 - (void)rz_unbindKey:(NSString *)key fromKeyPath:(NSString *)foreignKeyPath ofObject:(id)object
 {
     [object rz_removeTarget:self action:@selector(rz_observeBoundKeyChange:) boundKey:key forKeyPath:foreignKeyPath];
-}
-
-@end
-
-#pragma mark - RZDBObservableObject implementation
-
-@implementation RZDBObservableObject
-
-- (void)dealloc
-{
-    [self rz_cleanupObservers];
 }
 
 @end
