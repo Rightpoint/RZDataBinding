@@ -55,13 +55,14 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
  *  If enabled, it is safe to observe or bind to weak references, and there is need to call rz_removeTarget
  *  or rz_unbindKey before targets or observed objects are deallocated. To achieve automatic cleanup,
  *  RZDB swizzles the dealloc method to ensure observers are properly invalidated. There are other ways of implementing similar
- *  behavior, but we found this to be both the safest and most reliable in production.
+ *  behavior, but this has been found to be both the safest and most reliable in production.
  *
  *  If set to 0 (not recommended), objects MUST remove themselves as targets and unbind their keys from any observed objects before being deallocated.
  *  Failure to do so will result in crashes (just like standard KVO). Additionally, you should not add a target to or bind keys to 
  *  objects without first establishing a strong reference. Otherwise, the foreign object might be deallocated before the observer, causing in a crash.
- *  If you choose to disable global automatic cleanup by setting this to 0, you may still use the RZDBObservableObject as a base class to enable
- *  class-specific automatic cleanup.
+ *  If you choose to disable global automatic cleanup by setting this to 0, you must cleanup observers manually.
+ *
+ *  @see rz_cleanupObservers
  */
 #ifndef RZDB_AUTOMATIC_CLEANUP
 #define RZDB_AUTOMATIC_CLEANUP 1
@@ -162,19 +163,18 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
  */
 - (void)rz_unbindKey:(NSString *)key fromKeyPath:(NSString *)foreignKeyPath ofObject:(id)object;
 
-@end
-
-#pragma mark - RZDBObservableObject interface
-
+#if !RZDB_AUTOMATIC_CLEANUP
 /**
- *  A base class that automatically cleans up the appropriate observers before being deallocated, replicating the behavior of RZDB_AUTOMATIC_CLEANUP.
- *  When adding targets or binding to RZDBObservableObject instances, it is not necessary to call rz_removeTarget or rz_unbindKey before
- *  either the target or observable object are deallocated.
+ *  Removes all callbacks and bindings both to and from the receiver.
+ *  This method essentially resets the receiver to a pristine state with respect to RZDataBinding.
  *
- *  @note If RZDB_AUTOMATIC_CLEANUP is enabled, there is no need to use this base class. Use of this base class is intended for users who wish to disable
- *  global automatic cleanup, but easily enable it for certain classes.
+ *  If RZDB_AUTOMATIC_CLEANUP is not enabled, you MUST call this method on any
+ *  observing or observed object it is deallocated. Failure to do so will result in a crash (just like standard KVO).
  *
- *  @see RZDB_AUTOMATIC_CLEANUP
+ *  @note This method breaks all bindings and callbacks on the receiver, including those created
+ *  by other clients. Therefore it is only safe to call this method from the receiver's dealloc method.
  */
-@interface RZDBObservableObject : NSObject
+- (void)rz_cleanupObservers;
+#endif
+
 @end
