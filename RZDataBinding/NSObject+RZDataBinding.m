@@ -127,9 +127,24 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 - (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths
 {
+    [self rz_addTarget:target action:action forKeyPathChanges:keyPaths callImmediately:NO];
+}
+
+- (void)rz_addTarget:(id)target action:(SEL)action forKeyPathChanges:(NSArray *)keyPaths callImmediately:(BOOL)callImmediately
+{
+    BOOL callMultiple = NO;
+
+    if ( callImmediately ) {
+        callMultiple = [target methodSignatureForSelector:action].numberOfArguments > 2;
+    }
+
     [keyPaths enumerateObjectsUsingBlock:^(NSString *keyPath, NSUInteger idx, BOOL *stop) {
-        [self rz_addTarget:target action:action forKeyPathChange:keyPath callImmediately:NO];
+        [self rz_addTarget:target action:action forKeyPathChange:keyPath callImmediately:callMultiple];
     }];
+
+    if ( callImmediately && !callMultiple ) {
+        ((void(*)(id, SEL))objc_msgSend)(target, action);
+    }
 }
 
 - (void)rz_removeTarget:(id)target action:(SEL)action forKeyPathChange:(NSString *)keyPath
