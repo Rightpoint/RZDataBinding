@@ -8,7 +8,7 @@
 
 #import "RZUser.h"
 
-#import "NSObject+RZDataBinding.h"
+#import "RZDataBinding.h"
 
 @interface RZUser ()
 

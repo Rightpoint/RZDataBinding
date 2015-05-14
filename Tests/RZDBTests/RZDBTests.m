@@ -6,13 +6,10 @@
 //
 
 @import XCTest;
+@import CoreGraphics.CGGeometry;
 
-#import "NSObject+RZDataBinding.h"
-#import "RZDBCoalesce.h"
+#import "RZDataBinding.h"
 
-/**
- *  Change the base class to RZDBObservableObject to run tests with RZDB_AUTOMATIC_CLEANUP disabled
- */
 @interface RZDBTestObject : NSObject
 
 @property (copy, nonatomic) NSString *string;
@@ -42,6 +39,13 @@
     _string = [string copy];
     self.setStringCalls++;
 }
+
+#if !RZDB_AUTOMATIC_CLEANUP
+- (void)dealloc
+{
+    [self rz_cleanupObservers];
+}
+#endif
 
 @end
 
@@ -103,11 +107,16 @@
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
     
-    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
+    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)] callImmediately:YES];
     
     testObj.string = @"test";
     testObj.callbackCalls = 0;
     
+    XCTAssertTrue(observer.callbackCalls == 3, @"Callback called incorrect number of times. Expected:2 Actual:%i", (int)observer.callbackCalls);
+
+    observer.callbackCalls = 0;
+    [testObj rz_addTarget:observer action:@selector(changeCallbackWithDict:) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)] callImmediately:YES];
+
     XCTAssertTrue(observer.callbackCalls == 2, @"Callback called incorrect number of times. Expected:2 Actual:%i", (int)observer.callbackCalls);
 }
 
@@ -118,11 +127,13 @@
 
     for ( NSUInteger i = 0; i < 500000; i++ ) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            if ( arc4random() % 2 == 0 ) {
-                [testObj rz_addTarget:observer action:@selector(testCallback) forKeyPathChange:RZDB_KP_OBJ(testObj, string)];
-            }
-            else {
-                [testObj rz_removeTarget:observer action:@selector(testCallback) forKeyPathChange:RZDB_KP_OBJ(testObj, string)];
+            @autoreleasepool {
+                if ( arc4random() % 2 == 0 ) {
+                    [testObj rz_addTarget:observer action:@selector(testCallback) forKeyPathChange:RZDB_KP_OBJ(testObj, string)];
+                }
+                else {
+                    [testObj rz_removeTarget:observer action:@selector(testCallback) forKeyPathChange:RZDB_KP_OBJ(testObj, string)];
+                }
             }
         });
     }
@@ -206,8 +217,11 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         [RZDBCoalesce begin];
         for ( NSUInteger i = 0; i < 5000; i++ ) {
-            RZDBTestObject *t = [testObjects objectAtIndex:arc4random() % testObjects.count];
-            t.string = @"New Value";
+            @autoreleasepool {
+                RZDBTestObject *t = [testObjects objectAtIndex:arc4random() % testObjects.count];
+                t.string = @"New Value";
+            }
+
         }
         [RZDBCoalesce commit];
 
@@ -255,18 +269,18 @@
     XCTAssertTrue(observer.setStringCalls == 2, @"Binding triggered incorrect number of times. Expected:2 Actual:%i", (int)observer.setStringCalls);
 }
 
-- (void)testKeyBindingWithFunction
+- (void)testKeyBindingWithTransform
 {
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
     
     testObj.callbackCalls = 5;
     
-    [observer rz_bindKey:RZDB_KP_OBJ(observer, callbackCalls) toKeyPath:RZDB_KP_OBJ(testObj, callbackCalls) ofObject:testObj withFunction:^id (id value) {
+    [observer rz_bindKey:RZDB_KP_OBJ(observer, callbackCalls) toKeyPath:RZDB_KP_OBJ(testObj, callbackCalls) ofObject:testObj withTransform:^id (id value) {
         return @([(NSNumber *)value integerValue] + 100);
     }];
     
-    XCTAssertTrue(observer.callbackCalls == 105, @"Key binding function was not properly applied before setting value for key when key path changed.");
+    XCTAssertTrue(observer.callbackCalls == 105, @"Key binding transform was not properly applied before setting value for key when key path changed.");
     
     [observer rz_unbindKey:RZDB_KP_OBJ(observer, callbackCalls) fromKeyPath:RZDB_KP_OBJ(testObj, callbackCalls) ofObject:testObj];
     testObj.callbackCalls = 100;
@@ -285,6 +299,48 @@
     obj1.string = @"test";
     
     XCTAssertTrue([obj3.string isEqualToString:obj2.string] && [obj2.string isEqualToString:obj1.string], @"Binding chain failed--values not equal");
+}
+
+- (void)testTransformConstants
+{
+    id value = nil;
+
+    value = kRZDBNilToZeroTransform(value);
+    XCTAssertTrue([value isEqual:@(0)]);
+
+    value = nil;
+    value = kRZDBNilToOneTransform(value);
+    XCTAssertTrue([value isEqual:@(1)]);
+
+    value = nil;
+    value = kRZDBNilToCGSizeZeroTransform(value);
+    CGSize size = CGSizeMake(1.0f, 1.0f);
+    [value getValue:&size];
+    XCTAssertTrue(CGSizeEqualToSize(size, CGSizeZero));
+
+    value = nil;
+    value = kRZDBNilToCGRectZeroTransform(value);
+    CGRect rect = CGRectMake(1.0f, 1.0f, 1.0f, 1.0f);
+    [value getValue:&rect];
+    XCTAssertTrue(CGRectEqualToRect(rect, CGRectZero));
+
+    value = nil;
+    value = kRZDBNilToCGRectNullTransform(value);
+    rect = CGRectMake(1.0f, 1.0f, 1.0f, 1.0f);
+    [value getValue:&rect];
+    XCTAssertTrue(CGRectIsNull(rect));
+
+    value = @(NO);
+    value = kRZDBLogicalNegateTransform(value);
+    XCTAssertTrue([value boolValue]);
+
+    value = @(0.25);
+    value = kRZDBOneMinusTransform(value);
+    XCTAssertTrue([value doubleValue] == 0.75);
+
+    value = @(0x1337);
+    value = kRZDBBitwiseComplementTransform(value);
+    XCTAssertTrue([value longLongValue] == ~0x1337);
 }
 
 - (void)testDeallocation
