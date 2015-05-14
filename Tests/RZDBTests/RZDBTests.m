@@ -107,11 +107,16 @@
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
     
-    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)]];
+    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)] callImmediately:YES];
     
     testObj.string = @"test";
     testObj.callbackCalls = 0;
     
+    XCTAssertTrue(observer.callbackCalls == 3, @"Callback called incorrect number of times. Expected:2 Actual:%i", (int)observer.callbackCalls);
+
+    observer.callbackCalls = 0;
+    [testObj rz_addTarget:observer action:@selector(changeCallbackWithDict:) forKeyPathChanges:@[RZDB_KP_OBJ(testObj, string), RZDB_KP_OBJ(testObj, callbackCalls)] callImmediately:YES];
+
     XCTAssertTrue(observer.callbackCalls == 2, @"Callback called incorrect number of times. Expected:2 Actual:%i", (int)observer.callbackCalls);
 }
 
