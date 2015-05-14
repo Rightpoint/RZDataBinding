@@ -116,7 +116,11 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
     NSParameterAssert(target);
     NSParameterAssert(action);
 
-    NSKeyValueObservingOptions observationOptions = NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld;
+    NSKeyValueObservingOptions observationOptions = kNilOptions;
+
+    if ( [target methodSignatureForSelector:action].numberOfArguments > 2 ) {
+        observationOptions |= NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld;
+    }
 
     if ( callImmediately ) {
         observationOptions |= NSKeyValueObservingOptionInitial;
@@ -157,7 +161,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
             [NSException raise:NSInvalidArgumentException format:@"RZDataBinding cannot bind key:%@ to key path:%@ of object:%@. Reason: %@", key, foreignKeyPath, [object description], exception.reason];
         }
         
-        [object rz_addTarget:self action:@selector(rz_observeBoundKeyChange:) boundKey:key bindingTransform:bindingTransform forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew | NSKeyValueObservingOptionOld];
+        [object rz_addTarget:self action:@selector(rz_observeBoundKeyChange:) boundKey:key bindingTransform:bindingTransform forKeyPath:foreignKeyPath withOptions:NSKeyValueObservingOptionNew];
     }
 }
 
