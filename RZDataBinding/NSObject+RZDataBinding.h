@@ -52,7 +52,7 @@ OBJC_EXTERN NSString* const kRZDBChangeKeyKeyPath;
 
 /**
  *  Set this to 1 (recommended) to enable automatic cleanup of observers on object deallocation.
- *  If enabled, it is safe to observe or bind to weak references, and there is need to call rz_removeTarget
+ *  If enabled, it is safe to observe or bind to weak references, and there is no need to call rz_removeTarget
  *  or rz_unbindKey before targets or observed objects are deallocated. To achieve automatic cleanup,
  *  RZDB swizzles the dealloc method to ensure observers are properly invalidated. There are other ways of implementing similar
  *  behavior, but this has been found to be both the safest and most reliable in production.
