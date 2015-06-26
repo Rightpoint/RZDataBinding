@@ -303,31 +303,20 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 }
 
 #if RZDB_AUTOMATIC_CLEANUP
-static SEL kRZDBDefautDeallocSelector;
 + (void)load
 {
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         @autoreleasepool {
-            SEL selector = NSSelectorFromString(@"dealloc");
-            SEL replacementSelector = @selector(rz_dealloc);
-            
-            Method originalMethod = class_getInstanceMethod(self, selector);
-            Method replacementMethod = class_getInstanceMethod(self, replacementSelector);
-            
-            kRZDBDefautDeallocSelector = NSSelectorFromString([NSString stringWithFormat:@"%@%@", kRZDBDefaultSelectorPrefix, NSStringFromSelector(selector)]);
-            
-            class_addMethod(self, kRZDBDefautDeallocSelector, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod));
-            class_replaceMethod(self, selector, method_getImplementation(replacementMethod), method_getTypeEncoding(replacementMethod));
+            SEL deallocSEL = sel_getUid("dealloc");
+
+            __block IMP deallocIMP = NULL;
+            deallocIMP = method_setImplementation(class_getInstanceMethod(self, deallocSEL), imp_implementationWithBlock(^(__unsafe_unretained id self) {
+                [self rz_cleanupObservers];
+                ((void(*)(id, SEL))deallocIMP)(self, deallocSEL);
+            }));
         }
     });
-}
-
-- (void)rz_dealloc
-{
-    [self rz_cleanupObservers];
-    
-    ((void(*)(id, SEL))objc_msgSend)(self, kRZDBDefautDeallocSelector);
 }
 #endif
 
