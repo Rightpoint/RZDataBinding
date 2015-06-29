@@ -151,7 +151,7 @@ static void rz_swizzleDeallocIfNeeded(Class class)
 
 @interface RZDBObserverContainer : NSObject
 
-@property (strong, nonatomic) NSPointerArray *observers;
+@property (strong, nonatomic) NSHashTable *observers;
 
 - (void)addObserver:(RZDBObserver *)observer;
 - (void)removeObserver:(RZDBObserver *)observer;
@@ -357,7 +357,6 @@ static void rz_swizzleDeallocIfNeeded(Class class)
         [obs invalidate];
     }];
 
-    [dependentObservers.observers compact];
     [[dependentObservers.observers allObjects] enumerateObjectsUsingBlock:^(RZDBObserver *obs, NSUInteger idx, BOOL *stop) {
         [obs invalidate];
     }];
@@ -468,7 +467,7 @@ static void rz_swizzleDeallocIfNeeded(Class class)
 {
     self = [super init];
     if ( self != nil ) {
-        _observers = [NSPointerArray pointerArrayWithOptions:(NSPointerFunctionsWeakMemory | NSPointerFunctionsOpaquePersonality)];
+        _observers = [NSHashTable weakObjectsHashTable];
     }
     return self;
 }
@@ -476,20 +475,14 @@ static void rz_swizzleDeallocIfNeeded(Class class)
 - (void)addObserver:(RZDBObserver *)observer
 {
     @synchronized (self) {
-        [self.observers addPointer:(__bridge void *)(observer)];
+        [self.observers addObject:observer];
     }
 }
 
 - (void)removeObserver:(RZDBObserver *)observer
 {
     @synchronized (self) {
-        NSUInteger observerIndex = [[self.observers allObjects] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-            return obj == observer;
-        }];
-
-        if ( observerIndex != NSNotFound ) {
-            [self.observers removePointerAtIndex:observerIndex];
-        }
+        [self.observers removeObject:observer];
     }
 }
 
