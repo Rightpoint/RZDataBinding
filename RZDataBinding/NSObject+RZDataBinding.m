@@ -45,7 +45,7 @@ NSString* const kRZDBChangeKeyKeyPath = @"RZDBChangeKeyPath";
 static NSString* const kRZDBChangeKeyBoundKey            = @"_RZDBChangeBoundKey";
 static NSString* const kRZDBChangeKeyBindingTransformKey = @"_RZDBChangeBindingTransform";
 
-static NSString* const kRZDBDefaultSelectorPrefix = @"rzdb_default_";
+static void* const kRZDBSwizzledDeallocKey = (void *)&kRZDBSwizzledDeallocKey;
 
 static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
@@ -53,57 +53,63 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 #pragma mark - RZDataBinding_Private interface
 
+static BOOL rz_requiresDeallocSwizzle(Class class)
+{
+    BOOL swizzled = NO;
+
+    for ( Class currentClass = class; !swizzled && currentClass != nil; currentClass = class_getSuperclass(currentClass) ) {
+        swizzled = [objc_getAssociatedObject(currentClass, kRZDBSwizzledDeallocKey) boolValue];
+    }
+
+    return !swizzled;
+}
+
 static void rz_swizzleDeallocIfNeeded(Class class)
 {
-    static void* const kRZDBSwizzledDeallocKey = (void *)&kRZDBSwizzledDeallocKey;
-
     static SEL deallocSEL = NULL;
     static SEL cleanupSEL = NULL;
-    static SEL replacementSEL = NULL;
 
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         deallocSEL = sel_getUid("dealloc");
         cleanupSEL = sel_getUid("rz_cleanupObservers");
-        replacementSEL = sel_getUid("rzdb_dealloc");
     });
 
     @synchronized (class) {
-        if ( [objc_getAssociatedObject(class, kRZDBSwizzledDeallocKey) boolValue] ) {
+        if ( !rz_requiresDeallocSwizzle(class) ) {
             // dealloc swizzling already resolved
             return;
         }
 
         objc_setAssociatedObject(class, kRZDBSwizzledDeallocKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
 
-        Method dealloc = NULL;
+    Method dealloc = NULL;
 
-        // search instance methods of the class (does not search superclass methods)
-        unsigned int n;
-        Method *methods = class_copyMethodList(class, &n);
+    // search instance methods of the class (does not search superclass methods)
+    unsigned int n;
+    Method *methods = class_copyMethodList(class, &n);
 
-        for ( unsigned int i = 0; i < n; i++ ) {
-            if ( method_getName(methods[i]) == deallocSEL ) {
-                dealloc = methods[i];
-            }
+    for ( unsigned int i = 0; i < n; i++ ) {
+        if ( method_getName(methods[i]) == deallocSEL ) {
+            dealloc = methods[i];
         }
+    }
 
-        free(methods);
+    free(methods);
 
-        if ( dealloc == NULL ) {
-            // implement dealloc directly
-            class_addMethod(class, deallocSEL, imp_implementationWithBlock(^(__unsafe_unretained id self) {
-                ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
-            }), method_getTypeEncoding(dealloc));
-        }
-        else {
-            // extending existing dealloc implementation
-            __block IMP deallocIMP = NULL;
-            deallocIMP = method_setImplementation(dealloc, imp_implementationWithBlock(^(__unsafe_unretained id self) {
-                ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
-                ((void(*)(id, SEL))deallocIMP)(self, deallocSEL);
-            }));
-        }
+    if ( dealloc == NULL ) {
+        // implement dealloc directly
+        class_addMethod(class, deallocSEL, imp_implementationWithBlock(^(__unsafe_unretained id self) {
+            ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
+        }), method_getTypeEncoding(dealloc));
+    }
+    else {
+        // extending existing dealloc implementation
+        __block IMP deallocIMP = method_setImplementation(dealloc, imp_implementationWithBlock(^(__unsafe_unretained id self) {
+            ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
+            ((void(*)(id, SEL))deallocIMP)(self, deallocSEL);
+        }));
     }
 }
 
