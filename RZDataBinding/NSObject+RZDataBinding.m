@@ -90,19 +90,17 @@ static void rz_swizzleDeallocIfNeeded(Class class)
 
         free(methods);
 
-        IMP cleanupIMP = method_getImplementation(class_getInstanceMethod(class, cleanupSEL));
-
         if ( dealloc == NULL ) {
             // implement dealloc directly
             class_addMethod(class, deallocSEL, imp_implementationWithBlock(^(__unsafe_unretained id self) {
-                ((void(*)(id, SEL))cleanupIMP)(self, cleanupSEL);
+                ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
             }), method_getTypeEncoding(dealloc));
         }
         else {
             // extending existing dealloc implementation
             __block IMP deallocIMP = NULL;
             deallocIMP = method_setImplementation(dealloc, imp_implementationWithBlock(^(__unsafe_unretained id self) {
-                ((void(*)(id, SEL))cleanupIMP)(self, cleanupSEL);
+                ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
                 ((void(*)(id, SEL))deallocIMP)(self, deallocSEL);
             }));
         }
