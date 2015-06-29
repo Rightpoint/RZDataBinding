@@ -53,6 +53,62 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 #pragma mark - RZDataBinding_Private interface
 
+static void rz_swizzleDeallocIfNeeded(Class class)
+{
+    static void* const kRZDBSwizzledDeallocKey = (void *)&kRZDBSwizzledDeallocKey;
+
+    static SEL deallocSEL = NULL;
+    static SEL cleanupSEL = NULL;
+    static SEL replacementSEL = NULL;
+
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        deallocSEL = sel_getUid("dealloc");
+        cleanupSEL = sel_getUid("rz_cleanupObservers");
+        replacementSEL = sel_getUid("rzdb_dealloc");
+    });
+
+    @synchronized (class) {
+        if ( [objc_getAssociatedObject(class, kRZDBSwizzledDeallocKey) boolValue] ) {
+            // dealloc swizzling already resolved
+            return;
+        }
+
+        objc_setAssociatedObject(class, kRZDBSwizzledDeallocKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+
+        Method dealloc = NULL;
+
+        // search instance methods of the class (does not search superclass methods)
+        unsigned int n;
+        Method *methods = class_copyMethodList(class, &n);
+
+        for ( unsigned int i = 0; i < n; i++ ) {
+            if ( method_getName(methods[i]) == deallocSEL ) {
+                dealloc = methods[i];
+            }
+        }
+
+        free(methods);
+
+        IMP cleanupIMP = method_getImplementation(class_getInstanceMethod(class, cleanupSEL));
+
+        if ( dealloc == NULL ) {
+            // implement dealloc directly
+            class_addMethod(class, deallocSEL, imp_implementationWithBlock(^(__unsafe_unretained id self) {
+                ((void(*)(id, SEL))cleanupIMP)(self, cleanupSEL);
+            }), method_getTypeEncoding(dealloc));
+        }
+        else {
+            // extending existing dealloc implementation
+            __block IMP deallocIMP = NULL;
+            deallocIMP = method_setImplementation(dealloc, imp_implementationWithBlock(^(__unsafe_unretained id self) {
+                ((void(*)(id, SEL))cleanupIMP)(self, cleanupSEL);
+                ((void(*)(id, SEL))deallocIMP)(self, deallocSEL);
+            }));
+        }
+    }
+}
+
 @interface NSObject (RZDataBinding_Private)
 
 - (NSMutableArray *)rz_registeredObservers;
@@ -241,6 +297,11 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
         [dependentObservers addObserver:observer];
     }
+
+#if RZDB_AUTOMATIC_CLEANUP
+    rz_swizzleDeallocIfNeeded([self class]);
+    rz_swizzleDeallocIfNeeded([target class]);
+#endif
 }
 
 - (void)rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath
@@ -301,24 +362,6 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         [obs invalidate];
     }];
 }
-
-#if RZDB_AUTOMATIC_CLEANUP
-+ (void)load
-{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        @autoreleasepool {
-            SEL deallocSEL = sel_getUid("dealloc");
-
-            __block IMP deallocIMP = NULL;
-            deallocIMP = method_setImplementation(class_getInstanceMethod(self, deallocSEL), imp_implementationWithBlock(^(__unsafe_unretained id self) {
-                [self rz_cleanupObservers];
-                ((void(*)(id, SEL))deallocIMP)(self, deallocSEL);
-            }));
-        }
-    });
-}
-#endif
 
 @end
 
