@@ -256,6 +256,11 @@ static NSString* const kRZDBCoalesceStorageKey = @"RZDBCoalesce";
     return proxy;
 }
 
+- (Class)class
+{
+    return [self.representedObject class];
+}
+
 - (NSMethodSignature *)methodSignatureForSelector:(SEL)sel
 {
     return [self.representedObject methodSignatureForSelector:sel];
@@ -281,6 +286,11 @@ static NSString* const kRZDBCoalesceStorageKey = @"RZDBCoalesce";
     else {
         [invocation invoke];
     }
+}
+
+- (void)doesNotRecognizeSelector:(SEL)aSelector
+{
+    [self.representedObject doesNotRecognizeSelector:aSelector];
 }
 
 @end
