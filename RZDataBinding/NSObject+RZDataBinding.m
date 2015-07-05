@@ -45,13 +45,81 @@ NSString* const kRZDBChangeKeyKeyPath = @"RZDBChangeKeyPath";
 static NSString* const kRZDBChangeKeyBoundKey            = @"_RZDBChangeBoundKey";
 static NSString* const kRZDBChangeKeyBindingTransformKey = @"_RZDBChangeBindingTransform";
 
-static NSString* const kRZDBDefaultSelectorPrefix = @"rzdb_default_";
+static void* const kRZDBSwizzledDeallocKey = (void *)&kRZDBSwizzledDeallocKey;
 
 static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 #define RZDBNotNull(obj) ((obj) != nil && ![(obj) isEqual:[NSNull null]])
 
 #pragma mark - RZDataBinding_Private interface
+
+static BOOL rz_requiresDeallocSwizzle(Class class)
+{
+    BOOL swizzled = NO;
+
+    for ( Class currentClass = class; !swizzled && currentClass != nil; currentClass = class_getSuperclass(currentClass) ) {
+        swizzled = [objc_getAssociatedObject(currentClass, kRZDBSwizzledDeallocKey) boolValue];
+    }
+
+    return !swizzled;
+}
+
+static void rz_swizzleDeallocIfNeeded(Class class)
+{
+    static SEL deallocSEL = NULL;
+    static SEL cleanupSEL = NULL;
+
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        deallocSEL = sel_getUid("dealloc");
+        cleanupSEL = sel_getUid("rz_cleanupObservers");
+    });
+
+    @synchronized (class) {
+        if ( !rz_requiresDeallocSwizzle(class) ) {
+            // dealloc swizzling already resolved
+            return;
+        }
+
+        objc_setAssociatedObject(class, kRZDBSwizzledDeallocKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+
+    Method dealloc = NULL;
+
+    // search instance methods of the class (does not search superclass methods)
+    unsigned int n;
+    Method *methods = class_copyMethodList(class, &n);
+
+    for ( unsigned int i = 0; i < n; i++ ) {
+        if ( method_getName(methods[i]) == deallocSEL ) {
+            dealloc = methods[i];
+        }
+    }
+
+    free(methods);
+
+    if ( dealloc == NULL ) {
+        Class superclass = class_getSuperclass(class);
+
+        // implement dealloc directly
+        class_addMethod(class, deallocSEL, imp_implementationWithBlock(^(__unsafe_unretained id self) {
+            
+            ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
+
+            // call through to super
+            struct objc_super superStruct = (struct objc_super){ self, superclass };
+            ((void (*)(struct objc_super*, SEL))objc_msgSendSuper)(&superStruct, deallocSEL);
+
+        }), method_getTypeEncoding(dealloc));
+    }
+    else {
+        // extending existing dealloc implementation
+        __block IMP deallocIMP = method_setImplementation(dealloc, imp_implementationWithBlock(^(__unsafe_unretained id self) {
+            ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
+            ((void(*)(id, SEL))deallocIMP)(self, deallocSEL);
+        }));
+    }
+}
 
 @interface NSObject (RZDataBinding_Private)
 
@@ -95,7 +163,7 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 @interface RZDBObserverContainer : NSObject
 
-@property (strong, nonatomic) NSPointerArray *observers;
+@property (strong, nonatomic) NSHashTable *observers;
 
 - (void)addObserver:(RZDBObserver *)observer;
 - (void)removeObserver:(RZDBObserver *)observer;
@@ -241,6 +309,11 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
         [dependentObservers addObserver:observer];
     }
+
+#if RZDB_AUTOMATIC_CLEANUP
+    rz_swizzleDeallocIfNeeded([self class]);
+    rz_swizzleDeallocIfNeeded([target class]);
+#endif
 }
 
 - (void)rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath
@@ -296,40 +369,10 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
         [obs invalidate];
     }];
 
-    [dependentObservers.observers compact];
     [[dependentObservers.observers allObjects] enumerateObjectsUsingBlock:^(RZDBObserver *obs, NSUInteger idx, BOOL *stop) {
         [obs invalidate];
     }];
 }
-
-#if RZDB_AUTOMATIC_CLEANUP
-static SEL kRZDBDefautDeallocSelector;
-+ (void)load
-{
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        @autoreleasepool {
-            SEL selector = NSSelectorFromString(@"dealloc");
-            SEL replacementSelector = @selector(rz_dealloc);
-            
-            Method originalMethod = class_getInstanceMethod(self, selector);
-            Method replacementMethod = class_getInstanceMethod(self, replacementSelector);
-            
-            kRZDBDefautDeallocSelector = NSSelectorFromString([NSString stringWithFormat:@"%@%@", kRZDBDefaultSelectorPrefix, NSStringFromSelector(selector)]);
-            
-            class_addMethod(self, kRZDBDefautDeallocSelector, method_getImplementation(originalMethod), method_getTypeEncoding(originalMethod));
-            class_replaceMethod(self, selector, method_getImplementation(replacementMethod), method_getTypeEncoding(replacementMethod));
-        }
-    });
-}
-
-- (void)rz_dealloc
-{
-    [self rz_cleanupObservers];
-    
-    ((void(*)(id, SEL))objc_msgSend)(self, kRZDBDefautDeallocSelector);
-}
-#endif
 
 @end
 
@@ -436,7 +479,7 @@ static SEL kRZDBDefautDeallocSelector;
 {
     self = [super init];
     if ( self != nil ) {
-        _observers = [NSPointerArray pointerArrayWithOptions:(NSPointerFunctionsWeakMemory | NSPointerFunctionsOpaquePersonality)];
+        _observers = [NSHashTable weakObjectsHashTable];
     }
     return self;
 }
@@ -444,20 +487,14 @@ static SEL kRZDBDefautDeallocSelector;
 - (void)addObserver:(RZDBObserver *)observer
 {
     @synchronized (self) {
-        [self.observers addPointer:(__bridge void *)(observer)];
+        [self.observers addObject:observer];
     }
 }
 
 - (void)removeObserver:(RZDBObserver *)observer
 {
     @synchronized (self) {
-        NSUInteger observerIndex = [[self.observers allObjects] indexOfObjectPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-            return obj == observer;
-        }];
-
-        if ( observerIndex != NSNotFound ) {
-            [self.observers removePointerAtIndex:observerIndex];
-        }
+        [self.observers removeObject:observer];
     }
 }
 
