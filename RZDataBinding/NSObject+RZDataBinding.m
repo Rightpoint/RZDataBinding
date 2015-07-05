@@ -99,9 +99,17 @@ static void rz_swizzleDeallocIfNeeded(Class class)
     free(methods);
 
     if ( dealloc == NULL ) {
+        Class superclass = class_getSuperclass(class);
+
         // implement dealloc directly
         class_addMethod(class, deallocSEL, imp_implementationWithBlock(^(__unsafe_unretained id self) {
+            
             ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
+
+            // call through to super
+            struct objc_super superStruct = (struct objc_super){ self, superclass };
+            ((void (*)(struct objc_super*, SEL))objc_msgSendSuper)(&superStruct, deallocSEL);
+
         }), method_getTypeEncoding(dealloc));
     }
     else {
