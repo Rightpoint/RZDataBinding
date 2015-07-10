@@ -53,73 +53,9 @@ static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
 #pragma mark - RZDataBinding_Private interface
 
-static BOOL rz_requiresDeallocSwizzle(Class class)
-{
-    BOOL swizzled = NO;
-
-    for ( Class currentClass = class; !swizzled && currentClass != nil; currentClass = class_getSuperclass(currentClass) ) {
-        swizzled = [objc_getAssociatedObject(currentClass, kRZDBSwizzledDeallocKey) boolValue];
-    }
-
-    return !swizzled;
-}
-
-static void rz_swizzleDeallocIfNeeded(Class class)
-{
-    static SEL deallocSEL = NULL;
-    static SEL cleanupSEL = NULL;
-
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        deallocSEL = sel_getUid("dealloc");
-        cleanupSEL = sel_getUid("rz_cleanupObservers");
-    });
-
-    @synchronized (class) {
-        if ( !rz_requiresDeallocSwizzle(class) ) {
-            // dealloc swizzling already resolved
-            return;
-        }
-
-        objc_setAssociatedObject(class, kRZDBSwizzledDeallocKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-    }
-
-    Method dealloc = NULL;
-
-    // search instance methods of the class (does not search superclass methods)
-    unsigned int n;
-    Method *methods = class_copyMethodList(class, &n);
-
-    for ( unsigned int i = 0; i < n; i++ ) {
-        if ( method_getName(methods[i]) == deallocSEL ) {
-            dealloc = methods[i];
-        }
-    }
-
-    free(methods);
-
-    if ( dealloc == NULL ) {
-        Class superclass = class_getSuperclass(class);
-
-        // implement dealloc directly
-        class_addMethod(class, deallocSEL, imp_implementationWithBlock(^(__unsafe_unretained id self) {
-            
-            ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
-
-            // call through to super
-            struct objc_super superStruct = (struct objc_super){ self, superclass };
-            ((void (*)(struct objc_super*, SEL))objc_msgSendSuper)(&superStruct, deallocSEL);
-
-        }), method_getTypeEncoding(dealloc));
-    }
-    else {
-        // extending existing dealloc implementation
-        __block IMP deallocIMP = method_setImplementation(dealloc, imp_implementationWithBlock(^(__unsafe_unretained id self) {
-            ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
-            ((void(*)(id, SEL))deallocIMP)(self, deallocSEL);
-        }));
-    }
-}
+// methods used to implement RZDB_AUTOMATIC_CLEANUP
+BOOL rz_requiresDeallocSwizzle(Class class);
+void rz_swizzleDeallocIfNeeded(Class class);
 
 @interface NSObject (RZDataBinding_Private)
 
@@ -499,3 +435,81 @@ static void rz_swizzleDeallocIfNeeded(Class class)
 }
 
 @end
+
+// a class doesn't need dealloc swizzled if it or a superclass has been swizzled already
+BOOL rz_requiresDeallocSwizzle(Class class)
+{
+    BOOL swizzled = NO;
+
+    for ( Class currentClass = class; !swizzled && currentClass != nil; currentClass = class_getSuperclass(currentClass) ) {
+        swizzled = [objc_getAssociatedObject(currentClass, kRZDBSwizzledDeallocKey) boolValue];
+    }
+
+    return !swizzled;
+}
+
+// In order for automatic cleanup to work, observers must be removed before deallocation.
+// This method ensures that rz_cleanupObservers is called in the dealloc of classes of objects
+// that are used in RZDataBinding.
+void rz_swizzleDeallocIfNeeded(Class class)
+{
+    static SEL deallocSEL = NULL;
+    static SEL cleanupSEL = NULL;
+
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        deallocSEL = sel_getUid("dealloc");
+        cleanupSEL = sel_getUid("rz_cleanupObservers");
+    });
+
+    @synchronized (class) {
+        if ( !rz_requiresDeallocSwizzle(class) ) {
+            // dealloc swizzling already resolved
+            return;
+        }
+
+        objc_setAssociatedObject(class, kRZDBSwizzledDeallocKey, @(YES), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    }
+
+    Method dealloc = NULL;
+
+    // search instance methods of the class (does not search superclass methods)
+    unsigned int n;
+    Method *methods = class_copyMethodList(class, &n);
+
+    for ( unsigned int i = 0; i < n; i++ ) {
+        if ( method_getName(methods[i]) == deallocSEL ) {
+            dealloc = methods[i];
+            break;
+        }
+    }
+
+    free(methods);
+
+    if ( dealloc == NULL ) {
+        Class superclass = class_getSuperclass(class);
+
+        // class does not implement dealloc, so implement it directly
+        class_addMethod(class, deallocSEL, imp_implementationWithBlock(^(__unsafe_unretained id self) {
+
+            // cleanup RZDB observers
+            ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
+
+            // ARC automatically calls super when dealloc is implemented in code,
+            // but when provided our own dealloc IMP we have to call through to super manually
+            struct objc_super superStruct = (struct objc_super){ self, superclass };
+            ((void (*)(struct objc_super*, SEL))objc_msgSendSuper)(&superStruct, deallocSEL);
+
+        }), method_getTypeEncoding(dealloc));
+    }
+    else {
+        // class implements dealloc, so extend the existing implementation
+        __block IMP deallocIMP = method_setImplementation(dealloc, imp_implementationWithBlock(^(__unsafe_unretained id self) {
+            // cleanup RZDB observers
+            ((void(*)(id, SEL))objc_msgSend)(self, cleanupSEL);
+
+            // invoke the original dealloc IMP
+            ((void(*)(id, SEL))deallocIMP)(self, deallocSEL);
+        }));
+    }
+}
