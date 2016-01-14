@@ -73,9 +73,16 @@ __typeof(object) _rzdb_keypath_obj; \
 __unused __typeof(_rzdb_keypath_obj.keypath) _rzdb_keypath_prop; \
 @#keypath; \
 })
+
+#define RZDB_KP_PROTOCOL(ProtocolName, keypath) ({\
+id<ProtocolName> _rzdb_keypath_obj; \
+__unused __typeof(_rzdb_keypath_obj.keypath) _rzdb_keypath_prop; \
+@#keypath; \
+})
 #else
 #define RZDB_KP(Classname, keypath) (@#keypath)
 #define RZDB_KP_OBJ(self, keypath) (@#keypath)
+#define RZDB_KP_PROTOCOL(ProtocolName, keypath) (@#keypath)
 #endif
 
 /**
