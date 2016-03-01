@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "RZDataBinding"
-  s.version          = "2.0.2"
+  s.version          = "2.0.3"
   s.summary          = "KVO extensions that help maintain data integrity in your iOS or OSX app"
   s.description      = <<-DESC
                        Add callbacks when key paths of objects change, or bind values of two objects together either directly or using a function. Automatically cleanup before deallocation to avoid those nasty KVO observation info leaks.
