@@ -49,7 +49,16 @@ static void* const kRZDBSwizzledDeallocKey = (void *)&kRZDBSwizzledDeallocKey;
 
 static void* const kRZDBKVOContext = (void *)&kRZDBKVOContext;
 
+static void* const kRZDBRegisteredObserversKey = (void *)&kRZDBRegisteredObserversKey;
+static void* const kRZDBDependentObserversKey = (void *)&kRZDBDependentObserversKey;
+
 #define RZDBNotNull(obj) ((obj) != nil && ![(obj) isEqual:[NSNull null]])
+
+#define rz_registeredObservers(obj) objc_getAssociatedObject(obj, kRZDBRegisteredObserversKey)
+#define rz_setRegisteredObservers(obj, observers) objc_setAssociatedObject(obj, kRZDBRegisteredObserversKey, observers, OBJC_ASSOCIATION_RETAIN);
+
+#define rz_dependentObservers(obj) objc_getAssociatedObject(obj, kRZDBDependentObserversKey)
+#define rz_setDependentObservers(obj, observers) objc_setAssociatedObject(obj, kRZDBDependentObserversKey, observers, OBJC_ASSOCIATION_RETAIN);
 
 #pragma mark - RZDataBinding_Private interface
 
@@ -58,12 +67,6 @@ BOOL rz_requiresDeallocSwizzle(Class class);
 void rz_swizzleDeallocIfNeeded(Class class);
 
 @interface NSObject (RZDataBinding_Private)
-
-- (NSMutableArray *)rz_registeredObservers;
-- (void)rz_setRegisteredObservers:(NSMutableArray *)registeredObservers;
-
-- (RZDBObserverContainer *)rz_dependentObservers;
-- (void)rz_setDependentObservers:(RZDBObserverContainer *)dependentObservers;
 
 - (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingTransform:(RZDBKeyBindingTransform)bindingTransform forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options;
 - (void)rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath;
@@ -99,10 +102,13 @@ void rz_swizzleDeallocIfNeeded(Class class);
 
 @interface RZDBObserverContainer : NSObject
 
-@property (strong, nonatomic) NSHashTable *observers;
++ (instancetype)strongContainer;
++ (instancetype)weakContainer;
 
 - (void)addObserver:(RZDBObserver *)observer;
 - (void)removeObserver:(RZDBObserver *)observer;
+
+- (void)enumerateObserversUsingBlock:(void (^)(RZDBObserver *observer, BOOL *stop))block;
 
 @end
 
@@ -195,29 +201,9 @@ void rz_swizzleDeallocIfNeeded(Class class);
 
 @implementation NSObject (RZDataBinding_Private)
 
-- (NSMutableArray *)rz_registeredObservers
-{
-    return objc_getAssociatedObject(self, @selector(rz_registeredObservers));
-}
-
-- (void)rz_setRegisteredObservers:(NSMutableArray *)registeredObservers
-{
-    objc_setAssociatedObject(self, @selector(rz_registeredObservers), registeredObservers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
-- (RZDBObserverContainer *)rz_dependentObservers
-{
-    return objc_getAssociatedObject(self, @selector(rz_dependentObservers));
-}
-
-- (void)rz_setDependentObservers:(RZDBObserverContainer *)dependentObservers
-{
-    objc_setAssociatedObject(self, @selector(rz_dependentObservers), dependentObservers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
 - (void)rz_addTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey bindingTransform:(RZDBKeyBindingTransform)bindingTransform forKeyPath:(NSString *)keyPath withOptions:(NSKeyValueObservingOptions)options
 {
-    NSMutableArray *registeredObservers = nil;
+    RZDBObserverContainer *registeredObservers = nil;
     RZDBObserverContainer *dependentObservers = nil;
 
     RZDBObserver *observer = [[RZDBObserver alloc] initWithObservedObject:self keyPath:keyPath observationOptions:options];
@@ -225,22 +211,22 @@ void rz_swizzleDeallocIfNeeded(Class class);
     [observer setTarget:target action:action boundKey:boundKey bindingTransform:bindingTransform];
 
     @synchronized (self) {
-        registeredObservers = [self rz_registeredObservers];
+        registeredObservers = rz_registeredObservers(self);
 
         if ( registeredObservers == nil ) {
-            registeredObservers = [NSMutableArray array];
-            [self rz_setRegisteredObservers:registeredObservers];
+            registeredObservers = [RZDBObserverContainer strongContainer];
+            rz_setRegisteredObservers(self, registeredObservers);
         }
 
-        [registeredObservers addObject:observer];
+        [registeredObservers addObserver:observer];
     }
 
     @synchronized (target) {
-        dependentObservers = [target rz_dependentObservers];
+        dependentObservers = rz_dependentObservers(target);
 
         if ( dependentObservers == nil ) {
-            dependentObservers = [[RZDBObserverContainer alloc] init];
-            [target rz_setDependentObservers:dependentObservers];
+            dependentObservers = [RZDBObserverContainer weakContainer];
+            rz_setDependentObservers(target, dependentObservers);
         }
 
         [dependentObservers addObserver:observer];
@@ -254,22 +240,18 @@ void rz_swizzleDeallocIfNeeded(Class class);
 
 - (void)rz_removeTarget:(id)target action:(SEL)action boundKey:(NSString *)boundKey forKeyPath:(NSString *)keyPath
 {
-    @synchronized (self) {
-        NSMutableArray *registeredObservers = [self rz_registeredObservers];
+    [rz_registeredObservers(self) enumerateObserversUsingBlock:^(RZDBObserver *observer, BOOL *stop) {
+        BOOL targetsEqual   = (target == observer.target);
+        BOOL actionsEqual   = (action == NULL || action == observer.action);
+        BOOL boundKeysEqual = (boundKey == observer.boundKey || [boundKey isEqualToString:observer.boundKey]);
+        BOOL keyPathsEqual  = [keyPath isEqualToString:observer.keyPath];
 
-        [registeredObservers enumerateObjectsUsingBlock:^(RZDBObserver *observer, NSUInteger idx, BOOL *stop) {
-            BOOL targetsEqual   = (target == observer.target);
-            BOOL actionsEqual   = (action == NULL || action == observer.action);
-            BOOL boundKeysEqual = (boundKey == observer.boundKey || [boundKey isEqualToString:observer.boundKey]);
-            BOOL keyPathsEqual  = [keyPath isEqualToString:observer.keyPath];
+        BOOL allEqual = (targetsEqual && actionsEqual && boundKeysEqual && keyPathsEqual);
 
-            BOOL allEqual = (targetsEqual && actionsEqual && boundKeysEqual && keyPathsEqual);
-
-            if ( allEqual ) {
-                [observer invalidate];
-            }
-        }];
-    }
+        if ( allEqual ) {
+            [observer invalidate];
+        }
+    }];
 }
 
 - (void)rz_observeBoundKeyChange:(NSDictionary *)change
@@ -298,14 +280,11 @@ void rz_swizzleDeallocIfNeeded(Class class);
 
 - (void)rz_cleanupObservers
 {
-    NSMutableArray *registeredObservers = [self rz_registeredObservers];
-    RZDBObserverContainer *dependentObservers = [self rz_dependentObservers];
-
-    [[registeredObservers copy] enumerateObjectsUsingBlock:^(RZDBObserver *obs, NSUInteger idx, BOOL *stop) {
+    [rz_registeredObservers(self) enumerateObserversUsingBlock:^(RZDBObserver *obs, BOOL *stop) {
         [obs invalidate];
     }];
 
-    [[dependentObservers.observers allObjects] enumerateObjectsUsingBlock:^(RZDBObserver *obs, NSUInteger idx, BOOL *stop) {
+    [rz_dependentObservers(self) enumerateObserversUsingBlock:^(RZDBObserver *obs, BOOL *stop) {
         [obs invalidate];
     }];
 }
@@ -387,8 +366,8 @@ void rz_swizzleDeallocIfNeeded(Class class);
 
 - (void)invalidate
 {
-    [[self.target rz_dependentObservers] removeObserver:self];
-    [[self.observedObject rz_registeredObservers] removeObject:self];
+    [rz_dependentObservers(self.target) removeObserver:self];
+    [rz_registeredObservers(self.observedObject) removeObserver:self];
 
     // KVO throws an exception when removing an observer that was never added.
     // This should never be a problem given how things are setup, but make sure to avoid a crash.
@@ -409,13 +388,25 @@ void rz_swizzleDeallocIfNeeded(Class class);
 
 #pragma mark - RZDBObserverContainer implementation
 
-@implementation RZDBObserverContainer
+@implementation RZDBObserverContainer {
+    NSHashTable *_observers;
+}
 
-- (instancetype)init
++ (instancetype)strongContainer
+{
+    return [[self alloc] initWithBackingStore:[NSHashTable hashTableWithOptions:NSPointerFunctionsStrongMemory | NSPointerFunctionsObjectPersonality]];
+}
+
++ (instancetype)weakContainer
+{
+    return [[self alloc] initWithBackingStore:[NSHashTable weakObjectsHashTable]];
+}
+
+- (instancetype)initWithBackingStore:(NSHashTable *)backingStore
 {
     self = [super init];
     if ( self != nil ) {
-        _observers = [NSHashTable weakObjectsHashTable];
+        _observers = backingStore;
     }
     return self;
 }
@@ -423,14 +414,36 @@ void rz_swizzleDeallocIfNeeded(Class class);
 - (void)addObserver:(RZDBObserver *)observer
 {
     @synchronized (self) {
-        [self.observers addObject:observer];
+        [_observers addObject:observer];
     }
 }
 
 - (void)removeObserver:(RZDBObserver *)observer
 {
     @synchronized (self) {
-        [self.observers removeObject:observer];
+        [_observers removeObject:observer];
+    }
+}
+
+- (void)enumerateObserversUsingBlock:(void (^)(RZDBObserver *, BOOL *))block
+{
+    @synchronized (self) {
+        NSHashTable *observers = ^{
+            @synchronized (_observers) {
+                return [_observers copy];
+            }
+        }();
+
+        BOOL stop = NO;
+        for ( RZDBObserver *observer in observers ) {
+            if ( observer != nil ) {
+                block(observer, &stop);
+            }
+
+            if ( stop ) {
+                break;
+            }
+        }
     }
 }
 
