@@ -55,10 +55,10 @@ static void* const kRZDBDependentObserversKey = (void *)&kRZDBDependentObservers
 #define RZDBNotNull(obj) ((obj) != nil && ![(obj) isEqual:[NSNull null]])
 
 #define rz_registeredObservers(obj) objc_getAssociatedObject(obj, kRZDBRegisteredObserversKey)
-#define rz_setRegisteredObservers(obj, observers) objc_setAssociatedObject(obj, kRZDBRegisteredObserversKey, observers, OBJC_ASSOCIATION_RETAIN);
+#define rz_setRegisteredObservers(obj, observers) objc_setAssociatedObject(obj, kRZDBRegisteredObserversKey, observers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 
 #define rz_dependentObservers(obj) objc_getAssociatedObject(obj, kRZDBDependentObserversKey)
-#define rz_setDependentObservers(obj, observers) objc_setAssociatedObject(obj, kRZDBDependentObserversKey, observers, OBJC_ASSOCIATION_RETAIN);
+#define rz_setDependentObservers(obj, observers) objc_setAssociatedObject(obj, kRZDBDependentObserversKey, observers, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 
 #pragma mark - RZDataBinding_Private interface
 
@@ -217,9 +217,9 @@ void rz_swizzleDeallocIfNeeded(Class class);
             registeredObservers = [RZDBObserverContainer strongContainer];
             rz_setRegisteredObservers(self, registeredObservers);
         }
-
-        [registeredObservers addObserver:observer];
     }
+
+    [registeredObservers addObserver:observer];
 
     @synchronized (target) {
         dependentObservers = rz_dependentObservers(target);
@@ -228,9 +228,9 @@ void rz_swizzleDeallocIfNeeded(Class class);
             dependentObservers = [RZDBObserverContainer weakContainer];
             rz_setDependentObservers(target, dependentObservers);
         }
-
-        [dependentObservers addObserver:observer];
     }
+
+    [dependentObservers addObserver:observer];
 
 #if RZDB_AUTOMATIC_CLEANUP
     rz_swizzleDeallocIfNeeded([self class]);
@@ -322,13 +322,24 @@ void rz_swizzleDeallocIfNeeded(Class class);
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
     if ( context == kRZDBKVOContext ) {
-        if ( self.methodSignature.numberOfArguments > 2 ) {
-            NSDictionary *changeDict = [self changeDictForKVOChange:change];
+        id target = nil;
+        SEL action = NULL;
+        NSDictionary *changeDict = nil;
 
-            ((void(*)(id, SEL, NSDictionary *))objc_msgSend)(self.target, self.action, changeDict);
+        @synchronized (self) {
+            target = self.target;
+            action = self.action;
+
+            if ( self.methodSignature.numberOfArguments > 2 ) {
+                changeDict = [self changeDictForKVOChange:change];
+            }
+        }
+
+        if ( changeDict != nil ) {
+            ((void(*)(id, SEL, NSDictionary *))objc_msgSend)(target, action, changeDict);
         }
         else {
-            ((void(*)(id, SEL))objc_msgSend)(self.target, self.action);
+            ((void(*)(id, SEL))objc_msgSend)(target, action);
         }
     }
 }
@@ -366,22 +377,26 @@ void rz_swizzleDeallocIfNeeded(Class class);
 
 - (void)invalidate
 {
+    id observedObject = self.observedObject;
+
     [rz_dependentObservers(self.target) removeObserver:self];
-    [rz_registeredObservers(self.observedObject) removeObserver:self];
+    [rz_registeredObservers(observedObject) removeObserver:self];
 
     // KVO throws an exception when removing an observer that was never added.
     // This should never be a problem given how things are setup, but make sure to avoid a crash.
     @try {
-        [self.observedObject removeObserver:self forKeyPath:self.keyPath context:kRZDBKVOContext];
+        [observedObject removeObserver:self forKeyPath:self.keyPath context:kRZDBKVOContext];
     }
     @catch (__unused NSException *exception) {
-        RZDBLog(@"RZDataBinding attempted to remove an observer from object:%@, but the observer was never added. This shouldn't have happened, but won't affect anything going forward.", self.observedObject);
+        RZDBLog(@"RZDataBinding attempted to remove an observer from object:%@, but the observer was never added. This shouldn't have happened, but won't affect anything going forward.", observedObject);
     }
-    
-    self.observedObject = nil;
-    self.target = nil;
-    self.action = NULL;
-    self.methodSignature = nil;
+
+    @synchronized (self) {
+        self.observedObject = nil;
+        self.target = nil;
+        self.action = NULL;
+        self.methodSignature = nil;
+    }
 }
 
 @end
