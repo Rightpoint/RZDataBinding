@@ -136,15 +136,17 @@
     RZDBTestObject *testObj = [RZDBTestObject new];
     RZDBTestObject *observer = [RZDBTestObject new];
 
-    for ( NSUInteger i = 0; i < 500000; i++ ) {
+    for ( NSUInteger i = 0; i < 100000; i++ ) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             @autoreleasepool {
                 if ( arc4random() % 2 == 0 ) {
-                    [testObj rz_addTarget:observer action:@selector(testCallback) forKeyPathChange:RZDB_KP_OBJ(testObj, string)];
+                    [testObj rz_addTarget:observer action:@selector(changeCallback) forKeyPathChange:RZDB_KP_OBJ(testObj, string)];
                 }
                 else {
-                    [testObj rz_removeTarget:observer action:@selector(testCallback) forKeyPathChange:RZDB_KP_OBJ(testObj, string)];
+                    [testObj rz_removeTarget:observer action:@selector(changeCallback) forKeyPathChange:RZDB_KP_OBJ(testObj, string)];
                 }
+
+                testObj.string = @"test";
             }
         });
     }
