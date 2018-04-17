@@ -6,6 +6,7 @@
 <img src="http://cl.ly/image/1r0I0x401W2m/chain.png"
 alt="RZDataBinding">
 </p>
+
 ## Overview
 RZDataBinding is a framework designed to help maintain data integrity in your iOS or OS X app. It is built using the standard Key-Value Observation (KVO) framework, but is safer and provides additional functionality. Like KVO, RZDataBinding helps to avoid endless delegate chains by establishing direct callbacks for when an object changes state.
 
