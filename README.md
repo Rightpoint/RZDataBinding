@@ -31,7 +31,8 @@ alt="RZDataBinding">
 
 The demo shows a basic usage of RZDataBinding, but is by no means the canonical or most advanced use case. 
 
-##Usage
+## Usage
+
 **Register a callback for when the keypath of an object changes:**
 ``` obj-c
 // Register a selector to be called on a given target whenever keyPath changes on the receiver.
