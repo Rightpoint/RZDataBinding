@@ -444,8 +444,8 @@ void rz_swizzleDeallocIfNeeded(Class class);
 {
     @synchronized (self) {
         NSHashTable *observers = ^{
-            @synchronized (_observers) {
-                return [_observers copy];
+            @synchronized (self->_observers) {
+                return [self->_observers copy];
             }
         }();
 

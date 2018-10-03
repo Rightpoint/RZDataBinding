@@ -98,7 +98,7 @@ static NSString* const kRZDBCoalesceStorageKey = @"RZDBCoalesce";
     }
 }
 
-+ (void)coalesceBlock:(void (^)())coalesceBlock
++ (void)coalesceBlock:(void (^)(void))coalesceBlock
 {
     NSParameterAssert(coalesceBlock);
 

@@ -101,7 +101,7 @@
  *
  *  @see NSObject+RZDBCoalesce for how to support coalesced callbacks.
  */
-+ (void)coalesceBlock:(void (^)())coalesceBlock;
++ (void)coalesceBlock:(void (^)(void))coalesceBlock;
 
 /**
  *  Cannot instantiate RZDBCoalesce directly. Use the class methods instead.
