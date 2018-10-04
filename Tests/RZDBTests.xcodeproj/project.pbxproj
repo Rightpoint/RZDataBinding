@@ -8,23 +8,16 @@
 
 /* Begin PBXBuildFile section */
 		D49BB2C619CB866D000DEC83 /* RZDBTests.m in Sources */ = {isa = PBXBuildFile; fileRef = D49BB2C519CB866D000DEC83 /* RZDBTests.m */; };
-		D4AA6DB11AD4C5F600BA2A9E /* RZDBTransforms.m in Sources */ = {isa = PBXBuildFile; fileRef = D4AA6DAF1AD4C5F600BA2A9E /* RZDBTransforms.m */; };
-		D4B8C8321A5C2B8F00148F68 /* NSObject+RZDataBinding.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C8311A5C2B8F00148F68 /* NSObject+RZDataBinding.m */; };
-		D4C790A51AD2C6D000ACD1CE /* RZDBCoalesce.m in Sources */ = {isa = PBXBuildFile; fileRef = D4C790A41AD2C6D000ACD1CE /* RZDBCoalesce.m */; };
+		EA08A58EC25EA006AF3E4B2E /* libPods-RZDBTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C165B22B7D44975EA26F3888 /* libPods-RZDBTests.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		9F8785662E67665F1F5264CA /* Pods-RZDBTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RZDBTests.debug.xcconfig"; path = "Target Support Files/Pods-RZDBTests/Pods-RZDBTests.debug.xcconfig"; sourceTree = "<group>"; };
+		C165B22B7D44975EA26F3888 /* libPods-RZDBTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RZDBTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C2495802AE4DFA823A22BEA2 /* Pods-RZDBTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RZDBTests.release.xcconfig"; path = "Target Support Files/Pods-RZDBTests/Pods-RZDBTests.release.xcconfig"; sourceTree = "<group>"; };
 		D49BB2C019CB866D000DEC83 /* RZDBTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RZDBTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D49BB2C419CB866D000DEC83 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D49BB2C519CB866D000DEC83 /* RZDBTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RZDBTests.m; sourceTree = "<group>"; };
-		D4AA6DAE1AD4C54C00BA2A9E /* RZDataBinding.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = RZDataBinding.h; path = ../RZDataBinding/RZDataBinding.h; sourceTree = "<group>"; };
-		D4AA6DAF1AD4C5F600BA2A9E /* RZDBTransforms.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RZDBTransforms.m; path = ../RZDataBinding/RZDBTransforms.m; sourceTree = "<group>"; };
-		D4AA6DB01AD4C5F600BA2A9E /* RZDBTransforms.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBTransforms.h; path = ../RZDataBinding/RZDBTransforms.h; sourceTree = "<group>"; };
-		D4ABA1BE1AB9E5D200220A1A /* RZDBMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBMacros.h; path = ../RZDataBinding/RZDBMacros.h; sourceTree = "<group>"; };
-		D4B8C8301A5C2B8F00148F68 /* NSObject+RZDataBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+RZDataBinding.h"; path = "../RZDataBinding/NSObject+RZDataBinding.h"; sourceTree = "<group>"; };
-		D4B8C8311A5C2B8F00148F68 /* NSObject+RZDataBinding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSObject+RZDataBinding.m"; path = "../RZDataBinding/NSObject+RZDataBinding.m"; sourceTree = "<group>"; };
-		D4C790A31AD2C6D000ACD1CE /* RZDBCoalesce.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBCoalesce.h; path = ../RZDataBinding/RZDBCoalesce.h; sourceTree = "<group>"; };
-		D4C790A41AD2C6D000ACD1CE /* RZDBCoalesce.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RZDBCoalesce.m; path = ../RZDataBinding/RZDBCoalesce.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,25 +25,28 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EA08A58EC25EA006AF3E4B2E /* libPods-RZDBTests.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8D97FA78DF1DFC9A97B0EC2E /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				C165B22B7D44975EA26F3888 /* libPods-RZDBTests.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		D49BB2B519CB862A000DEC83 = {
 			isa = PBXGroup;
 			children = (
-				D4AA6DAE1AD4C54C00BA2A9E /* RZDataBinding.h */,
-				D4ABA1BE1AB9E5D200220A1A /* RZDBMacros.h */,
-				D4AA6DB01AD4C5F600BA2A9E /* RZDBTransforms.h */,
-				D4AA6DAF1AD4C5F600BA2A9E /* RZDBTransforms.m */,
-				D4C790A31AD2C6D000ACD1CE /* RZDBCoalesce.h */,
-				D4C790A41AD2C6D000ACD1CE /* RZDBCoalesce.m */,
-				D4B8C8301A5C2B8F00148F68 /* NSObject+RZDataBinding.h */,
-				D4B8C8311A5C2B8F00148F68 /* NSObject+RZDataBinding.m */,
 				D49BB2C219CB866D000DEC83 /* RZDBTests */,
 				D49BB2C119CB866D000DEC83 /* Products */,
+				D9EFE37A934BA67EA88816B7 /* Pods */,
+				8D97FA78DF1DFC9A97B0EC2E /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -79,6 +75,16 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		D9EFE37A934BA67EA88816B7 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				9F8785662E67665F1F5264CA /* Pods-RZDBTests.debug.xcconfig */,
+				C2495802AE4DFA823A22BEA2 /* Pods-RZDBTests.release.xcconfig */,
+			);
+			name = Pods;
+			path = ../Pods;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -86,6 +92,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D49BB2C719CB866D000DEC83 /* Build configuration list for PBXNativeTarget "RZDBTests" */;
 			buildPhases = (
+				A0E096874995B1C50975B715 /* [CP] Check Pods Manifest.lock */,
 				D49BB2BC19CB866D000DEC83 /* Sources */,
 				D49BB2BD19CB866D000DEC83 /* Frameworks */,
 				D49BB2BE19CB866D000DEC83 /* Resources */,
@@ -105,7 +112,7 @@
 		D49BB2B619CB862A000DEC83 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 1000;
 				TargetAttributes = {
 					D49BB2BF19CB866D000DEC83 = {
 						CreatedOnToolsVersion = 6.0;
@@ -139,15 +146,37 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		A0E096874995B1C50975B715 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-RZDBTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		D49BB2BC19CB866D000DEC83 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				D49BB2C619CB866D000DEC83 /* RZDBTests.m in Sources */,
-				D4C790A51AD2C6D000ACD1CE /* RZDBCoalesce.m in Sources */,
-				D4AA6DB11AD4C5F600BA2A9E /* RZDBTransforms.m in Sources */,
-				D4B8C8321A5C2B8F00148F68 /* NSObject+RZDataBinding.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -157,7 +186,32 @@
 		D49BB2BA19CB862A000DEC83 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 				ONLY_ACTIVE_ARCH = YES;
 			};
 			name = Debug;
@@ -165,11 +219,37 @@
 		D49BB2BB19CB862A000DEC83 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
 			};
 			name = Release;
 		};
 		D49BB2C819CB866D000DEC83 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 9F8785662E67665F1F5264CA /* Pods-RZDBTests.debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -187,10 +267,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -218,6 +294,7 @@
 		};
 		D49BB2C919CB866D000DEC83 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C2495802AE4DFA823A22BEA2 /* Pods-RZDBTests.release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
@@ -236,10 +313,6 @@
 				COPY_PHASE_STRIP = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				FRAMEWORK_SEARCH_PATHS = (
-					"$(SDKROOT)/Developer/Library/Frameworks",
-					"$(inherited)",
-				);
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;

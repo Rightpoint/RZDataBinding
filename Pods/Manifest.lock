@@ -1,0 +1,16 @@
+PODS:
+  - RZDataBinding (2.1.1)
+
+DEPENDENCIES:
+  - RZDataBinding (from `./`)
+
+EXTERNAL SOURCES:
+  RZDataBinding:
+    :path: "./"
+
+SPEC CHECKSUMS:
+  RZDataBinding: 222391bc25edfc8c79c519a69681d9ed0445db74
+
+PODFILE CHECKSUM: 314dcd587730ec720a0ceedd882372e5cfb044b3
+
+COCOAPODS: 1.6.0.beta.1
