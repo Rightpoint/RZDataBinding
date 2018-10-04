@@ -1,38 +1,63 @@
 version: 2.1
 
 jobs:
-  test-xcode-10:
-    macos:
-      xcode: "10.0.0"
+  setup:
+    executor: xcode-10
     steps:
-      - setup
+      - setup-workspace
+
+  test-xcode-10:
+    executor: xcode-10
+    steps:
+      - attach-workspace
       - run-tests:
           destination: "platform=iOS Simulator,name=iPad Air 2,OS=12.0"
 
   test-xcode-9:
-    macos:
-      xcode: "9.3.0"
+    executor: xcode-9
     steps:
-      - setup
+      - attach-workspace
       - run-tests:
           destination: "platform=iOS Simulator,name=iPad Air 2,OS=10.3.1"
 
   deploy-to-cocoapods:
-    macos:
-      xcode: "10.0.0"
+    executor: xcode-10
     steps:
-      - setup
+      - attach-workspace
       - run: bundle exec pod trunk push
 
 commands:
-  setup:
+  persist-workspace:
+    description: "Persists to shared workspace"
+    steps:
+      - persist_to_workspace:
+          root: /Users/distiller/project
+          paths:
+            - .
+      - persist_to_workspace:
+          root: /Users/distiller/.cocoapods
+          paths:
+            - .
+
+  attach-workspace:
+    description: "Attaches to shared workspace"
+    steps:
+      - attach_workspace:
+          at: /Users/distiller/project
+      - attach_workspace:
+          at: /Users/distiller/.cocoapods
+
+  setup-workspace:
     description: "Shared setup"
     steps:
       - checkout
-      - run:
-          name: Fetch CocoaPods Specs
-          command: |
-            curl https://cocoapods-specs.circleci.com/fetch-cocoapods-repo-from-s3.sh | bash -s cf
+      - restore-gems
+      - cocoapods-specs
+      - persist-workspace
+
+  restore-gems:
+    description: "Restore Ruby Gems"
+    steps:
       - restore_cache:
           key: 1-gems-{{ checksum "Gemfile.lock" }}
       - run: bundle check || bundle install --path vendor/bundle
@@ -40,6 +65,15 @@ commands:
           key: 1-gems-{{ checksum "Gemfile.lock" }}
           paths:
             - vendor/bundle
+
+  cocoapods-specs:
+    description: "Fetch CocoaPods Specs"
+    steps:
+      - run:
+          name: Fetch CocoaPods Specs
+          command: |
+            curl https://cocoapods-specs.circleci.com/fetch-cocoapods-repo-from-s3.sh | bash -s cf
+
   run-tests:
     description: "Runs the tests"
     parameters:
@@ -48,18 +82,45 @@ commands:
         default: "platform=iOS Simulator,name=iPad Air 2,OS=12.0"
     steps:
       - run: bundle exec fastlane test
-      - run: bundle exec fastlane build_example destination:<< parameters.destination >>
+      - run: bundle exec fastlane build_example destination:"<< parameters.destination >>"
       - run: bundle exec pod lib lint
+      - store_test_results:
+          path: output/scan
+
+executors:
+  xcode-10:
+    working_directory: /Users/distiller/project
+    macos:
+      xcode: "10.0.0"
+    environment:
+      FL_OUTPUT_DIR: output
+    shell: /bin/bash --login -o pipefail
+
+  xcode-9:
+    working_directory: /Users/distiller/project
+    macos:
+      xcode: "9.3.0"
+    environment:
+      FL_OUTPUT_DIR: output
+    shell: /bin/bash --login -o pipefail
 
 workflows:
   version: 2
   build-test-deploy:
     jobs:
+      - setup:
+          filters:
+            tags:
+              only: /.*/
       - test-xcode-10:
+          requires:
+            - setup
           filters:
             tags:
               only: /.*/
       - test-xcode-9:
+          requires:
+            - setup
           filters:
             tags:
               only: /.*/
