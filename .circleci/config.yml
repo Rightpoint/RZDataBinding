@@ -1,59 +1,40 @@
 version: 2.1
 
 jobs:
-  setup:
-    executor: xcode-10
-    steps:
-      - setup-workspace
-
   test-xcode-10:
     executor: xcode-10
     steps:
-      - attach-workspace
+      - setup
       - run-tests:
           destination: "platform=iOS Simulator,name=iPad Air 2,OS=12.0"
 
   test-xcode-9:
     executor: xcode-9
     steps:
-      - attach-workspace
+      - setup
       - run-tests:
           destination: "platform=iOS Simulator,name=iPad Air 2,OS=10.3.1"
+
+  check-podspec:
+    executor: xcode-10
+    steps:
+      - setup
+      - cocoapods-specs
+      - run: bundle exec pod lib lint
 
   deploy-to-cocoapods:
     executor: xcode-10
     steps:
-      - attach-workspace
+      - setup
+      - cocoapods-specs
       - run: bundle exec pod trunk push
 
 commands:
-  persist-workspace:
-    description: "Persists to shared workspace"
-    steps:
-      - persist_to_workspace:
-          root: /Users/distiller/project
-          paths:
-            - .
-      - persist_to_workspace:
-          root: /Users/distiller/.cocoapods
-          paths:
-            - .
-
-  attach-workspace:
-    description: "Attaches to shared workspace"
-    steps:
-      - attach_workspace:
-          at: /Users/distiller/project
-      - attach_workspace:
-          at: /Users/distiller/.cocoapods
-
-  setup-workspace:
+  setup:
     description: "Shared setup"
     steps:
       - checkout
       - restore-gems
-      - cocoapods-specs
-      - persist-workspace
 
   restore-gems:
     description: "Restore Ruby Gems"
@@ -83,7 +64,6 @@ commands:
     steps:
       - run: bundle exec fastlane test
       - run: bundle exec fastlane build_example destination:"<< parameters.destination >>"
-      - run: bundle exec pod lib lint
       - store_test_results:
           path: output/scan
 
@@ -108,19 +88,15 @@ workflows:
   version: 2
   build-test-deploy:
     jobs:
-      - setup:
+      - check-podspec:
           filters:
             tags:
               only: /.*/
       - test-xcode-10:
-          requires:
-            - setup
           filters:
             tags:
               only: /.*/
       - test-xcode-9:
-          requires:
-            - setup
           filters:
             tags:
               only: /.*/
@@ -128,6 +104,7 @@ workflows:
           requires:
             - test-xcode-10
             - test-xcode-9
+            - check-podspec
           filters:
             tags:
               only: /\d+(\.\d+)*(-.*)*/
