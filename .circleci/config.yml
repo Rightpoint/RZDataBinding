@@ -64,8 +64,9 @@ commands:
     steps:
       - run: bundle exec fastlane test
       - run: bundle exec fastlane build_example destination:"<< parameters.destination >>"
+      - run: mv fastlane/test_output/report.junit fastlane/test_output/report.xml
       - store_test_results:
-          path: output/scan
+          path: fastlane/test_output
 
 executors:
   xcode-10:
@@ -73,7 +74,6 @@ executors:
     macos:
       xcode: "10.0.0"
     environment:
-      FL_OUTPUT_DIR: output
       LC_ALL: en_US.UTF-8
       LANG: en_US.UTF-8
     shell: /bin/bash --login -o pipefail
@@ -83,7 +83,6 @@ executors:
     macos:
       xcode: "9.3.0"
     environment:
-      FL_OUTPUT_DIR: output
       LC_ALL: en_US.UTF-8
       LANG: en_US.UTF-8
     shell: /bin/bash --login -o pipefail
