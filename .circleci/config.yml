@@ -74,6 +74,8 @@ executors:
       xcode: "10.0.0"
     environment:
       FL_OUTPUT_DIR: output
+      LC_ALL: en_US.UTF-8
+      LANG: en_US.UTF-8
     shell: /bin/bash --login -o pipefail
 
   xcode-9:
@@ -82,6 +84,8 @@ executors:
       xcode: "9.3.0"
     environment:
       FL_OUTPUT_DIR: output
+      LC_ALL: en_US.UTF-8
+      LANG: en_US.UTF-8
     shell: /bin/bash --login -o pipefail
 
 workflows:
