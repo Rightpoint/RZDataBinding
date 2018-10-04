@@ -24,7 +24,7 @@ jobs:
           command: |
             bundle check || bundle install
       - run: bundle exec fastlane test
-      - run: bundle exec fastlane build_example
+      - run: bundle exec fastlane build_example destination:"platform=iOS Simulator,name=iPad Air 2,OS=10.3.1"
       - run: bundle exec pod lib lint
 
   deploy-to-cocoapods:

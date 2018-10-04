@@ -21,8 +21,12 @@ platform :ios do
     scan(scheme: "RZDBTests")
   end
 
-  lane :build_example do
+  lane :build_example do |options|
+    destination = "platform=iOS Simulator,name=iPad Air 2,OS=12.0"
+    if options[:destination]
+      destination = options[:destination]
+    end
     xcodebuild(scheme: "RZDBDemo",
-               destination: "platform=iOS Simulator,name=iPad Air 2,OS=12.0")
+               destination: destination)
   end
 end
