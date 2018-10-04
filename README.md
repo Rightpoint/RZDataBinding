@@ -1,6 +1,9 @@
 # RZDataBinding
 
 [![Version](https://img.shields.io/cocoapods/v/RZDataBinding.svg?style=flat)](http://cocoadocs.org/docsets/RZDataBinding)
+[![CircleCI](https://img.shields.io/circleci/project/github/Raizlabs/RZDataBinding/master.svg)](https://circleci.com/gh/Raizlabs/RZDataBinding)
+[![License](https://img.shields.io/cocoapods/l/RZDataBinding.svg?style=flat)](http://cocoapods.org/pods/RZDataBinding)
+[![Platform](https://img.shields.io/cocoapods/p/RZDataBinding.svg?style=flat)](http://cocoapods.org/pods/RZDataBinding)
 
 <p align="center">
 <img src="http://cl.ly/image/1r0I0x401W2m/chain.png"
