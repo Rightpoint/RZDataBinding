@@ -7,11 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B912906B67743CE3792B2534 /* libPods-RZDBDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1ADFD7A5AB8101455FC4F632 /* libPods-RZDBDemo.a */; };
 		D41F4FDB1A5346EF00D0BA2D /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = D41F4FD71A5346EF00D0BA2D /* LaunchScreen.xib */; };
 		D41F4FDC1A5346EF00D0BA2D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D41F4FD91A5346EF00D0BA2D /* Main.storyboard */; };
-		D4AD92B31AD5784C00AA80D1 /* NSObject+RZDataBinding.m in Sources */ = {isa = PBXBuildFile; fileRef = D4AD92AC1AD5784C00AA80D1 /* NSObject+RZDataBinding.m */; };
-		D4AD92B41AD5784C00AA80D1 /* RZDBCoalesce.m in Sources */ = {isa = PBXBuildFile; fileRef = D4AD92AF1AD5784C00AA80D1 /* RZDBCoalesce.m */; };
-		D4AD92B51AD5784C00AA80D1 /* RZDBTransforms.m in Sources */ = {isa = PBXBuildFile; fileRef = D4AD92B21AD5784C00AA80D1 /* RZDBTransforms.m */; };
 		D4B8C8A31A5C47EC00148F68 /* UIColor+RZHexColor.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C8A21A5C47EC00148F68 /* UIColor+RZHexColor.m */; };
 		D4B8C8A61A5C4A0700148F68 /* UIImage+RZColor.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C8A51A5C4A0700148F68 /* UIImage+RZColor.m */; };
 		D4B8C8A91A5C57B400148F68 /* RZUserViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D4B8C8A81A5C57B400148F68 /* RZUserViewController.m */; };
@@ -26,16 +24,11 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0B712CB9BE11C9E485AC97D2 /* Pods-RZDBDemo.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RZDBDemo.release.xcconfig"; path = "Target Support Files/Pods-RZDBDemo/Pods-RZDBDemo.release.xcconfig"; sourceTree = "<group>"; };
+		1ADFD7A5AB8101455FC4F632 /* libPods-RZDBDemo.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-RZDBDemo.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		654A9E2D07A1F4E467EC48D5 /* Pods-RZDBDemo.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RZDBDemo.debug.xcconfig"; path = "Target Support Files/Pods-RZDBDemo/Pods-RZDBDemo.debug.xcconfig"; sourceTree = "<group>"; };
 		D41F4FD81A5346EF00D0BA2D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = SOURCE_ROOT; };
 		D41F4FDA1A5346EF00D0BA2D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = SOURCE_ROOT; };
-		D4AD92AB1AD5784C00AA80D1 /* NSObject+RZDataBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "NSObject+RZDataBinding.h"; path = "../RZDataBinding/NSObject+RZDataBinding.h"; sourceTree = "<group>"; };
-		D4AD92AC1AD5784C00AA80D1 /* NSObject+RZDataBinding.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "NSObject+RZDataBinding.m"; path = "../RZDataBinding/NSObject+RZDataBinding.m"; sourceTree = "<group>"; };
-		D4AD92AD1AD5784C00AA80D1 /* RZDataBinding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDataBinding.h; path = ../RZDataBinding/RZDataBinding.h; sourceTree = "<group>"; };
-		D4AD92AE1AD5784C00AA80D1 /* RZDBCoalesce.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBCoalesce.h; path = ../RZDataBinding/RZDBCoalesce.h; sourceTree = "<group>"; };
-		D4AD92AF1AD5784C00AA80D1 /* RZDBCoalesce.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RZDBCoalesce.m; path = ../RZDataBinding/RZDBCoalesce.m; sourceTree = "<group>"; };
-		D4AD92B01AD5784C00AA80D1 /* RZDBMacros.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBMacros.h; path = ../RZDataBinding/RZDBMacros.h; sourceTree = "<group>"; };
-		D4AD92B11AD5784C00AA80D1 /* RZDBTransforms.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RZDBTransforms.h; path = ../RZDataBinding/RZDBTransforms.h; sourceTree = "<group>"; };
-		D4AD92B21AD5784C00AA80D1 /* RZDBTransforms.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = RZDBTransforms.m; path = ../RZDataBinding/RZDBTransforms.m; sourceTree = "<group>"; };
 		D4B8C8A11A5C47EC00148F68 /* UIColor+RZHexColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIColor+RZHexColor.h"; path = "Utils/UIColor+RZHexColor.h"; sourceTree = "<group>"; };
 		D4B8C8A21A5C47EC00148F68 /* UIColor+RZHexColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = "UIColor+RZHexColor.m"; path = "Utils/UIColor+RZHexColor.m"; sourceTree = "<group>"; };
 		D4B8C8A41A5C4A0700148F68 /* UIImage+RZColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "UIImage+RZColor.h"; path = "Utils/UIImage+RZColor.h"; sourceTree = "<group>"; };
@@ -62,12 +55,31 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B912906B67743CE3792B2534 /* libPods-RZDBDemo.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		073E7AE09923838C758FEF4A /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				1ADFD7A5AB8101455FC4F632 /* libPods-RZDBDemo.a */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		A6999C97C0E88139457FBB93 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				654A9E2D07A1F4E467EC48D5 /* Pods-RZDBDemo.debug.xcconfig */,
+				0B712CB9BE11C9E485AC97D2 /* Pods-RZDBDemo.release.xcconfig */,
+			);
+			name = Pods;
+			path = ../Pods;
+			sourceTree = "<group>";
+		};
 		D4B8C8A01A5C47D200148F68 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -82,9 +94,10 @@
 		D4C5F3F01A39F5A100CC6FB3 = {
 			isa = PBXGroup;
 			children = (
-				D4C5F4281A39F6CC00CC6FB3 /* RZDataBinding */,
 				D4C5F3FB1A39F5A100CC6FB3 /* RZDBDemo */,
 				D4C5F3FA1A39F5A100CC6FB3 /* Products */,
+				A6999C97C0E88139457FBB93 /* Pods */,
+				073E7AE09923838C758FEF4A /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -126,21 +139,6 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
-		D4C5F4281A39F6CC00CC6FB3 /* RZDataBinding */ = {
-			isa = PBXGroup;
-			children = (
-				D4AD92AB1AD5784C00AA80D1 /* NSObject+RZDataBinding.h */,
-				D4AD92AC1AD5784C00AA80D1 /* NSObject+RZDataBinding.m */,
-				D4AD92AD1AD5784C00AA80D1 /* RZDataBinding.h */,
-				D4AD92AE1AD5784C00AA80D1 /* RZDBCoalesce.h */,
-				D4AD92AF1AD5784C00AA80D1 /* RZDBCoalesce.m */,
-				D4AD92B01AD5784C00AA80D1 /* RZDBMacros.h */,
-				D4AD92B11AD5784C00AA80D1 /* RZDBTransforms.h */,
-				D4AD92B21AD5784C00AA80D1 /* RZDBTransforms.m */,
-			);
-			name = RZDataBinding;
-			sourceTree = "<group>";
-		};
 		D4C5F4291A39F8DF00CC6FB3 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -158,6 +156,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = D4C5F41C1A39F5A100CC6FB3 /* Build configuration list for PBXNativeTarget "RZDBDemo" */;
 			buildPhases = (
+				6B31A3A117CE46C84955EDC2 /* [CP] Check Pods Manifest.lock */,
 				D4C5F3F51A39F5A100CC6FB3 /* Sources */,
 				D4C5F3F61A39F5A100CC6FB3 /* Frameworks */,
 				D4C5F3F71A39F5A100CC6FB3 /* Resources */,
@@ -219,21 +218,43 @@
 		};
 /* End PBXResourcesBuildPhase section */
 
+/* Begin PBXShellScriptBuildPhase section */
+		6B31A3A117CE46C84955EDC2 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-RZDBDemo-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		D4C5F3F51A39F5A100CC6FB3 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				D4C5F4051A39F5A100CC6FB3 /* RZTableViewController.m in Sources */,
-				D4AD92B41AD5784C00AA80D1 /* RZDBCoalesce.m in Sources */,
 				D4C5F4021A39F5A100CC6FB3 /* RZAppDelegate.m in Sources */,
 				D4B8C8A91A5C57B400148F68 /* RZUserViewController.m in Sources */,
 				D4C5F4241A39F64E00CC6FB3 /* RZUser.m in Sources */,
 				D4C5F3FF1A39F5A100CC6FB3 /* main.m in Sources */,
-				D4AD92B51AD5784C00AA80D1 /* RZDBTransforms.m in Sources */,
 				D4B8C8A61A5C4A0700148F68 /* UIImage+RZColor.m in Sources */,
 				D4B8C8A31A5C47EC00148F68 /* UIColor+RZHexColor.m in Sources */,
-				D4AD92B31AD5784C00AA80D1 /* NSObject+RZDataBinding.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -360,6 +381,7 @@
 		};
 		D4C5F41D1A39F5A100CC6FB3 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 654A9E2D07A1F4E467EC48D5 /* Pods-RZDBDemo.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = RZDBDemo/Info.plist;
@@ -373,6 +395,7 @@
 		};
 		D4C5F41E1A39F5A100CC6FB3 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0B712CB9BE11C9E485AC97D2 /* Pods-RZDBDemo.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = RZDBDemo/Info.plist;

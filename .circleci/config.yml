@@ -1,0 +1,62 @@
+version: 2
+
+jobs:
+  test-xcode-10:
+    macos:
+      xcode: "10.0.0"
+    steps:
+      - checkout
+      - run:
+          name: Restore Ruby Gems
+          command: |
+            bundle check || bundle install
+      - run: bundle exec fastlane test
+      - run: bundle exec fastlane build_example
+      - run: bundle exec pod lib lint
+
+  test-xcode-9:
+    macos:
+      xcode: "9.3.0"
+    steps:
+      - checkout
+      - run:
+          name: Restore Ruby Gems
+          command: |
+            bundle check || bundle install
+      - run: bundle exec fastlane test
+      - run: bundle exec fastlane build_example
+      - run: bundle exec pod lib lint
+
+  deploy-to-cocoapods:
+    macos:
+      xcode: "10.0.0"
+    steps:
+      - checkout
+      - run:
+          name: Install CocoaPods Specs Repo
+          command: |
+            curl https://cocoapods-specs.circleci.com/fetch-cocoapods-repo-from-s3.sh | bash -s cf
+      - run: bundle install
+      - run: bundle exec pod trunk push
+
+workflows:
+  version: 2
+  build-test-deploy:
+    jobs:
+      - test-xcode-10:
+          filters:
+            tags:
+              only: /.*/
+      - test-xcode-9:
+          filters:
+            tags:
+              only: /.*/
+      - deploy-to-cocoapods:
+          requires:
+            - test-xcode-10
+            - test-xcode-9
+          filters:
+            tags:
+              only: /\d+(\.\d+)*(-.*)*/
+            branches:
+              ignore: /.*/
